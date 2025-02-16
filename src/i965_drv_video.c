@@ -298,6 +298,10 @@ i965_image_formats_map[I965_MAX_IMAGE_FORMATS + 1] = {
 	{
 		I965_SURFACETYPE_YUV,
 		{ VA_FOURCC_422H, VA_LSB_FIRST, 16, }
+	},
+	{
+		I965_SURFACETYPE_YUV,
+		{ VA_FOURCC_IMC3, VA_LSB_FIRST, 16 }
 	}
 };
 
@@ -4639,6 +4643,7 @@ i965_CreateImage(VADriverContextP ctx,
 		image->data_size  = size * 2 + 2 * size2 * 2;
 		break;
 	default:
+		fprintf(stderr, "i965_CreateImage: Unknown image format %#010x.\r\n", format->fourcc);
 		goto error;
 	}
 
