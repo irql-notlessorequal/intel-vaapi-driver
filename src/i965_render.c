@@ -167,171 +167,171 @@ enum {
 
 static struct i965_kernel render_kernels_gen4[] = {
 	{
-		"SF",
-		SF_KERNEL,
-		sf_kernel_static,
-		sizeof(sf_kernel_static),
-		NULL
+		.name = "SF",
+		.interface = SF_KERNEL,
+		.bin = sf_kernel_static,
+		.size = sizeof(sf_kernel_static),
+		.bo = NULL
 	},
 	{
-		"PS",
-		PS_KERNEL,
-		ps_kernel_static,
-		sizeof(ps_kernel_static),
-		NULL
+		.name = "PS",
+		.interface = PS_KERNEL,
+		.bin = ps_kernel_static,
+		.size = sizeof(ps_kernel_static),
+		.bo = NULL
 	},
 
 	{
-		"PS_SUBPIC",
-		PS_SUBPIC_KERNEL,
-		ps_subpic_kernel_static,
-		sizeof(ps_subpic_kernel_static),
-		NULL
+		.name = "PS_SUBPIC",
+		.interface = PS_SUBPIC_KERNEL,
+		.bin = ps_subpic_kernel_static,
+		.size = sizeof(ps_subpic_kernel_static),
+		.bo = NULL
 	},
 
 	// Not used
 	{
-		"PS_CLEAR",
-		PS_CLEAR_KERNEL,
-		NULL,
-		0,
-		0
+		.name = "PS_CLEAR",
+		.interface = PS_CLEAR_KERNEL,
+		.bin = NULL,
+		.size = 0,
+		.bo = NULL
 	}
 };
 
 static struct i965_kernel render_kernels_gen5[] = {
 	{
-		"SF",
-		SF_KERNEL,
-		sf_kernel_static_gen5,
-		sizeof(sf_kernel_static_gen5),
-		NULL
+		.name = "SF",
+		.interface = SF_KERNEL,
+		.bin = sf_kernel_static_gen5,
+		.size = sizeof(sf_kernel_static_gen5),
+		.bo = NULL
 	},
 	{
-		"PS",
-		PS_KERNEL,
-		ps_kernel_static_gen5,
-		sizeof(ps_kernel_static_gen5),
-		NULL
+		.name = "PS",
+		.interface = PS_KERNEL,
+		.bin = ps_kernel_static_gen5,
+		.size = sizeof(ps_kernel_static_gen5),
+		.bo = NULL
 	},
 
 	{
-		"PS_SUBPIC",
-		PS_SUBPIC_KERNEL,
-		ps_subpic_kernel_static_gen5,
-		sizeof(ps_subpic_kernel_static_gen5),
-		NULL
+		.name = "PS_SUBPIC",
+		.interface = PS_SUBPIC_KERNEL,
+		.bin = ps_subpic_kernel_static_gen5,
+		.size = sizeof(ps_subpic_kernel_static_gen5),
+		.bo = NULL
 	},
 
 	// Not used
 	{
-		"PS_CLEAR",
-		PS_CLEAR_KERNEL,
-		NULL,
-		0,
-		0
+		.name = "PS_CLEAR",
+		.interface = PS_CLEAR_KERNEL,
+		.bin = NULL,
+		.size = 0,
+		.bo = NULL
 	}
 };
 
 static struct i965_kernel render_kernels_gen6[] = {
 	{
-		"SF",
-		SF_KERNEL,
-		sf_kernel_static_gen6,
-		sizeof(sf_kernel_static_gen6),
-		NULL
+		.name = "SF",
+		.interface = SF_KERNEL,
+		.bin = sf_kernel_static_gen6,
+		.size = sizeof(sf_kernel_static_gen6),
+		.bo = NULL
 	},
 	{
-		"PS",
-		PS_KERNEL,
-		ps_kernel_static_gen6,
-		sizeof(ps_kernel_static_gen6),
-		NULL
+		.name = "PS",
+		.interface = PS_KERNEL,
+		.bin = ps_kernel_static_gen6,
+		.size = sizeof(ps_kernel_static_gen6),
+		.bo = NULL
 	},
 
 	{
-		"PS_SUBPIC",
-		PS_SUBPIC_KERNEL,
-		ps_subpic_kernel_static_gen6,
-		sizeof(ps_subpic_kernel_static_gen6),
-		NULL
+		.name = "PS_SUBPIC",
+		.interface = PS_SUBPIC_KERNEL,
+		.bin = ps_subpic_kernel_static_gen6,
+		.size = sizeof(ps_subpic_kernel_static_gen6),
+		.bo = NULL
 	},
 
 	// Not used
 	{
-		"PS_CLEAR",
-		PS_CLEAR_KERNEL,
-		NULL,
-		0,
-		0
+		.name = "PS_CLEAR",
+		.interface = PS_CLEAR_KERNEL,
+		.bin = NULL,
+		.size = 0,
+		.bo = NULL
 	}
 };
 
 static struct i965_kernel render_kernels_gen7[] = {
 	{
-		"SF",
-		SF_KERNEL,
-		sf_kernel_static_gen7,
-		sizeof(sf_kernel_static_gen7),
-		NULL
+		.name = "SF",
+		.interface = SF_KERNEL,
+		.bin = sf_kernel_static_gen7,
+		.size = sizeof(sf_kernel_static_gen7),
+		.bo = NULL
 	},
 	{
-		"PS",
-		PS_KERNEL,
-		ps_kernel_static_gen7,
-		sizeof(ps_kernel_static_gen7),
-		NULL
+		.name = "PS",
+		.interface = PS_KERNEL,
+		.bin = ps_kernel_static_gen7,
+		.size = sizeof(ps_kernel_static_gen7),
+		.bo = NULL
 	},
 
 	{
-		"PS_SUBPIC",
-		PS_SUBPIC_KERNEL,
-		ps_subpic_kernel_static_gen7,
-		sizeof(ps_subpic_kernel_static_gen7),
-		NULL
+		.name = "PS_SUBPIC",
+		.interface = PS_SUBPIC_KERNEL,
+		.bin = ps_subpic_kernel_static_gen7,
+		.size = sizeof(ps_subpic_kernel_static_gen7),
+		.bo = NULL
 	},
 
 	// Not used
 	{
-		"PS_CLEAR",
-		PS_CLEAR_KERNEL,
-		NULL,
-		0,
-		0
+		.name = "PS_CLEAR",
+		.interface = PS_CLEAR_KERNEL,
+		.bin = NULL,
+		.size = 0,
+		.bo = NULL
 	}
 };
 
 static struct i965_kernel render_kernels_gen7_haswell[] = {
 	{
-		"SF",
-		SF_KERNEL,
-		sf_kernel_static_gen7,
-		sizeof(sf_kernel_static_gen7),
-		NULL
+		.name = "SF",
+		.interface = SF_KERNEL,
+		.bin = sf_kernel_static_gen7,
+		.size = sizeof(sf_kernel_static_gen7),
+		.bo = NULL
 	},
 	{
-		"PS",
-		PS_KERNEL,
-		ps_kernel_static_gen7_haswell,
-		sizeof(ps_kernel_static_gen7_haswell),
-		NULL
+		.name = "PS",
+		.interface = PS_KERNEL,
+		.bin = ps_kernel_static_gen7_haswell,
+		.size = sizeof(ps_kernel_static_gen7_haswell),
+		.bo = NULL
 	},
 
 	{
-		"PS_SUBPIC",
-		PS_SUBPIC_KERNEL,
-		ps_subpic_kernel_static_gen7,
-		sizeof(ps_subpic_kernel_static_gen7),
-		NULL
+		.name = "PS_SUBPIC",
+		.interface = PS_SUBPIC_KERNEL,
+		.bin = ps_subpic_kernel_static_gen7,
+		.size = sizeof(ps_subpic_kernel_static_gen7),
+		.bo = NULL
 	},
 
 	// Not used
 	{
-		"PS_CLEAR",
-		PS_CLEAR_KERNEL,
-		NULL,
-		0,
-		0
+		.name = "PS_CLEAR",
+		.interface = PS_CLEAR_KERNEL,
+		.bin = NULL,
+		.size = 0,
+		.bo = NULL
 	}
 };
 

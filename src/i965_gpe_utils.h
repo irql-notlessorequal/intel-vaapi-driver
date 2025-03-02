@@ -219,9 +219,10 @@ struct gpe_mi_load_register_reg_parameter {
 	unsigned int dst_mmio_offset;
 };
 
-struct gpe_mi_math_parameter {
-	unsigned int num_instructions;
+struct gpe_mi_math_parameter
+{
 	unsigned int *instruction_list;
+	unsigned int num_instructions;
 };
 
 struct gpe_mi_conditional_batch_buffer_end_parameter {
@@ -518,14 +519,16 @@ enum walker_degree {
 	WALKER_26Z_DEGREE,
 	WALKER_45Z_DEGREE,
 };
-struct gpe_encoder_kernel_walker_parameter {
+struct gpe_encoder_kernel_walker_parameter
+{
 	unsigned int walker_degree;
-	unsigned int use_scoreboard;
 	unsigned int scoreboard_mask;
-	unsigned int no_dependency;
 	unsigned int resolution_x;
 	unsigned int resolution_y;
-	unsigned int use_vertical_raster_scan;
+
+	bool no_dependency;
+	bool use_scoreboard;
+	bool use_vertical_raster_scan; /* UNUSED? */
 };
 
 extern void

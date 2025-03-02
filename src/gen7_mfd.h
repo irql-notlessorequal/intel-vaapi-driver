@@ -75,7 +75,8 @@ struct gen7_vc1_surface {
 
 struct hw_context;
 
-struct gen7_mfd_context {
+struct gen7_mfd_context
+{
 	struct hw_context base;
 
 	union {
@@ -95,14 +96,15 @@ struct gen7_mfd_context {
 	GenBuffer           segmentation_buffer;
 
 	VASurfaceID jpeg_wa_surface_id;
-	struct object_surface *jpeg_wa_surface_object;
-	dri_bo *jpeg_wa_slice_data_bo;
 
-	unsigned int decoder_format_mode : 1;
 	int wa_mpeg2_slice_vertical_position;
 
+	struct object_surface *jpeg_wa_surface_object;
+	dri_bo *jpeg_wa_slice_data_bo;
 	void *driver_context;
-} __attribute__((packed));
+
+	bool decoder_format_mode;
+};
 
 static VAConfigAttrib *gen7_lookup_config_attribute(struct object_config *obj_config, VAConfigAttribType type)
 {

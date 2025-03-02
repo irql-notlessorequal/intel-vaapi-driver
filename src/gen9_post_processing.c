@@ -126,46 +126,46 @@ static const uint32_t pp_8bit_420_rgb32_scaling_gen9[][4] = {
 
 struct i965_kernel pp_common_scaling_gen9[] = {
 	{
-		"10bit to 10bit",
-		0,
-		pp_10bit_scaling_gen9,
-		sizeof(pp_10bit_scaling_gen9),
-		NULL,
+		.name = "10bit to 10bit",
+		.interface = 0,
+		.bin = pp_10bit_scaling_gen9,
+		.size = sizeof(pp_10bit_scaling_gen9),
+		.bo = NULL,
 	},
 
 	{
-		"8bit to 8bit",
-		1,
-		pp_yuv420p8_scaling_gen9,
-		sizeof(pp_yuv420p8_scaling_gen9),
-		NULL,
+		.name = "8bit to 8bit",
+		.interface = 1,
+		.bin = pp_yuv420p8_scaling_gen9,
+		.size = sizeof(pp_yuv420p8_scaling_gen9),
+		.bo = NULL,
 	},
 
 	{
-		"10bit to 8bit",
-		2,
-		pp_10bit_8bit_scaling_gen9,
-		sizeof(pp_10bit_8bit_scaling_gen9),
-		NULL,
+		.name = "10bit to 8bit",
+		.interface = 2,
+		.bin = pp_10bit_8bit_scaling_gen9,
+		.size = sizeof(pp_10bit_8bit_scaling_gen9),
+		.bo = NULL,
 	},
 
 	{
-		"8bit 420 to rgb32",
-		3,
-		pp_8bit_420_rgb32_scaling_gen9,
-		sizeof(pp_8bit_420_rgb32_scaling_gen9),
-		NULL,
+		.name = "8bit 420 to rgb32",
+		.interface = 3,
+		.bin = pp_8bit_420_rgb32_scaling_gen9,
+		.size = sizeof(pp_8bit_420_rgb32_scaling_gen9),
+		.bo = NULL,
 	},
 };
 
 static struct pp_module pp_modules_gen9[] = {
 	{
 		{
-			"NULL module (for testing)",
-			PP_NULL,
-			pp_null_gen9,
-			sizeof(pp_null_gen9),
-			NULL,
+			.name = "NULL module (for testing)",
+			.interface = PP_NULL,
+			.bin = pp_null_gen9,
+			.size = sizeof(pp_null_gen9),
+			.bo = NULL,
 		},
 
 		pp_null_initialize,
@@ -173,11 +173,11 @@ static struct pp_module pp_modules_gen9[] = {
 
 	{
 		{
-			"NV12_NV12",
-			PP_NV12_LOAD_SAVE_N12,
-			pp_nv12_load_save_nv12_gen9,
-			sizeof(pp_nv12_load_save_nv12_gen9),
-			NULL,
+			.name = "NV12_NV12",
+			.interface = PP_NV12_LOAD_SAVE_N12,
+			.bin = pp_nv12_load_save_nv12_gen9,
+			.size = sizeof(pp_nv12_load_save_nv12_gen9),
+			.bo = NULL,
 		},
 
 		gen8_pp_plx_avs_initialize,
@@ -185,34 +185,22 @@ static struct pp_module pp_modules_gen9[] = {
 
 	{
 		{
-			"NV12_PL3",
-			PP_NV12_LOAD_SAVE_PL3,
-			pp_nv12_load_save_pl3_gen9,
-			sizeof(pp_nv12_load_save_pl3_gen9),
-			NULL,
+			.name = "NV12_PL3",
+			.interface = PP_NV12_LOAD_SAVE_PL3,
+			.bin = pp_nv12_load_save_pl3_gen9,
+			.size = sizeof(pp_nv12_load_save_pl3_gen9),
+			.bo = NULL,
 		},
 		gen8_pp_plx_avs_initialize,
 	},
 
 	{
 		{
-			"PL3_NV12",
-			PP_PL3_LOAD_SAVE_N12,
-			pp_pl3_load_save_nv12_gen9,
-			sizeof(pp_pl3_load_save_nv12_gen9),
-			NULL,
-		},
-
-		gen8_pp_plx_avs_initialize,
-	},
-
-	{
-		{
-			"PL3_PL3",
-			PP_PL3_LOAD_SAVE_PL3,
-			pp_pl3_load_save_pl3_gen9,
-			sizeof(pp_pl3_load_save_pl3_gen9),
-			NULL,
+			.name = "PL3_NV12",
+			.interface = PP_PL3_LOAD_SAVE_N12,
+			.bin = pp_pl3_load_save_nv12_gen9,
+			.size = sizeof(pp_pl3_load_save_nv12_gen9),
+			.bo = NULL,
 		},
 
 		gen8_pp_plx_avs_initialize,
@@ -220,11 +208,11 @@ static struct pp_module pp_modules_gen9[] = {
 
 	{
 		{
-			"NV12 Scaling module",
-			PP_NV12_SCALING,
-			pp_nv12_scaling_gen9,
-			sizeof(pp_nv12_scaling_gen9),
-			NULL,
+			.name = "PL3_PL3",
+			.interface = PP_PL3_LOAD_SAVE_PL3,
+			.bin = pp_pl3_load_save_pl3_gen9,
+			.size = sizeof(pp_pl3_load_save_pl3_gen9),
+			.bo = NULL,
 		},
 
 		gen8_pp_plx_avs_initialize,
@@ -232,11 +220,11 @@ static struct pp_module pp_modules_gen9[] = {
 
 	{
 		{
-			"NV12 AVS module",
-			PP_NV12_AVS,
-			pp_nv12_avs_gen9,
-			sizeof(pp_nv12_avs_gen9),
-			NULL,
+			.name = "NV12 Scaling module",
+			.interface = PP_NV12_SCALING,
+			.bin = pp_nv12_scaling_gen9,
+			.size = sizeof(pp_nv12_scaling_gen9),
+			.bo = NULL,
 		},
 
 		gen8_pp_plx_avs_initialize,
@@ -244,11 +232,23 @@ static struct pp_module pp_modules_gen9[] = {
 
 	{
 		{
-			"NV12 DNDI module",
-			PP_NV12_DNDI,
-			pp_nv12_dndi_gen9,
-			sizeof(pp_nv12_dndi_gen9),
-			NULL,
+			.name = "NV12 AVS module",
+			.interface = PP_NV12_AVS,
+			.bin = pp_nv12_avs_gen9,
+			.size = sizeof(pp_nv12_avs_gen9),
+			.bo = NULL,
+		},
+
+		gen8_pp_plx_avs_initialize,
+	},
+
+	{
+		{
+			.name = "NV12 DNDI module",
+			.interface = PP_NV12_DNDI,
+			.bin = pp_nv12_dndi_gen9,
+			.size = sizeof(pp_nv12_dndi_gen9),
+			.bo = NULL,
 		},
 
 		pp_null_initialize,
@@ -256,22 +256,22 @@ static struct pp_module pp_modules_gen9[] = {
 
 	{
 		{
-			"NV12 DN module",
-			PP_NV12_DN,
-			pp_nv12_dn_gen9,
-			sizeof(pp_nv12_dn_gen9),
-			NULL,
+			.name = "NV12 DN module",
+			.interface = PP_NV12_DN,
+			.bin = pp_nv12_dn_gen9,
+			.size = sizeof(pp_nv12_dn_gen9),
+			.bo = NULL,
 		},
 
 		pp_null_initialize,
 	},
 	{
 		{
-			"NV12_PA module",
-			PP_NV12_LOAD_SAVE_PA,
-			pp_nv12_load_save_pa_gen9,
-			sizeof(pp_nv12_load_save_pa_gen9),
-			NULL,
+			.name = "NV12_PA module",
+			.interface = PP_NV12_LOAD_SAVE_PA,
+			.bin = pp_nv12_load_save_pa_gen9,
+			.size = sizeof(pp_nv12_load_save_pa_gen9),
+			.bo = NULL,
 		},
 
 		gen8_pp_plx_avs_initialize,
@@ -279,11 +279,11 @@ static struct pp_module pp_modules_gen9[] = {
 
 	{
 		{
-			"PL3_PA module",
-			PP_PL3_LOAD_SAVE_PA,
-			pp_pl3_load_save_pa_gen9,
-			sizeof(pp_pl3_load_save_pa_gen9),
-			NULL,
+			.name = "PL3_PA module",
+			.interface = PP_PL3_LOAD_SAVE_PA,
+			.bin = pp_pl3_load_save_pa_gen9,
+			.size = sizeof(pp_pl3_load_save_pa_gen9),
+			.bo = NULL,
 		},
 
 		gen8_pp_plx_avs_initialize,
@@ -291,11 +291,11 @@ static struct pp_module pp_modules_gen9[] = {
 
 	{
 		{
-			"PA_NV12 module",
-			PP_PA_LOAD_SAVE_NV12,
-			pp_pa_load_save_nv12_gen9,
-			sizeof(pp_pa_load_save_nv12_gen9),
-			NULL,
+			.name = "PA_NV12 module",
+			.interface = PP_PA_LOAD_SAVE_NV12,
+			.bin = pp_pa_load_save_nv12_gen9,
+			.size = sizeof(pp_pa_load_save_nv12_gen9),
+			.bo = NULL,
 		},
 
 		gen8_pp_plx_avs_initialize,
@@ -303,11 +303,11 @@ static struct pp_module pp_modules_gen9[] = {
 
 	{
 		{
-			"PA_PL3 module",
-			PP_PA_LOAD_SAVE_PL3,
-			pp_pa_load_save_pl3_gen9,
-			sizeof(pp_pa_load_save_pl3_gen9),
-			NULL,
+			.name = "PA_PL3 module",
+			.interface = PP_PA_LOAD_SAVE_PL3,
+			.bin = pp_pa_load_save_pl3_gen9,
+			.size = sizeof(pp_pa_load_save_pl3_gen9),
+			.bo = NULL,
 		},
 
 		gen8_pp_plx_avs_initialize,
@@ -315,11 +315,11 @@ static struct pp_module pp_modules_gen9[] = {
 
 	{
 		{
-			"PA_PA module",
-			PP_PA_LOAD_SAVE_PA,
-			pp_pa_load_save_pa_gen9,
-			sizeof(pp_pa_load_save_pa_gen9),
-			NULL,
+			.name = "PA_PA module",
+			.interface = PP_PA_LOAD_SAVE_PA,
+			.bin = pp_pa_load_save_pa_gen9,
+			.size = sizeof(pp_pa_load_save_pa_gen9),
+			.bo = NULL,
 		},
 
 		gen8_pp_plx_avs_initialize,
@@ -327,11 +327,11 @@ static struct pp_module pp_modules_gen9[] = {
 
 	{
 		{
-			"RGBX_NV12 module",
-			PP_RGBX_LOAD_SAVE_NV12,
-			pp_rgbx_load_save_nv12_gen9,
-			sizeof(pp_rgbx_load_save_nv12_gen9),
-			NULL,
+			.name = "RGBX_NV12 module",
+			.interface = PP_RGBX_LOAD_SAVE_NV12,
+			.bin = pp_rgbx_load_save_nv12_gen9,
+			.size = sizeof(pp_rgbx_load_save_nv12_gen9),
+			.bo = NULL,
 		},
 
 		gen8_pp_plx_avs_initialize,
@@ -339,11 +339,11 @@ static struct pp_module pp_modules_gen9[] = {
 
 	{
 		{
-			"NV12_RGBX module",
-			PP_NV12_LOAD_SAVE_RGBX,
-			pp_nv12_load_save_rgbx_gen9,
-			sizeof(pp_nv12_load_save_rgbx_gen9),
-			NULL,
+			.name = "NV12_RGBX module",
+			.interface = PP_NV12_LOAD_SAVE_RGBX,
+			.bin = pp_nv12_load_save_rgbx_gen9,
+			.size = sizeof(pp_nv12_load_save_rgbx_gen9),
+			.bo = NULL,
 		},
 
 		gen8_pp_plx_avs_initialize,
