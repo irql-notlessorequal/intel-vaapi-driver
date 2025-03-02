@@ -152,53 +152,53 @@ extern uint32_t g_intel_debug_option_flags;
 		}                                       \
 	} while (0)
 
-struct intel_device_info {
+struct intel_device_info
+{
 	int gen;
 	int gt;
 
 	unsigned int urb_size;
 	unsigned int max_wm_threads;
 
-	unsigned int is_g4x         : 1; /* gen4 */
-	unsigned int is_ivybridge   : 1; /* gen7 */
-	unsigned int is_baytrail    : 1; /* gen7 */
-	unsigned int is_haswell     : 1; /* gen7 */
-	unsigned int is_cherryview  : 1; /* gen8 */
-	unsigned int is_skylake     : 1; /* gen9 */
-	unsigned int is_broxton     : 1; /* gen9 */
-	unsigned int is_kabylake    : 1; /* gen9p5 */
-	unsigned int is_glklake     : 1; /* gen9p5 lp*/
-	unsigned int is_cfllake     : 1;
+	bool is_g4x : 1; /* gen4 */
+	bool is_ivybridge : 1; /* gen7 */
+	bool is_baytrail : 1; /* gen7 */
+	bool is_haswell : 1; /* gen7 */
+	bool is_cherryview : 1; /* gen8 */
+	bool is_skylake : 1; /* gen9 */
+	bool is_broxton : 1; /* gen9 */
+	bool is_kabylake : 1; /* gen9p5 */
+	bool is_glklake : 1; /* gen9p5 lp*/
+	bool is_cfllake : 1;
 };
 
-struct intel_driver_data {
+struct intel_driver_data
+{
 	int fd;
 	int device_id;
 	int revision;
 
-	int dri2Enabled;
+	/* We will always have a positive number of EUs. */
+	unsigned int eu_total;
 
 	sigset_t sa_mask;
 	pthread_mutex_t ctxmutex;
 	int locked;
+	unsigned int mocs_state;
 
 	dri_bufmgr *bufmgr;
 	const struct intel_device_info *device_info;
 
-	/* We will always have a positive number of EUs. */
-	unsigned int eu_total;
-
-	unsigned int mocs_state;
-
-	unsigned int has_exec2  : 1; /* Flag: has execbuffer2? */
-	unsigned int has_bsd    : 1; /* Flag: has bitstream decoder for H.264? */
-	unsigned int has_blt    : 1; /* Flag: has BLT unit? */
-	unsigned int has_vebox  : 1; /* Flag: has VEBOX unit */
-	unsigned int has_bsd2   : 1; /* Flag: has the second BSD video ring unit */
-	unsigned int has_huc    : 1; /* Flag: has a fully loaded HuC firmware? */
-	unsigned int hybrid_vp8 : 1; /* Flag: User has enrolled in experimental VP8 encoding support. */
-	unsigned int rc_hw_mode : 1; /* Flag: User has enrolled in RateControlCounter */
-	unsigned int dec_base	: 1; /* Flag: User has enrolled in experimental VA_DEC_SLICE_MODE_BASE support  */
+	bool dri2Enabled : 1;
+	bool has_exec2  : 1; /* Flag: has execbuffer2? */
+	bool has_bsd    : 1; /* Flag: has bitstream decoder for H.264? */
+	bool has_blt    : 1; /* Flag: has BLT unit? */
+	bool has_vebox  : 1; /* Flag: has VEBOX unit */
+	bool has_bsd2   : 1; /* Flag: has the second BSD video ring unit */
+	bool has_huc    : 1; /* Flag: has a fully loaded HuC firmware? */
+	bool hybrid_vp8 : 1; /* Flag: User has enrolled in experimental VP8 encoding support. */
+	bool rc_hw_mode : 1; /* Flag: User has enrolled in RateControlCounter */
+	bool dec_base	: 1; /* Flag: User has enrolled in experimental VA_DEC_SLICE_MODE_BASE support  */
 };
 
 bool intel_driver_init(VADriverContextP ctx);

@@ -56,19 +56,19 @@ static const uint32_t gen6_mfc_batchbuffer_avc_inter[][4] = {
 
 static struct i965_kernel gen6_mfc_kernels[] = {
 	{
-		"MFC AVC INTRA BATCHBUFFER ",
-		MFC_BATCHBUFFER_AVC_INTRA,
-		gen6_mfc_batchbuffer_avc_intra,
-		sizeof(gen6_mfc_batchbuffer_avc_intra),
-		NULL
+		.name = "MFC AVC INTRA BATCHBUFFER ",
+		.interface = MFC_BATCHBUFFER_AVC_INTRA,
+		.bin = gen6_mfc_batchbuffer_avc_intra,
+		.size = sizeof(gen6_mfc_batchbuffer_avc_intra),
+		.bo = NULL
 	},
 
 	{
-		"MFC AVC INTER BATCHBUFFER ",
-		MFC_BATCHBUFFER_AVC_INTER,
-		gen6_mfc_batchbuffer_avc_inter,
-		sizeof(gen6_mfc_batchbuffer_avc_inter),
-		NULL
+		.name = "MFC AVC INTER BATCHBUFFER ",
+		.interface = MFC_BATCHBUFFER_AVC_INTER,
+		.bin = gen6_mfc_batchbuffer_avc_inter,
+		.size = sizeof(gen6_mfc_batchbuffer_avc_inter),
+		.bo = NULL
 	},
 };
 

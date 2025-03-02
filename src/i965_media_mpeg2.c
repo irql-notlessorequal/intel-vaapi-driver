@@ -160,123 +160,123 @@ static const uint32_t field_bidirect_16x8_kernel[][4] = {
 
 static struct i965_kernel  mpeg2_vld_kernels_gen4[] = {
 	{
-		"FRAME_INTRA",
-		FRAME_INTRA,
-		frame_intra_kernel,
-		sizeof(frame_intra_kernel),
-		NULL
+		.name = "FRAME_INTRA",
+		.interface = FRAME_INTRA,
+		.bin = frame_intra_kernel,
+		.size = sizeof(frame_intra_kernel),
+		.bo = NULL
 	},
 
 	{
-		"FRAME_FRAME_PRED_FORWARD",
-		FRAME_FRAME_PRED_FORWARD,
-		frame_frame_pred_forward_kernel,
-		sizeof(frame_frame_pred_forward_kernel),
-		NULL
+		.name = "FRAME_FRAME_PRED_FORWARD",
+		.interface = FRAME_FRAME_PRED_FORWARD,
+		.bin = frame_frame_pred_forward_kernel,
+		.size = sizeof(frame_frame_pred_forward_kernel),
+		.bo = NULL
 	},
 
 	{
-		"FRAME_FRAME_PRED_BACKWARD",
-		FRAME_FRAME_PRED_BACKWARD,
-		frame_frame_pred_backward_kernel,
-		sizeof(frame_frame_pred_backward_kernel),
-		NULL
+		.name = "FRAME_FRAME_PRED_BACKWARD",
+		.interface = FRAME_FRAME_PRED_BACKWARD,
+		.bin = frame_frame_pred_backward_kernel,
+		.size = sizeof(frame_frame_pred_backward_kernel),
+		.bo = NULL
 	},
 
 	{
-		"FRAME_FRAME_PRED_BIDIRECT",
-		FRAME_FRAME_PRED_BIDIRECT,
-		frame_frame_pred_bidirect_kernel,
-		sizeof(frame_frame_pred_bidirect_kernel),
-		NULL
+		.name = "FRAME_FRAME_PRED_BIDIRECT",
+		.interface = FRAME_FRAME_PRED_BIDIRECT,
+		.bin = frame_frame_pred_bidirect_kernel,
+		.size = sizeof(frame_frame_pred_bidirect_kernel),
+		.bo = NULL
 	},
 
 	{
-		"FRAME_FIELD_PRED_FORWARD",
-		FRAME_FIELD_PRED_FORWARD,
-		frame_field_pred_forward_kernel,
-		sizeof(frame_field_pred_forward_kernel),
-		NULL
+		.name = "FRAME_FIELD_PRED_FORWARD",
+		.interface = FRAME_FIELD_PRED_FORWARD,
+		.bin = frame_field_pred_forward_kernel,
+		.size = sizeof(frame_field_pred_forward_kernel),
+		.bo = NULL
 	},
 
 	{
-		"FRAME_FIELD_PRED_BACKWARD",
-		FRAME_FIELD_PRED_BACKWARD,
-		frame_field_pred_backward_kernel,
-		sizeof(frame_field_pred_backward_kernel),
-		NULL
+		.name = "FRAME_FIELD_PRED_BACKWARD",
+		.interface = FRAME_FIELD_PRED_BACKWARD,
+		.bin = frame_field_pred_backward_kernel,
+		.size = sizeof(frame_field_pred_backward_kernel),
+		.bo = NULL
 	},
 
 	{
-		"FRAME_FIELD_PRED_BIDIRECT",
-		FRAME_FIELD_PRED_BIDIRECT,
-		frame_field_pred_bidirect_kernel,
-		sizeof(frame_field_pred_bidirect_kernel),
-		NULL
+		.name = "FRAME_FIELD_PRED_BIDIRECT",
+		.interface = FRAME_FIELD_PRED_BIDIRECT,
+		.bin = frame_field_pred_bidirect_kernel,
+		.size = sizeof(frame_field_pred_bidirect_kernel),
+		.bo = NULL
 	},
 
 	{
-		"LIB",
-		LIB_INTERFACE,
-		lib_kernel,
-		sizeof(lib_kernel),
-		NULL
+		.name = "LIB",
+		.interface = LIB_INTERFACE,
+		.bin = lib_kernel,
+		.size = sizeof(lib_kernel),
+		.bo = NULL
 	},
 
 	{
-		"FIELD_INTRA",
-		FIELD_INTRA,
-		field_intra_kernel,
-		sizeof(field_intra_kernel),
-		NULL
+		.name = "FIELD_INTRA",
+		.interface = FIELD_INTRA,
+		.bin = field_intra_kernel,
+		.size = sizeof(field_intra_kernel),
+		.bo = NULL
 	},
 
 	{
-		"FIELD_FORWARD",
-		FIELD_FORWARD,
-		field_forward_kernel,
-		sizeof(field_forward_kernel),
-		NULL
+		.name = "FIELD_FORWARD",
+		.interface = FIELD_FORWARD,
+		.bin = field_forward_kernel,
+		.size = sizeof(field_forward_kernel),
+		.bo = NULL
 	},
 
 	{
-		"FIELD_FORWARD_16X8",
-		FIELD_FORWARD_16X8,
-		field_forward_16x8_kernel,
-		sizeof(field_forward_16x8_kernel),
-		NULL
+		.name = "FIELD_FORWARD_16X8",
+		.interface = FIELD_FORWARD_16X8,
+		.bin = field_forward_16x8_kernel,
+		.size = sizeof(field_forward_16x8_kernel),
+		.bo = NULL
 	},
 
 	{
-		"FIELD_BACKWARD",
-		FIELD_BACKWARD,
-		field_backward_kernel,
-		sizeof(field_backward_kernel),
-		NULL
+		.name = "FIELD_BACKWARD",
+		.interface = FIELD_BACKWARD,
+		.bin = field_backward_kernel,
+		.size = sizeof(field_backward_kernel),
+		.bo = NULL
 	},
 
 	{
-		"FIELD_BACKWARD_16X8",
-		FIELD_BACKWARD_16X8,
-		field_backward_16x8_kernel,
-		sizeof(field_backward_16x8_kernel),
-		NULL
+		.name = "FIELD_BACKWARD_16X8",
+		.interface = FIELD_BACKWARD_16X8,
+		.bin = field_backward_16x8_kernel,
+		.size = sizeof(field_backward_16x8_kernel),
+		.bo = NULL
 	},
 
 	{
-		"FIELD_BIDIRECT",
-		FIELD_BIDIRECT,
-		field_bidirect_kernel,
-		sizeof(field_bidirect_kernel),
-		NULL
+		.name = "FIELD_BIDIRECT",
+		.interface = FIELD_BIDIRECT,
+		.bin = field_bidirect_kernel,
+		.size = sizeof(field_bidirect_kernel),
+		.bo = NULL
 	},
 
 	{
-		"FIELD_BIDIRECT_16X8",
-		FIELD_BIDIRECT_16X8,
-		field_bidirect_16x8_kernel,
-		sizeof(field_bidirect_16x8_kernel),
-		NULL
+		.name = "FIELD_BIDIRECT_16X8",
+		.interface = FIELD_BIDIRECT_16X8,
+		.bin = field_bidirect_16x8_kernel,
+		.size = sizeof(field_bidirect_16x8_kernel),
+		.bo = NULL
 	}
 };
 
@@ -330,123 +330,123 @@ static const uint32_t field_bidirect_16x8_kernel_gen5[][4] = {
 
 static struct i965_kernel  mpeg2_vld_kernels_gen5[] = {
 	{
-		"FRAME_INTRA",
-		FRAME_INTRA,
-		frame_intra_kernel_gen5,
-		sizeof(frame_intra_kernel_gen5),
-		NULL
+		.name = "FRAME_INTRA",
+		.interface = FRAME_INTRA,
+		.bin = frame_intra_kernel_gen5,
+		.size = sizeof(frame_intra_kernel_gen5),
+		.bo = NULL
 	},
 
 	{
-		"FRAME_FRAME_PRED_FORWARD",
-		FRAME_FRAME_PRED_FORWARD,
-		frame_frame_pred_forward_kernel_gen5,
-		sizeof(frame_frame_pred_forward_kernel_gen5),
-		NULL
+		.name = "FRAME_FRAME_PRED_FORWARD",
+		.interface = FRAME_FRAME_PRED_FORWARD,
+		.bin = frame_frame_pred_forward_kernel_gen5,
+		.size = sizeof(frame_frame_pred_forward_kernel_gen5),
+		.bo = NULL
 	},
 
 	{
-		"FRAME_FRAME_PRED_BACKWARD",
-		FRAME_FRAME_PRED_BACKWARD,
-		frame_frame_pred_backward_kernel_gen5,
-		sizeof(frame_frame_pred_backward_kernel_gen5),
-		NULL
+		.name = "FRAME_FRAME_PRED_BACKWARD",
+		.interface = FRAME_FRAME_PRED_BACKWARD,
+		.bin = frame_frame_pred_backward_kernel_gen5,
+		.size = sizeof(frame_frame_pred_backward_kernel_gen5),
+		.bo = NULL
 	},
 
 	{
-		"FRAME_FRAME_PRED_BIDIRECT",
-		FRAME_FRAME_PRED_BIDIRECT,
-		frame_frame_pred_bidirect_kernel_gen5,
-		sizeof(frame_frame_pred_bidirect_kernel_gen5),
-		NULL
+		.name = "FRAME_FRAME_PRED_BIDIRECT",
+		.interface = FRAME_FRAME_PRED_BIDIRECT,
+		.bin = frame_frame_pred_bidirect_kernel_gen5,
+		.size = sizeof(frame_frame_pred_bidirect_kernel_gen5),
+		.bo = NULL
 	},
 
 	{
-		"FRAME_FIELD_PRED_FORWARD",
-		FRAME_FIELD_PRED_FORWARD,
-		frame_field_pred_forward_kernel_gen5,
-		sizeof(frame_field_pred_forward_kernel_gen5),
-		NULL
+		.name = "FRAME_FIELD_PRED_FORWARD",
+		.interface = FRAME_FIELD_PRED_FORWARD,
+		.bin = frame_field_pred_forward_kernel_gen5,
+		.size = sizeof(frame_field_pred_forward_kernel_gen5),
+		.bo = NULL
 	},
 
 	{
-		"FRAME_FIELD_PRED_BACKWARD",
-		FRAME_FIELD_PRED_BACKWARD,
-		frame_field_pred_backward_kernel_gen5,
-		sizeof(frame_field_pred_backward_kernel_gen5),
-		NULL
+		.name = "FRAME_FIELD_PRED_BACKWARD",
+		.interface = FRAME_FIELD_PRED_BACKWARD,
+		.bin = frame_field_pred_backward_kernel_gen5,
+		.size = sizeof(frame_field_pred_backward_kernel_gen5),
+		.bo = NULL
 	},
 
 	{
-		"FRAME_FIELD_PRED_BIDIRECT",
-		FRAME_FIELD_PRED_BIDIRECT,
-		frame_field_pred_bidirect_kernel_gen5,
-		sizeof(frame_field_pred_bidirect_kernel_gen5),
-		NULL
+		.name = "FRAME_FIELD_PRED_BIDIRECT",
+		.interface = FRAME_FIELD_PRED_BIDIRECT,
+		.bin = frame_field_pred_bidirect_kernel_gen5,
+		.size = sizeof(frame_field_pred_bidirect_kernel_gen5),
+		.bo = NULL
 	},
 
 	{
-		"LIB",
-		LIB_INTERFACE,
-		lib_kernel_gen5,
-		sizeof(lib_kernel_gen5),
-		NULL
+		.name = "LIB",
+		.interface = LIB_INTERFACE,
+		.bin = lib_kernel_gen5,
+		.size = sizeof(lib_kernel_gen5),
+		.bo = NULL
 	},
 
 	{
-		"FIELD_INTRA",
-		FIELD_INTRA,
-		field_intra_kernel_gen5,
-		sizeof(field_intra_kernel_gen5),
-		NULL
+		.name = "FIELD_INTRA",
+		.interface = FIELD_INTRA,
+		.bin = field_intra_kernel_gen5,
+		.size = sizeof(field_intra_kernel_gen5),
+		.bo = NULL
 	},
 
 	{
-		"FIELD_FORWARD",
-		FIELD_FORWARD,
-		field_forward_kernel_gen5,
-		sizeof(field_forward_kernel_gen5),
-		NULL
+		.name = "FIELD_FORWARD",
+		.interface = FIELD_FORWARD,
+		.bin = field_forward_kernel_gen5,
+		.size = sizeof(field_forward_kernel_gen5),
+		.bo = NULL
 	},
 
 	{
-		"FIELD_FORWARD_16X8",
-		FIELD_FORWARD_16X8,
-		field_forward_16x8_kernel_gen5,
-		sizeof(field_forward_16x8_kernel_gen5),
-		NULL
+		.name = "FIELD_FORWARD_16X8",
+		.interface = FIELD_FORWARD_16X8,
+		.bin = field_forward_16x8_kernel_gen5,
+		.size = sizeof(field_forward_16x8_kernel_gen5),
+		.bo = NULL
 	},
 
 	{
-		"FIELD_BACKWARD",
-		FIELD_BACKWARD,
-		field_backward_kernel_gen5,
-		sizeof(field_backward_kernel_gen5),
-		NULL
+		.name = "FIELD_BACKWARD",
+		.interface = FIELD_BACKWARD,
+		.bin = field_backward_kernel_gen5,
+		.size = sizeof(field_backward_kernel_gen5),
+		.bo = NULL
 	},
 
 	{
-		"FIELD_BACKWARD_16X8",
-		FIELD_BACKWARD_16X8,
-		field_backward_16x8_kernel_gen5,
-		sizeof(field_backward_16x8_kernel_gen5),
-		NULL
+		.name = "FIELD_BACKWARD_16X8",
+		.interface = FIELD_BACKWARD_16X8,
+		.bin = field_backward_16x8_kernel_gen5,
+		.size = sizeof(field_backward_16x8_kernel_gen5),
+		.bo = NULL
 	},
 
 	{
-		"FIELD_BIDIRECT",
-		FIELD_BIDIRECT,
-		field_bidirect_kernel_gen5,
-		sizeof(field_bidirect_kernel_gen5),
-		NULL
+		.name = "FIELD_BIDIRECT",
+		.interface = FIELD_BIDIRECT,
+		.bin = field_bidirect_kernel_gen5,
+		.size = sizeof(field_bidirect_kernel_gen5),
+		.bo = NULL
 	},
 
 	{
-		"FIELD_BIDIRECT_16X8",
-		FIELD_BIDIRECT_16X8,
-		field_bidirect_16x8_kernel_gen5,
-		sizeof(field_bidirect_16x8_kernel_gen5),
-		NULL
+		.name = "FIELD_BIDIRECT_16X8",
+		.interface = FIELD_BIDIRECT_16X8,
+		.bin = field_bidirect_16x8_kernel_gen5,
+		.size = sizeof(field_bidirect_16x8_kernel_gen5),
+		.bo = NULL
 	}
 };
 

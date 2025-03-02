@@ -74,25 +74,25 @@ static const uint32_t gen8_vme_inter_bframe[][4] = {
 
 static struct i965_kernel gen8_vme_kernels[] = {
 	{
-		"VME Intra Frame",
-		VME_INTRA_SHADER, /*index*/
-		gen8_vme_intra_frame,
-		sizeof(gen8_vme_intra_frame),
-		NULL
+		.name = "VME Intra Frame",
+		.interface = VME_INTRA_SHADER, /*index*/
+		.bin = gen8_vme_intra_frame,
+		.size = sizeof(gen8_vme_intra_frame),
+		.bo = NULL
 	},
 	{
-		"VME inter Frame",
-		VME_INTER_SHADER,
-		gen8_vme_inter_frame,
-		sizeof(gen8_vme_inter_frame),
-		NULL
+		.name = "VME inter Frame",
+		.interface = VME_INTER_SHADER,
+		.bin = gen8_vme_inter_frame,
+		.size = sizeof(gen8_vme_inter_frame),
+		.bo = NULL
 	},
 	{
-		"VME inter BFrame",
-		VME_BINTER_SHADER,
-		gen8_vme_inter_bframe,
-		sizeof(gen8_vme_inter_bframe),
-		NULL
+		.name = "VME inter BFrame",
+		.interface = VME_BINTER_SHADER,
+		.bin = gen8_vme_inter_bframe,
+		.size = sizeof(gen8_vme_inter_bframe),
+		.bo = NULL
 	}
 };
 
@@ -106,18 +106,18 @@ static const uint32_t gen8_vme_mpeg2_inter_frame[][4] = {
 
 static struct i965_kernel gen8_vme_mpeg2_kernels[] = {
 	{
-		"VME Intra Frame",
-		VME_INTRA_SHADER, /*index*/
-		gen8_vme_mpeg2_intra_frame,
-		sizeof(gen8_vme_mpeg2_intra_frame),
-		NULL
+		.name = "VME Intra Frame",
+		.interface = VME_INTRA_SHADER, /*index*/
+		.bin = gen8_vme_mpeg2_intra_frame,
+		.size = sizeof(gen8_vme_mpeg2_intra_frame),
+		.bo = NULL
 	},
 	{
-		"VME inter Frame",
-		VME_INTER_SHADER,
-		gen8_vme_mpeg2_inter_frame,
-		sizeof(gen8_vme_mpeg2_inter_frame),
-		NULL
+		.name = "VME inter Frame",
+		.interface = VME_INTER_SHADER,
+		.bin = gen8_vme_mpeg2_inter_frame,
+		.size = sizeof(gen8_vme_mpeg2_inter_frame),
+		.bo = NULL
 	},
 };
 
@@ -131,18 +131,18 @@ static const uint32_t gen8_vme_vp8_inter_frame[][4] = {
 
 static struct i965_kernel gen8_vme_vp8_kernels[] = {
 	{
-		"VME Intra Frame",
-		VME_INTRA_SHADER, /*index*/
-		gen8_vme_vp8_intra_frame,
-		sizeof(gen8_vme_vp8_intra_frame),
-		NULL
+		.name = "VME Intra Frame",
+		.interface = VME_INTRA_SHADER, /*index*/
+		.bin = gen8_vme_vp8_intra_frame,
+		.size = sizeof(gen8_vme_vp8_intra_frame),
+		.bo = NULL
 	},
 	{
-		"VME inter Frame",
-		VME_INTER_SHADER,
-		gen8_vme_vp8_inter_frame,
-		sizeof(gen8_vme_vp8_inter_frame),
-		NULL
+		.name = "VME inter Frame",
+		.interface = VME_INTER_SHADER,
+		.bin = gen8_vme_vp8_inter_frame,
+		.size = sizeof(gen8_vme_vp8_inter_frame),
+		.bo = NULL
 	},
 };
 
