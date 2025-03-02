@@ -485,12 +485,14 @@ struct generic_enc_codec_state {
 /*
  by now VME and PAK use the same context. it will bind the ctx according to the codec and platform, also vdenc and non-vdenc
 */
-struct encoder_vme_mfc_context {
+struct encoder_vme_mfc_context
+{
+	void *generic_enc_ctx;
+	void *private_enc_ctx; //pointer to the specific enc_ctx
+	void *generic_enc_state;
+	void *private_enc_state; //pointer to the specific enc_state
+
 	int32_t codec_id;
-	void * generic_enc_ctx;
-	void * private_enc_ctx; //pointer to the specific enc_ctx
-	void * generic_enc_state;
-	void * private_enc_state; //pointer to the specific enc_state
 };
 
 #endif /* _I965_COMMON_ENCODER_H */

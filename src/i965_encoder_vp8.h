@@ -89,12 +89,14 @@
 struct encode_state;
 struct intel_encoder_context;
 
-struct i965_encoder_vp8_surface {
+struct i965_encoder_vp8_surface
+{
 	VADriverContextP ctx;
-	VASurfaceID scaled_4x_surface_id;
 	struct object_surface *scaled_4x_surface_obj;
-	VASurfaceID scaled_16x_surface_id;
 	struct object_surface *scaled_16x_surface_obj;
+
+	VASurfaceID scaled_4x_surface_id;
+	VASurfaceID scaled_16x_surface_id;
 	unsigned int qp_index;
 };
 
@@ -672,9 +674,10 @@ struct i965_encoder_vp8_me_context {
 
 #define DC_BIAS_SEGMENT_DEFAULT_VAL_VP8 1500
 
-struct mbenc_surface_parameters {
-	int i_frame_dist_in_use;
+struct mbenc_surface_parameters
+{
 	struct i965_gpe_resource *me_brc_distortion_buffer;
+	bool i_frame_dist_in_use;
 };
 
 enum vp8_binding_table_offset_mbenc {
@@ -2240,19 +2243,21 @@ enum VP8_ENCODER_WALKER_DEGREE {
 	VP8_ENCODER_45Z_DEGREE
 };
 
-struct vp8_encoder_kernel_walker_parameter {
-	unsigned int                walker_degree;
-	unsigned int                use_scoreboard;
-	unsigned int                scoreboard_mask;
-	unsigned int                no_dependency;
-	unsigned int                resolution_x;
-	unsigned int                resolution_y;
+struct vp8_encoder_kernel_walker_parameter
+{
+	unsigned int walker_degree;
+	unsigned int scoreboard_mask;
+	unsigned int resolution_x;
+	unsigned int resolution_y;
+	bool use_scoreboard;
+	bool no_dependency;
 };
 
-struct vp8_encoder_scoreboard_parameters {
-	unsigned int                mask;
-	unsigned int                type;
-	unsigned int                enable;
+struct vp8_encoder_scoreboard_parameters
+{
+	unsigned int mask;
+	unsigned int type;
+	bool enable;
 };
 
 #define VP8_BRC_HISTORY_BUFFER_SIZE     704

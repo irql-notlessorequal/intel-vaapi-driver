@@ -93,32 +93,32 @@ static const uint32_t gen7_vme_binter_frame[][4] = {
 
 static struct i965_kernel gen7_vme_kernels[] = {
 	{
-		"AVC VME Intra Frame",
-		AVC_VME_INTRA_SHADER,           /*index*/
-		gen7_vme_intra_frame,
-		sizeof(gen7_vme_intra_frame),
-		NULL
+		.name = "AVC VME Intra Frame",
+		.interface = AVC_VME_INTRA_SHADER,           /*index*/
+		.bin = gen7_vme_intra_frame,
+		.size = sizeof(gen7_vme_intra_frame),
+		.bo = NULL
 	},
 	{
-		"AVC VME inter Frame",
-		AVC_VME_INTER_SHADER,
-		gen7_vme_inter_frame,
-		sizeof(gen7_vme_inter_frame),
-		NULL
+		.name = "AVC VME inter Frame",
+		.interface = AVC_VME_INTER_SHADER,
+		.bin = gen7_vme_inter_frame,
+		.size = sizeof(gen7_vme_inter_frame),
+		.bo = NULL
 	},
 	{
-		"AVC VME BATCHBUFFER",
-		AVC_VME_BATCHBUFFER,
-		gen7_vme_batchbuffer,
-		sizeof(gen7_vme_batchbuffer),
-		NULL
+		.name = "AVC VME BATCHBUFFER",
+		.interface = AVC_VME_BATCHBUFFER,
+		.bin = gen7_vme_batchbuffer,
+		.size = sizeof(gen7_vme_batchbuffer),
+		.bo = NULL
 	},
 	{
-		"AVC VME binter Frame",
-		AVC_VME_BINTER_SHADER,
-		gen7_vme_binter_frame,
-		sizeof(gen7_vme_binter_frame),
-		NULL
+		.name = "AVC VME binter Frame",
+		.interface = AVC_VME_BINTER_SHADER,
+		.bin = gen7_vme_binter_frame,
+		.size = sizeof(gen7_vme_binter_frame),
+		.bo = NULL
 	}
 };
 
@@ -132,18 +132,18 @@ static const uint32_t gen7_vme_mpeg2_batchbuffer[][4] = {
 
 static struct i965_kernel gen7_vme_mpeg2_kernels[] = {
 	{
-		"MPEG2 VME inter Frame",
-		MPEG2_VME_INTER_SHADER,
-		gen7_vme_mpeg2_inter_frame,
-		sizeof(gen7_vme_mpeg2_inter_frame),
-		NULL
+		.name = "MPEG2 VME inter Frame",
+		.interface = MPEG2_VME_INTER_SHADER,
+		.bin = gen7_vme_mpeg2_inter_frame,
+		.size = sizeof(gen7_vme_mpeg2_inter_frame),
+		.bo = NULL
 	},
 	{
-		"MPEG2 VME BATCHBUFFER",
-		MPEG2_VME_BATCHBUFFER,
-		gen7_vme_mpeg2_batchbuffer,
-		sizeof(gen7_vme_mpeg2_batchbuffer),
-		NULL
+		.name = "MPEG2 VME BATCHBUFFER",
+		.interface = MPEG2_VME_BATCHBUFFER,
+		.bin = gen7_vme_mpeg2_batchbuffer,
+		.size = sizeof(gen7_vme_mpeg2_batchbuffer),
+		.bo = NULL
 	},
 };
 

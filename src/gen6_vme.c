@@ -74,25 +74,25 @@ static const uint32_t gen6_vme_batchbuffer[][4] = {
 
 static struct i965_kernel gen6_vme_kernels[] = {
 	{
-		"AVC VME Intra Frame",
-		AVC_VME_INTRA_SHADER,           /*index*/
-		gen6_vme_intra_frame,
-		sizeof(gen6_vme_intra_frame),
-		NULL
+		.name = "AVC VME Intra Frame",
+		.interface = AVC_VME_INTRA_SHADER,           /*index*/
+		.bin = gen6_vme_intra_frame,
+		.size = sizeof(gen6_vme_intra_frame),
+		.bo = NULL
 	},
 	{
-		"AVC VME inter Frame",
-		AVC_VME_INTER_SHADER,
-		gen6_vme_inter_frame,
-		sizeof(gen6_vme_inter_frame),
-		NULL
+		.name = "AVC VME inter Frame",
+		.interface = AVC_VME_INTER_SHADER,
+		.bin = gen6_vme_inter_frame,
+		.size = sizeof(gen6_vme_inter_frame),
+		.bo = NULL
 	},
 	{
-		"AVC VME BATCHBUFFER",
-		AVC_VME_BATCHBUFFER,
-		gen6_vme_batchbuffer,
-		sizeof(gen6_vme_batchbuffer),
-		NULL
+		.name = "AVC VME BATCHBUFFER",
+		.interface = AVC_VME_BATCHBUFFER,
+		.bin = gen6_vme_batchbuffer,
+		.size = sizeof(gen6_vme_batchbuffer),
+		.bo = NULL
 	},
 };
 
