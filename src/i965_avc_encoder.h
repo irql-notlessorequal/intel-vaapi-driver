@@ -286,8 +286,15 @@ struct generic_search_path_delta {
 	uint8_t search_path_delta_y: 4;
 };
 
-struct scaling_param {
+struct scaling_param
+{
 	VASurfaceID             curr_pic;
+
+	bool                    use_4x_scaling;
+	bool                    use_16x_scaling;
+	bool                    use_32x_scaling;
+	bool                    blk8x8_stat_enabled;
+
 	void                    *p_scaling_bti;
 	struct object_surface   *input_surface;
 	struct object_surface   *output_surface;
@@ -303,10 +310,6 @@ struct scaling_param {
 	bool                    enable_mb_flatness_check;
 	bool                    enable_mb_variance_output;
 	bool                    enable_mb_pixel_average_output;
-	bool                    use_4x_scaling;
-	bool                    use_16x_scaling;
-	bool                    use_32x_scaling;
-	bool                    blk8x8_stat_enabled;
 	struct i965_gpe_resource            *pres_mbv_proc_stat_buffer;
 	struct i965_gpe_resource            *pres_flatness_check_surface;
 };

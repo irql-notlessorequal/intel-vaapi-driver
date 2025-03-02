@@ -3772,8 +3772,8 @@ static VAStatus
 i965_encoder_vp8_vme_mbenc(VADriverContextP ctx,
 						   struct encode_state *encode_state,
 						   struct intel_encoder_context *encoder_context,
-						   int is_phase2,
-						   int is_iframe_dist)
+						   bool is_phase2,
+						   bool is_iframe_dist)
 {
 	struct i965_encoder_vp8_context *vp8_context = encoder_context->vme_context;
 	struct i965_encoder_vp8_mbenc_context *mbenc_context = &vp8_context->mbenc_context;

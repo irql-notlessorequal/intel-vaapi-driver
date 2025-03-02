@@ -471,8 +471,17 @@ struct gen7_pp_inline_parameter {
 	} grf10;
 };
 
-struct i965_post_processing_context {
+struct i965_post_processing_context
+{
 	int current_pp;
+
+#define VPPGPE_8BIT_8BIT        (1 << 0)
+#define VPPGPE_8BIT_10BIT       (1 << 1)
+#define VPPGPE_10BIT_10BIT      (1 << 2)
+#define VPPGPE_10BIT_8BIT       (1 << 3)
+#define VPPGPE_8BIT_420_RGB32   (1 << 4)
+	unsigned int scaling_gpe_context_initialized;
+
 	struct pp_module pp_modules[NUM_PP_MODULES];
 	void *pp_static_parameter;
 	void *pp_inline_parameter;
@@ -587,14 +596,6 @@ struct i965_post_processing_context {
 
 
 	struct i965_gpe_context scaling_gpe_context;
-
-#define VPPGPE_8BIT_8BIT        (1 << 0)
-#define VPPGPE_8BIT_10BIT       (1 << 1)
-#define VPPGPE_10BIT_10BIT      (1 << 2)
-#define VPPGPE_10BIT_8BIT       (1 << 3)
-#define VPPGPE_8BIT_420_RGB32   (1 << 4)
-
-	unsigned int scaling_gpe_context_initialized;
 };
 
 struct i965_proc_context {

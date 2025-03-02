@@ -43,7 +43,7 @@
 
 #define WIDTH_IN_MACROBLOCKS(width)     (ALIGN(width, 16) >> 4)
 #define HEIGHT_IN_MACROBLOCKS(height)   (ALIGN(height, 16) >> 4)
-#define MAX_TEMPORAL_LAYERS         4
+#define MAX_TEMPORAL_LAYERS				4
 
 struct intel_roi {
 	short left;
@@ -59,7 +59,8 @@ struct intel_fraction {
 	unsigned int den;
 };
 
-struct intel_encoder_context {
+struct intel_encoder_context
+{
 	struct hw_context base;
 	VADriverContextP ctx;
 	int codec;
@@ -113,12 +114,11 @@ struct intel_encoder_context {
 	unsigned int context_roi : 1;
 	unsigned int is_new_sequence : 1; /* Currently only valid for H.264, TODO for other codecs */
 
+	unsigned int preenc_enabled : 1;
+	unsigned int hw_rate_control : 1; /* "MbRateCtrlFlag- RateControlCounterEnable" */
+
 	unsigned int fei_enabled : 1;
 	unsigned int fei_function_mode; /* configured VA_FEI_FUNCTION_XXX */
-
-	unsigned int preenc_enabled : 1;
-
-	unsigned int hw_rate_control : 1; /* "MbRateCtrlFlag- RateControlCounterEnable" */
 
 	void (*vme_context_destroy)(void *vme_context);
 	VAStatus(*vme_pipeline)(VADriverContextP ctx,
