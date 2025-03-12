@@ -50,6 +50,7 @@
 #include "i965_encoder.h"
 
 #include "i965_post_processing.h"
+#include "i965_format_utils.h"
 
 #include "gen9_vp9_encapi.h"
 
@@ -251,6 +252,36 @@ typedef struct {
 
 static const i965_image_format_map_t
 i965_image_formats_map[I965_MAX_IMAGE_FORMATS + 1] = {
+	/* Native Formats */
+	{
+		I965_SURFACETYPE_YUV,
+		{ VA_FOURCC_NV12, VA_LSB_FIRST, 12, }
+	},
+	{
+		I965_SURFACETYPE_YUV,
+		{ VA_FOURCC_YV12, VA_LSB_FIRST, 12, }
+	},
+	{
+		I965_SURFACETYPE_YUV,
+		{ VA_FOURCC_I420, VA_LSB_FIRST, 12, }
+	},
+	{
+		I965_SURFACETYPE_YUV,
+		{ VA_FOURCC_YUY2, VA_LSB_FIRST, 16, }
+	},
+	{
+		I965_SURFACETYPE_YUV,
+		{ VA_FOURCC_UYVY, VA_LSB_FIRST, 16, }
+	},
+	{
+		I965_SURFACETYPE_YUV,
+		{ VA_FOURCC_422H, VA_LSB_FIRST, 16, }
+	},
+	{
+		I965_SURFACETYPE_YUV,
+		{ VA_FOURCC_P010, VA_LSB_FIRST, 24, }
+	},
+	/* Secondary Formats */
 	{
 		/* [31:0] A:R:G:B 8:8:8:8 little endian */
 		I965_SURFACETYPE_RGBA,
@@ -272,33 +303,10 @@ i965_image_formats_map[I965_MAX_IMAGE_FORMATS + 1] = {
 		{ VA_FOURCC_RGBA, VA_LSB_FIRST, 32, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000 }
 	},
 	{
-		I965_SURFACETYPE_YUV,
-		{ VA_FOURCC_NV12, VA_LSB_FIRST, 12, }
+		/* [31:0] B:G:R:A 8:8:8:8 little endian */
+		I965_SURFACETYPE_RGBA,
+		{ VA_FOURCC_ARGB, VA_LSB_FIRST, 32, 32, 0x0000ff00, 0x00ff0000, 0xff000000, 0x000000ff }
 	},
-	{
-		I965_SURFACETYPE_YUV,
-		{ VA_FOURCC_P010, VA_LSB_FIRST, 24, }
-	},
-	{
-		I965_SURFACETYPE_YUV,
-		{ VA_FOURCC_YUY2, VA_LSB_FIRST, 16, }
-	},
-	{
-		I965_SURFACETYPE_YUV,
-		{ VA_FOURCC_UYVY, VA_LSB_FIRST, 16, }
-	},
-	{
-		I965_SURFACETYPE_YUV,
-		{ VA_FOURCC_YV12, VA_LSB_FIRST, 12, }
-	},
-	{
-		I965_SURFACETYPE_YUV,
-		{ VA_FOURCC_I420, VA_LSB_FIRST, 12, }
-	},
-	{
-		I965_SURFACETYPE_YUV,
-		{ VA_FOURCC_422H, VA_LSB_FIRST, 16, }
-	}
 };
 
 /* List of supported subpicture formats */
@@ -1784,11 +1792,11 @@ i965_surface_native_memory(VADriverContextP ctx,
 		expected_fourcc == VA_FOURCC_YV16)
 		tiling = 0;
 
-	return i965_check_alloc_surface_bo(ctx, obj_surface, tiling, expected_fourcc, get_sampling_from_fourcc(expected_fourcc));
+	return i965_check_alloc_surface_bo(ctx, obj_surface, tiling, expected_fourcc, obj_surface->subsampling);
 }
 
 static VAStatus
-i965_suface_external_memory(VADriverContextP ctx,
+i965_surface_external_memory(VADriverContextP ctx,
 							struct object_surface *obj_surface,
 							int external_memory_type,
 							VASurfaceAttribExternalBuffers *memory_attibute,
@@ -2055,12 +2063,17 @@ i965_CreateSurfaces2(
 	unsigned int        num_attribs
 )
 {
+	ASSERT_RET(ctx, VA_STATUS_ERROR_INVALID_CONTEXT);
+	ASSERT_RET(width, VA_STATUS_ERROR_INVALID_PARAMETER);
+	ASSERT_RET(height, VA_STATUS_ERROR_INVALID_PARAMETER);
+	ASSERT_RET(num_surfaces, VA_STATUS_ERROR_INVALID_PARAMETER);
+
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
 	int i, j;
 	VAStatus vaStatus = VA_STATUS_SUCCESS;
 	int expected_fourcc = 0;
 	int memory_type = I965_SURFACE_MEM_NATIVE; /* native */
-	VASurfaceAttribExternalBuffers *memory_attibute = NULL;
+	VASurfaceAttribExternalBuffers *memory_attribute = NULL;
 
 	for (i = 0; i < num_attribs && attrib_list; i++) {
 		if ((attrib_list[i].type == VASurfaceAttribPixelFormat) &&
@@ -2092,34 +2105,54 @@ i965_CreateSurfaces2(
 			}
 			else
 			{
-				fprintf(stderr, "i965_CreateSurfaces2: Unknown VA_SURFACE_TYPE: %i\n", attrib_list[i].value.value.i);
+				i965_log_debug(ctx, "i965_CreateSurfaces2: Unknown VA_SURFACE_TYPE: %i\n", attrib_list[i].value.value.i);
 			}
 		}
 
 		if ((attrib_list[i].type == VASurfaceAttribExternalBufferDescriptor) &&
 			(attrib_list[i].flags == VA_SURFACE_ATTRIB_SETTABLE)) {
 			ASSERT_RET(attrib_list[i].value.type == VAGenericValueTypePointer, VA_STATUS_ERROR_INVALID_PARAMETER);
-			memory_attibute = (VASurfaceAttribExternalBuffers *)attrib_list[i].value.value.p;
+			memory_attribute = (VASurfaceAttribExternalBuffers *)attrib_list[i].value.value.p;
 		}
 	}
 
 	/* support 420 & 422 & RGB32 format, 422 and RGB32 are only used
 	 * for post-processing (including color conversion) */
-	if (VA_RT_FORMAT_YUV420 != format &&
-		VA_RT_FORMAT_YUV420_10BPP != format &&
-		VA_RT_FORMAT_YUV422 != format &&
-		VA_RT_FORMAT_YUV444 != format &&
-		VA_RT_FORMAT_YUV411 != format &&
-		VA_RT_FORMAT_YUV400 != format &&
-		VA_RT_FORMAT_RGB32  != format) {
-		return VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT;
+	switch (format)
+	{
+		case VA_RT_FORMAT_YUV420:
+		case VA_RT_FORMAT_YUV422:
+		case VA_RT_FORMAT_YUV444:
+		case VA_RT_FORMAT_YUV411:
+		case VA_RT_FORMAT_YUV400:
+		case VA_RT_FORMAT_RGB32:
+			break;
+
+		case VA_RT_FORMAT_YUV420_10BPP:
+			/**
+			 * Only allow this format if we support it.
+			 */
+			if (i965->codec_info->has_vpp_p010)
+				break;
+
+		default:
+		{
+			i965_log_debug(ctx, "Rejecting unsupported RT format: %#010x\n", format);
+			return VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT;
+		}
 	}
 
-	/* Refuse 10bpp formats if we don't actually support them. */
-	if (VA_RT_FORMAT_YUV420_10BPP == format && !i965->codec_info->has_vpp_p010)
+	/**
+	 * Chromium doesn't provide a FOURCC to this function,
+	 * this will cause it to explode later on as we need a BO
+	 * when exporting the surface via vaExportSurfaceHandle.
+	 * 
+	 * Do what the iHD does and guess now.
+	 */
+	if (!expected_fourcc)
 	{
-		fprintf(stderr, "i965_CreateSurfaces2: Rejecting VA_RT_FORMAT_YUV420_10BPP on unsupported hardware, this is an application issue.\r\n");
-		return VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT;
+		i965_GuessExpectedFourCC(format, &expected_fourcc);
+		i965_log_debug(ctx, "i965_CreateSurfaces2: No FOURCC defined, making a bold assumption instead!\n");
 	}
 
 	for (i = 0; i < num_surfaces; i++) {
@@ -2158,35 +2191,35 @@ i965_CreateSurfaces2(
 		obj_surface->derived_image_id = VA_INVALID_ID;
 		obj_surface->private_data = NULL;
 		obj_surface->free_private_data = NULL;
-		obj_surface->subsampling = SUBSAMPLE_YUV420;
+		obj_surface->subsampling = GetSubsamplingFromFormat(format, expected_fourcc);
 
 		obj_surface->wrapper_surface = VA_INVALID_ID;
 		obj_surface->exported_primefd = -1;
 
 		switch (memory_type) {
 		case I965_SURFACE_MEM_NATIVE:
-			if (memory_attibute) {
-				if (!(memory_attibute->flags & VA_SURFACE_EXTBUF_DESC_ENABLE_TILING))
+			if (memory_attribute) {
+				if (!(memory_attribute->flags & VA_SURFACE_EXTBUF_DESC_ENABLE_TILING))
 					obj_surface->user_disable_tiling = true;
 
-				if (memory_attibute->pixel_format) {
+				if (memory_attribute->pixel_format) {
 					if (expected_fourcc)
-						ASSERT_RET(memory_attibute->pixel_format == expected_fourcc, VA_STATUS_ERROR_INVALID_PARAMETER);
+						ASSERT_RET(memory_attribute->pixel_format == expected_fourcc, VA_STATUS_ERROR_INVALID_PARAMETER);
 					else
-						expected_fourcc = memory_attibute->pixel_format;
+						expected_fourcc = memory_attribute->pixel_format;
 				}
 				ASSERT_RET(expected_fourcc, VA_STATUS_ERROR_INVALID_PARAMETER);
-				if (memory_attibute->pitches[0]) {
+				if (memory_attribute->pitches[0]) {
 					int bpp_1stplane = bpp_1stplane_by_fourcc(expected_fourcc);
 					ASSERT_RET(bpp_1stplane, VA_STATUS_ERROR_INVALID_PARAMETER);
-					obj_surface->width = memory_attibute->pitches[0];
+					obj_surface->width = memory_attribute->pitches[0];
 					obj_surface->user_h_stride_set = true;
 					ASSERT_RET(IS_ALIGNED(obj_surface->width, 16), VA_STATUS_ERROR_INVALID_PARAMETER);
 					ASSERT_RET(obj_surface->width >= width * bpp_1stplane, VA_STATUS_ERROR_INVALID_PARAMETER);
 
-					if (memory_attibute->offsets[1]) {
-						ASSERT_RET(!memory_attibute->offsets[0], VA_STATUS_ERROR_INVALID_PARAMETER);
-						obj_surface->height = memory_attibute->offsets[1] / memory_attibute->pitches[0];
+					if (memory_attribute->offsets[1]) {
+						ASSERT_RET(!memory_attribute->offsets[0], VA_STATUS_ERROR_INVALID_PARAMETER);
+						obj_surface->height = memory_attribute->offsets[1] / memory_attribute->pitches[0];
 						obj_surface->user_v_stride_set = true;
 						ASSERT_RET(IS_ALIGNED(obj_surface->height, 16), VA_STATUS_ERROR_INVALID_PARAMETER);
 						ASSERT_RET(obj_surface->height >= height, VA_STATUS_ERROR_INVALID_PARAMETER);
@@ -2201,12 +2234,17 @@ i965_CreateSurfaces2(
 
 		case I965_SURFACE_MEM_GEM_FLINK:
 		case I965_SURFACE_MEM_DRM_PRIME:
-			vaStatus = i965_suface_external_memory(ctx,
+			vaStatus = i965_surface_external_memory(ctx,
 												   obj_surface,
 												   memory_type,
-												   memory_attibute,
+												   memory_attribute,
 												   i);
 			break;
+
+		default:
+			i965_log_debug(ctx, "i965_CreateSurfaces2: Unknown memory type %d, expect explosion?\n", memory_type);
+			break;
+
 		}
 		if (VA_STATUS_SUCCESS != vaStatus) {
 			i965_destroy_surface(&i965->surface_heap, (struct object_base *)obj_surface);
@@ -4936,6 +4974,7 @@ i965_check_alloc_surface_bo(VADriverContextP ctx,
 		case VA_FOURCC_RGBX:
 		case VA_FOURCC_BGRA:
 		case VA_FOURCC_BGRX:
+		case VA_FOURCC_ARGB:
 			assert(subsampling == SUBSAMPLE_RGBX);
 
 			obj_surface->width = ALIGN(obj_surface->orig_width * 4, 128);
@@ -5023,10 +5062,12 @@ i965_check_alloc_surface_bo(VADriverContextP ctx,
 			region_width = obj_surface->width;
 			region_height = obj_surface->height;
 			break;
+
 		case VA_FOURCC_RGBA:
 		case VA_FOURCC_RGBX:
 		case VA_FOURCC_BGRA:
 		case VA_FOURCC_BGRX:
+		case VA_FOURCC_ARGB:
 			obj_surface->width = ALIGN(obj_surface->orig_width * 4, i965->codec_info->min_linear_wpitch);
 			region_width = obj_surface->width;
 			region_height = obj_surface->height;
@@ -6352,6 +6393,85 @@ i965_GetSurfaceAttributes(
 	return vaStatus;
 }
 
+static int i965_PopulateVideoProcFormats(struct i965_driver_data *i965, int i, VASurfaceAttrib *attribs)
+{
+	/* RGBx formats */
+
+	attribs[i].type = VASurfaceAttribPixelFormat;
+	attribs[i].value.type = VAGenericValueTypeInteger;
+	attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+	attribs[i].value.value.i = VA_FOURCC_RGBA;
+	i++;
+
+	attribs[i].type = VASurfaceAttribPixelFormat;
+	attribs[i].value.type = VAGenericValueTypeInteger;
+	attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+	attribs[i].value.value.i = VA_FOURCC_RGBX;
+	i++;
+
+	attribs[i].type = VASurfaceAttribPixelFormat;
+	attribs[i].value.type = VAGenericValueTypeInteger;
+	attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+	attribs[i].value.value.i = VA_FOURCC_BGRA;
+	i++;
+
+	attribs[i].type = VASurfaceAttribPixelFormat;
+	attribs[i].value.type = VAGenericValueTypeInteger;
+	attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+	attribs[i].value.value.i = VA_FOURCC_BGRX;
+	i++;
+
+	attribs[i].type = VASurfaceAttribPixelFormat;
+	attribs[i].value.type = VAGenericValueTypeInteger;
+	attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+	attribs[i].value.value.i = VA_FOURCC_ARGB;
+	i++;
+
+	/* YUY2 (supported by all H/W) */
+
+	attribs[i].type = VASurfaceAttribPixelFormat;
+	attribs[i].value.type = VAGenericValueTypeInteger;
+	attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+	attribs[i].value.value.i = VA_FOURCC_YUY2;
+	i++;
+
+	/* 10-bit formats */
+
+	if (HAS_VPP_P010(i965))
+	{
+		attribs[i].type = VASurfaceAttribPixelFormat;
+		attribs[i].value.type = VAGenericValueTypeInteger;
+		attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+		attribs[i].value.value.i = VA_FOURCC_P010;
+		i++;
+
+		attribs[i].type = VASurfaceAttribPixelFormat;
+		attribs[i].value.type = VAGenericValueTypeInteger;
+		attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+		attribs[i].value.value.i = VA_FOURCC_I010;
+		i++;
+	}
+
+	/* YUV422 (Ivybridge and newer) */
+
+	if (i965->intel.device_info->gen >= 7)
+	{
+		attribs[i].type = VASurfaceAttribPixelFormat;
+		attribs[i].value.type = VAGenericValueTypeInteger;
+		attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+		attribs[i].value.value.i = VA_FOURCC_UYVY;
+		i++;
+
+		attribs[i].type = VASurfaceAttribPixelFormat;
+		attribs[i].value.type = VAGenericValueTypeInteger;
+		attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+		attribs[i].value.value.i = VA_FOURCC_YV16;
+		i++;
+	}
+
+	return i;
+}
+
 static VAStatus
 i965_QuerySurfaceAttributes(VADriverContextP ctx,
 							VAConfigID config,
@@ -6464,24 +6584,9 @@ i965_QuerySurfaceAttributes(VADriverContextP ctx,
 			attribs[i].value.value.i = VA_FOURCC_YV12;
 			i++;
 
-			if (obj_config->entrypoint == VAEntrypointVideoProc) {
-				attribs[i].type = VASurfaceAttribPixelFormat;
-				attribs[i].value.type = VAGenericValueTypeInteger;
-				attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[i].value.value.i = VA_FOURCC_YUY2;
-				i++;
-
-				attribs[i].type = VASurfaceAttribPixelFormat;
-				attribs[i].value.type = VAGenericValueTypeInteger;
-				attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[i].value.value.i = VA_FOURCC_RGBA;
-				i++;
-
-				attribs[i].type = VASurfaceAttribPixelFormat;
-				attribs[i].value.type = VAGenericValueTypeInteger;
-				attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[i].value.value.i = VA_FOURCC_RGBX;
-				i++;
+			if (obj_config->entrypoint == VAEntrypointVideoProc)
+			{
+				i = i965_PopulateVideoProcFormats(i965, i, attribs);
 			}
 		}
 	} else if (IS_GEN7(i965->intel.device_info)) {
@@ -6567,48 +6672,9 @@ i965_QuerySurfaceAttributes(VADriverContextP ctx,
 			attribs[i].value.value.i = VA_FOURCC_IMC3;
 			i++;
 
-			if (obj_config->entrypoint == VAEntrypointVideoProc) {
-				attribs[i].type = VASurfaceAttribPixelFormat;
-				attribs[i].value.type = VAGenericValueTypeInteger;
-				attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[i].value.value.i = VA_FOURCC_YUY2;
-				i++;
-
-				attribs[i].type = VASurfaceAttribPixelFormat;
-				attribs[i].value.type = VAGenericValueTypeInteger;
-				attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[i].value.value.i = VA_FOURCC_UYVY;
-				i++;
-
-				attribs[i].type = VASurfaceAttribPixelFormat;
-				attribs[i].value.type = VAGenericValueTypeInteger;
-				attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[i].value.value.i = VA_FOURCC_RGBA;
-				i++;
-
-				attribs[i].type = VASurfaceAttribPixelFormat;
-				attribs[i].value.type = VAGenericValueTypeInteger;
-				attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[i].value.value.i = VA_FOURCC_RGBX;
-				i++;
-
-				attribs[i].type = VASurfaceAttribPixelFormat;
-				attribs[i].value.type = VAGenericValueTypeInteger;
-				attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[i].value.value.i = VA_FOURCC_BGRA;
-				i++;
-
-				attribs[i].type = VASurfaceAttribPixelFormat;
-				attribs[i].value.type = VAGenericValueTypeInteger;
-				attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[i].value.value.i = VA_FOURCC_BGRX;
-				i++;
-
-				attribs[i].type = VASurfaceAttribPixelFormat;
-				attribs[i].value.type = VAGenericValueTypeInteger;
-				attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[i].value.value.i = VA_FOURCC_YV16;
-				i++;
+			if (obj_config->entrypoint == VAEntrypointVideoProc)
+			{
+				i = i965_PopulateVideoProcFormats(i965, i, attribs);
 			}
 		}
 	} else if (IS_GEN8(i965->intel.device_info) ||
@@ -6711,62 +6777,9 @@ i965_QuerySurfaceAttributes(VADriverContextP ctx,
 				i++;
 			}
 
-			if (obj_config->entrypoint == VAEntrypointVideoProc) {
-				attribs[i].type = VASurfaceAttribPixelFormat;
-				attribs[i].value.type = VAGenericValueTypeInteger;
-				attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[i].value.value.i = VA_FOURCC_YUY2;
-				i++;
-
-				attribs[i].type = VASurfaceAttribPixelFormat;
-				attribs[i].value.type = VAGenericValueTypeInteger;
-				attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[i].value.value.i = VA_FOURCC_UYVY;
-				i++;
-
-				attribs[i].type = VASurfaceAttribPixelFormat;
-				attribs[i].value.type = VAGenericValueTypeInteger;
-				attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[i].value.value.i = VA_FOURCC_RGBA;
-				i++;
-
-				attribs[i].type = VASurfaceAttribPixelFormat;
-				attribs[i].value.type = VAGenericValueTypeInteger;
-				attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[i].value.value.i = VA_FOURCC_RGBX;
-				i++;
-
-				attribs[i].type = VASurfaceAttribPixelFormat;
-				attribs[i].value.type = VAGenericValueTypeInteger;
-				attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[i].value.value.i = VA_FOURCC_BGRA;
-				i++;
-
-				attribs[i].type = VASurfaceAttribPixelFormat;
-				attribs[i].value.type = VAGenericValueTypeInteger;
-				attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[i].value.value.i = VA_FOURCC_BGRX;
-				i++;
-
-				attribs[i].type = VASurfaceAttribPixelFormat;
-				attribs[i].value.type = VAGenericValueTypeInteger;
-				attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[i].value.value.i = VA_FOURCC_YV16;
-				i++;
-
-				if (HAS_VPP_P010(i965)) {
-					attribs[i].type = VASurfaceAttribPixelFormat;
-					attribs[i].value.type = VAGenericValueTypeInteger;
-					attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-					attribs[i].value.value.i = VA_FOURCC_P010;
-					i++;
-
-					attribs[i].type = VASurfaceAttribPixelFormat;
-					attribs[i].value.type = VAGenericValueTypeInteger;
-					attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-					attribs[i].value.value.i = VA_FOURCC_I010;
-					i++;
-				}
+			if (obj_config->entrypoint == VAEntrypointVideoProc)
+			{
+				i = i965_PopulateVideoProcFormats(i965, i, attribs);
 			}
 
 			/* Additional support for jpeg encoder */
@@ -7004,228 +7017,6 @@ i965_ReleaseBufferHandle(VADriverContextP ctx, VABufferID buf_id)
 	return i965_release_buffer_handle(obj_buffer);
 }
 
-// Locally define DRM_FORMAT values not available in older but still
-// supported versions of libdrm.
-#ifndef DRM_FORMAT_R8
-#define DRM_FORMAT_R8        fourcc_code('R', '8', ' ', ' ')
-#endif
-#ifndef DRM_FORMAT_R16
-#define DRM_FORMAT_R16       fourcc_code('R', '1', '6', ' ')
-#endif
-#ifndef DRM_FORMAT_GR88
-#define DRM_FORMAT_GR88      fourcc_code('G', 'R', '8', '8')
-#endif
-#ifndef DRM_FORMAT_GR1616
-#define DRM_FORMAT_GR1616    fourcc_code('G', 'R', '3', '2')
-#endif
-
-static uint32_t drm_format_of_separate_plane(uint32_t fourcc, int plane)
-{
-	if (plane == 0) {
-		switch (fourcc)
-		{
-
-		case VA_FOURCC_NV12:
-		case VA_FOURCC_I420:
-		case VA_FOURCC_IMC3:
-		case VA_FOURCC_YV12:
-		case VA_FOURCC_YV16:
-		case VA_FOURCC_422H:
-		case VA_FOURCC_422V:
-		case VA_FOURCC_444P:
-		case VA_FOURCC_Y800:
-		case VA_FOURCC_RGBP:
-		case VA_FOURCC_BGRP:
-			return DRM_FORMAT_R8;
-		case VA_FOURCC_P010:
-		case VA_FOURCC_P012:
-		case VA_FOURCC_P016:
-		case VA_FOURCC_I010:
-			return DRM_FORMAT_R16;
-
-		case VA_FOURCC_YUY2:
-			return DRM_FORMAT_YUYV;
-		case VA_FOURCC_YVYU:
-			return DRM_FORMAT_YVYU;
-		case VA_FOURCC_VYUY:
-			return DRM_FORMAT_VYUY;
-		case VA_FOURCC_UYVY:
-			return DRM_FORMAT_UYVY;
-		case VA_FOURCC_AYUV:
-			return DRM_FORMAT_AYUV;
-#if VA_CHECK_VERSION(1, 13, 0)
-		case VA_FOURCC_XYUV:
-			return DRM_FORMAT_XYUV8888;
-#endif
-		case VA_FOURCC_Y210:
-			return DRM_FORMAT_Y210;
-		case VA_FOURCC_Y216:
-			return DRM_FORMAT_Y216;
-		case VA_FOURCC_Y410:
-			return DRM_FORMAT_Y410;
-		case VA_FOURCC_Y416:
-			return DRM_FORMAT_Y416;
-#if VA_CHECK_VERSION(1, 9, 0)
-		case VA_FOURCC_Y212:
-			return DRM_FORMAT_Y216;
-		case VA_FOURCC_Y412:
-			return DRM_FORMAT_Y416;
-#endif
-
-		case VA_FOURCC_ARGB:
-			return DRM_FORMAT_ARGB8888;
-		case VA_FOURCC_ABGR:
-			return DRM_FORMAT_ABGR8888;
-		case VA_FOURCC_RGBA:
-			return DRM_FORMAT_RGBA8888;
-		case VA_FOURCC_BGRA:
-			return DRM_FORMAT_BGRA8888;
-		case VA_FOURCC_XRGB:
-			return DRM_FORMAT_XRGB8888;
-		case VA_FOURCC_XBGR:
-			return DRM_FORMAT_XBGR8888;
-		case VA_FOURCC_RGBX:
-			return DRM_FORMAT_RGBX8888;
-		case VA_FOURCC_BGRX:
-			return DRM_FORMAT_BGRX8888;
-		case VA_FOURCC_A2R10G10B10:
-			return DRM_FORMAT_ARGB2101010;
-		case VA_FOURCC_A2B10G10R10:
-			return DRM_FORMAT_ABGR2101010;
-		case VA_FOURCC_X2R10G10B10:
-			return DRM_FORMAT_XRGB2101010;
-		case VA_FOURCC_X2B10G10R10:
-			return DRM_FORMAT_XBGR2101010;
-
-		default:
-		{
-			fprintf(stderr, "drm_format_of_separate_plane: Unknown fourcc %#010x, returning zero. (plane=%u)\r\n", fourcc, plane);
-			return 0;
-		}
-		}
-	} else {
-		switch (fourcc)
-		{
-
-		case VA_FOURCC_NV12:
-			return DRM_FORMAT_GR88;
-		case VA_FOURCC_I420:
-		case VA_FOURCC_IMC3:
-		case VA_FOURCC_YV12:
-		case VA_FOURCC_YV16:
-		case VA_FOURCC_422H:
-		case VA_FOURCC_422V:
-		case VA_FOURCC_444P:
-		case VA_FOURCC_RGBP:
-		case VA_FOURCC_BGRP:
-			return DRM_FORMAT_R8;
-		case VA_FOURCC_P010:
-		case VA_FOURCC_P012:
-		case VA_FOURCC_P016:
-			return DRM_FORMAT_GR1616;
-		case VA_FOURCC_I010:
-			return DRM_FORMAT_R16;
-
-		default:
-			{
-				fprintf(stderr, "drm_format_of_separate_plane: Unknown fourcc %#010x, returning zero. (plane=%u)\r\n", fourcc, plane);
-				return 0;
-			}
-		}
-	}
-}
-
-static uint32_t drm_format_of_composite_object(uint32_t fourcc)
-{
-	switch (fourcc) {
-
-	case VA_FOURCC_NV12:
-		return DRM_FORMAT_NV12;
-	case VA_FOURCC_I420:
-		return DRM_FORMAT_YUV420;
-	case VA_FOURCC_IMC3:
-		return DRM_FORMAT_YUV420;
-	case VA_FOURCC_YV12:
-		return DRM_FORMAT_YVU420;
-	case VA_FOURCC_YV16:
-		return DRM_FORMAT_YVU422;
-	case VA_FOURCC_422H:
-		return DRM_FORMAT_YUV422;
-	case VA_FOURCC_422V:
-		return DRM_FORMAT_YUV422;
-	case VA_FOURCC_444P:
-		return DRM_FORMAT_YUV444;
-	case VA_FOURCC_YUY2:
-		return DRM_FORMAT_YUYV;
-	case VA_FOURCC_YVYU:
-		return DRM_FORMAT_YVYU;
-	case VA_FOURCC_VYUY:
-		return DRM_FORMAT_VYUY;
-	case VA_FOURCC_UYVY:
-		return DRM_FORMAT_UYVY;
-	case VA_FOURCC_AYUV:
-		return DRM_FORMAT_AYUV;
-#if VA_CHECK_VERSION(1, 13, 0)
-	case VA_FOURCC_XYUV:
-		return DRM_FORMAT_XYUV8888;
-#endif
-	case VA_FOURCC_Y210:
-		return DRM_FORMAT_Y210;
-#if VA_CHECK_VERSION(1, 9, 0)
-	case VA_FOURCC_Y212:
-		return DRM_FORMAT_Y216;
-#endif
-	case VA_FOURCC_Y216:
-		return DRM_FORMAT_Y216;
-	case VA_FOURCC_Y410:
-		return DRM_FORMAT_Y410;
-#if VA_CHECK_VERSION(1, 9, 0)
-	case VA_FOURCC_Y412:
-		return DRM_FORMAT_Y416;
-#endif
-	case VA_FOURCC_Y416:
-		return DRM_FORMAT_Y416;
-	case VA_FOURCC_Y800:
-		return DRM_FORMAT_R8;
-	case VA_FOURCC_P010:
-		return DRM_FORMAT_P010;
-	case VA_FOURCC_P012:
-		return DRM_FORMAT_P016;
-	case VA_FOURCC_P016:
-		return DRM_FORMAT_P016;
-	case VA_FOURCC_ARGB:
-		return DRM_FORMAT_ARGB8888;
-	case VA_FOURCC_ABGR:
-		return DRM_FORMAT_ABGR8888;
-	case VA_FOURCC_RGBA:
-		return DRM_FORMAT_RGBA8888;
-	case VA_FOURCC_BGRA:
-		return DRM_FORMAT_BGRA8888;
-	case VA_FOURCC_XRGB:
-		return DRM_FORMAT_XRGB8888;
-	case VA_FOURCC_XBGR:
-		return DRM_FORMAT_XBGR8888;
-	case VA_FOURCC_RGBX:
-		return DRM_FORMAT_RGBX8888;
-	case VA_FOURCC_BGRX:
-		return DRM_FORMAT_BGRX8888;
-	case VA_FOURCC_A2R10G10B10:
-		return DRM_FORMAT_ARGB2101010;
-	case VA_FOURCC_A2B10G10R10:
-		return DRM_FORMAT_ABGR2101010;
-	case VA_FOURCC_X2R10G10B10:
-		return DRM_FORMAT_XRGB2101010;
-	case VA_FOURCC_X2B10G10R10:
-		return DRM_FORMAT_XBGR2101010;
-
-	default:
-		{
-			fprintf(stderr, "drm_format_of_composite_object: Unknown fourcc %#010x, returning zero.\r\n", fourcc);
-			return 0;
-		}
-	}
-}
-
 static VAStatus
 i965_ExportSurfaceHandle(VADriverContextP ctx, VASurfaceID surface_id,
 						 uint32_t mem_type, uint32_t flags,
@@ -7240,9 +7031,16 @@ i965_ExportSurfaceHandle(VADriverContextP ctx, VASurfaceID surface_id,
 	int composite_object =
 		flags & VA_EXPORT_SURFACE_COMPOSED_LAYERS;
 
-	if (!obj_surface || !obj_surface->bo) {
+	if (!obj_surface)
+	{
 		i965_log_info(ctx, "vaExportSurfaceHandle: Attempted to export unknown surface %08x.\n", surface_id);
 		return VA_STATUS_ERROR_INVALID_SURFACE;
+	}
+
+	if (!obj_surface->bo)
+	{
+		i965_log_debug(ctx, "vaExportSurfaceHandle: Surface lacks a backing BO to export\n");
+		return VA_STATUS_ERROR_INVALID_SURFACE;		
 	}
 
 	if (
@@ -7287,7 +7085,10 @@ i965_ExportSurfaceHandle(VADriverContextP ctx, VASurfaceID surface_id,
 	}
 
 	if (drm_intel_bo_gem_export_to_prime(obj_surface->bo, &fd))
+	{
+		i965_log_debug(ctx, "vaExportSurfaceHandle: drm_intel_bo_gem_export_to_prime() returned an error.\n");
 		return VA_STATUS_ERROR_INVALID_SURFACE;
+	}
 
 	if (drm_intel_bo_get_tiling(obj_surface->bo, &tiling, &swizzle))
 		tiling = I915_TILING_NONE;
@@ -7682,8 +7483,30 @@ void i965_log_info(VADriverContextP ctx, const char *format, ...)
 		if (ret > 0)
 			ctx->info_callback(ctx, tmp);
 	}
+}
 
-	va_end(vl);
+void i965_log_debug(VADriverContextP ctx, const char *format, ...)
+{
+	if (!(g_intel_debug_option_flags & VA_INTEL_DEBUG_VERBOSE))
+		return;
+
+	va_list vl;
+
+	va_start(vl, format);
+
+	if (!ctx->info_callback) {
+		// No info callback: this message is only useful for developers,
+		// so just discard it.
+	} else {
+		// Put the message on the stack.  If it overruns the size of the
+		// then it will just be truncated - callers shouldn't be sending
+		// messages which are too long.
+		char tmp[1024];
+		int ret;
+		ret = vsnprintf(tmp, sizeof(tmp), format, vl);
+		if (ret > 0)
+			ctx->info_callback(ctx, tmp);
+	}
 }
 
 extern struct hw_codec_info *i965_get_codec_info(int devid);

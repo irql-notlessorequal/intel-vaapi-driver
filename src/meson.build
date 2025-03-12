@@ -133,6 +133,7 @@ headers = [
   'i965_decoder.h',
   'i965_decoder_utils.h',
   'i965_defines.h',
+  'i965_format_utils.h',
   'i965_drv_video.h',
   'i965_encoder.h',
   'i965_encoder_utils.h',

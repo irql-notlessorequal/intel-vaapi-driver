@@ -1,38 +1,54 @@
-[![Stories in Ready](https://badge.waffle.io/intel/intel-vaapi-driver.png?label=ready&title=Ready)](http://waffle.io/intel/intel-vaapi-driver)
-[![Build Status](https://travis-ci.org/intel/intel-vaapi-driver.svg?branch=master)](https://travis-ci.org/intel/intel-vaapi-driver)
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/11612/badge.svg)](https://scan.coverity.com/projects/01org-intel-vaapi-driver)
+# Intel legacy VA-API driver.
 
-# Intel-vaapi-driver Project
+This is a fork with many changes, including but not limited to:
 
-VA-API (Video Acceleration API) user mode driver for Intel GEN Graphics family
+- Functioning Chromium support
+- Fix JPEG decoding of oddly encoded files on gen7/8 (https://github.com/intel/intel-vaapi-driver/pull/514)
+- fix exporting buffers with 3 planes and `VA_EXPORT_SURFACE_SEPARATE_LAYERS` (https://github.com/intel/intel-vaapi-driver/pull/530)
+- `i965_pci_ids`: Add CFL PCI ID found on Xeon W-1290P (https://github.com/intel/intel-vaapi-driver/pull/548)
+- Make wl_drm optional (https://github.com/intel/intel-vaapi-driver/pull/566)
+- Expose `VAConfigAttribMaxPictureWidth` and `VAConfigAttribMaxPictureHeight`.
+- Partial support for `vaSyncSurface2`.
+- Improved per-codec limits.
+- Improved hybrid codec support.
+- Expose ARGB format support. (https://github.com/intel/intel-vaapi-driver/issues/500)
 
-VA-API is an open-source library and API specification, which
-provides access to graphics hardware acceleration capabilities
-for video processing. It consists of a main library and
-driver-specific acceleration backends for each supported hardware 
-vendor.
+# Release schedule
 
-The current video driver backend provides a bridge to the GEN GPUs through the packaging of buffers and
-commands to be sent to the i915 driver for exercising both hardware and shader functionality for video
-decode, encode, and processing.
+This driver has a single digit count of planned releases, after that this driver will too be strictly
+in maintenance mode, since it's basically feature complete.
 
-If you would like to contribute to intel-vaapi-driver, check our [Contributing
-guide](https://github.com/intel/intel-vaapi-driver/blob/master/CONTRIBUTING.md).
+This README will be updated when that happens.
 
-We also recommend taking a look at the ['janitorial'
-bugs](https://github.com/intel/intel-vaapi-driver/issues?q=is%3Aopen+is%3Aissue+label%3AJanitorial)
-in our list of open issues as these bugs can be solved without an
-extensive knowledge of intel-vaapi-driver.
+# Reporting issues
 
-We would love to help you start contributing!
+- Reproducers are highly welcome (i don't like seeing "it doesn't work")
+- Sample footage (if possible) for any fork regressions are welcome
+- Remember that I am just some random person on the Internet.
 
-The intel vaapi media development team can be reached via our [mailing
-list](https://lists.01.org/mailman/listinfo/intel-vaapi-media) and on IRC
-in channel ##intel-media on [Freenode](https://freenode.net/kb/answer/chat).
+# GPU support matrix
 
-We also use [#Slack](https://slack.com) and host [VAAPI Media Slack
-Team](https://intel-media.slack.com).  You can signup by submitting your email
-address to our [Slack Team invite page](https://slack-join-intel-media.herokuapp.com).
+| GPU Generation | MPEG-2              | VC1    | H.264 (AVC)         | H.265 (HEVC)        | JPEG                | VP8                 | VP9                    |
+|----------------|---------------------|--------|---------------------|---------------------|---------------------|---------------------|------------------------|
+| G45 (CTG)      | DECODE              |        |                     |                     |                     |                     |                        |
+| ILK (5.x)      | DECODE              |        | DECODE              |                     |                     |                     |                        |
+| SNB (6.x)      | DECODE              | DECODE | DECODE<br>ENCODE[1] |                     |                     |                     |                        |
+| IVB (7.0)      | DECODE<br>ENCODE[1] | DECODE | DECODE<br>ENCODE[1] |                     | DECODE              |                     |                        |
+| HSW (7.5)      | DECODE<br>ENCODE[1] | DECODE | DECODE<br>ENCODE[1] |                     | DECODE              |                     | DECODE[2]              |
+| CHV (8.0 LP)   | DECODE<br>ENCODE[1] | DECODE | DECODE<br>ENCODE[1] | DECODE              | DECODE<br>ENCODE[1] | DECODE<br>ENCODE[1] | DECODE[2]              |
+| BDW (8.0) [3]  | DECODE<br>ENCODE[1] | DECODE | DECODE<br>ENCODE[1] |                     | DECODE              | DECODE              | DECODE[2]              |
+| SKL (9.0) [3]  | DECODE<br>ENCODE[1] | DECODE | DECODE<br>ENCODE[4] | DECODE<br>ENCODE[1] | DECODE<br>ENCODE[1] | DECODE<br>ENCODE[1] | DECODE[2]              |
+| KBL (9.5) [3]  | DECODE<br>ENCODE[1] | DECODE | DECODE<br>ENCODE[4] | DECODE<br>ENCODE[1] | DECODE<br>ENCODE[1] | DECODE<br>ENCODE[1] | DECODE[5]<br>ENCODE[6] |
+| ??? (10.0)     | ?                   | ?      | ?                   | ?                   | ?                   | ?                   | ?                      |
 
-Slack complements our other means of communication.  Pick the one that works
-best for you!
+[1] - Intel's hardware encoder uses GPU resources during an encode, high GPU load can cause bad encoding performance.
+
+[2] - "Hybrid" support only, known to be buggy.
+
+[3] - Supported by the iHD driver, **you shouldn't be using this driver**
+
+[4] - Supports Low Power encoders, which fully offload the work without using GPU resources.
+
+[5] - Supports VP9 natively.
+
+[6] - Encoding is supported by this driver, known to be buggy. Likely safe up to 1920x1080 at 60 FPS.

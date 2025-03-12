@@ -52,7 +52,7 @@
 #define I965_MAX_PROFILES                       20
 #define I965_MAX_ENTRYPOINTS                    7
 #define I965_MAX_CONFIG_ATTRIBUTES              32
-#define I965_MAX_IMAGE_FORMATS                  11
+#define I965_MAX_IMAGE_FORMATS                  12
 #define I965_MAX_SUBPIC_FORMATS                 6
 #define I965_MAX_SUBPIC_SUM                     4
 #define I965_MAX_SURFACE_ATTRIBUTES             32
@@ -688,5 +688,6 @@ i965_destroy_surface_storage(struct object_surface *obj_surface);
 // Logging functions for errors (to be shown to users) and info (useful for developers).
 void i965_log_error(VADriverContextP ctx, const char *format, ...);
 void i965_log_info(VADriverContextP ctx, const char *format, ...);
+void i965_log_debug(VADriverContextP ctx, const char *format, ...);
 
 #endif /* _I965_DRV_VIDEO_H_ */

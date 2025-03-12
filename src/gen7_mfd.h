@@ -102,7 +102,7 @@ struct gen7_mfd_context
 	struct object_surface *jpeg_wa_surface_object;
 	dri_bo *jpeg_wa_slice_data_bo;
 	void *driver_context;
-
+  
 	bool decoder_format_mode;
 };
 
