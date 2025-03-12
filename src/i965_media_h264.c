@@ -162,19 +162,19 @@ static const uint32_t h264_avc_null_gen4[][4] = {
 
 static struct i965_kernel h264_avc_kernels_gen4[] = {
 	{
-		"AVC combined kernel",
-		H264_AVC_COMBINED,
-		h264_avc_combined_gen4,
-		sizeof(h264_avc_combined_gen4),
-		NULL
+		.name = "AVC combined kernel",
+		.interface = H264_AVC_COMBINED,
+		.bin = h264_avc_combined_gen4,
+		.size = sizeof(h264_avc_combined_gen4),
+		.bo = NULL
 	},
 
 	{
-		"NULL kernel",
-		H264_AVC_NULL,
-		h264_avc_null_gen4,
-		sizeof(h264_avc_null_gen4),
-		NULL
+		.name = "NULL kernel",
+		.interface = H264_AVC_NULL,
+		.bin = h264_avc_null_gen4,
+		.size = sizeof(h264_avc_null_gen4),
+		.bo = NULL
 	}
 };
 
@@ -257,19 +257,19 @@ static const uint32_t h264_avc_null_gen5[][4] = {
 
 static struct i965_kernel h264_avc_kernels_gen5[] = {
 	{
-		"AVC combined kernel",
-		H264_AVC_COMBINED,
-		h264_avc_combined_gen5,
-		sizeof(h264_avc_combined_gen5),
-		NULL
+		.name = "AVC combined kernel",
+		.interface = H264_AVC_COMBINED,
+		.bin = h264_avc_combined_gen5,
+		.size = sizeof(h264_avc_combined_gen5),
+		.bo = NULL
 	},
 
 	{
-		"NULL kernel",
-		H264_AVC_NULL,
-		h264_avc_null_gen5,
-		sizeof(h264_avc_null_gen5),
-		NULL
+		.name = "NULL kernel",
+		.interface = H264_AVC_NULL,
+		.bin = h264_avc_null_gen5,
+		.size = sizeof(h264_avc_null_gen5),
+		.bo = NULL
 	}
 };
 

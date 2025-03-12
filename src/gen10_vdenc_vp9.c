@@ -51,11 +51,11 @@ static const uint32_t gen10_vdenc_vp9_dys[][4] = {
 
 static struct i965_kernel vdenc_vp9_kernels_dys[1] = {
 	{
-		"dys",
-		0,
-		gen10_vdenc_vp9_dys,
-		sizeof(gen10_vdenc_vp9_dys),
-		NULL
+		.name = "dys",
+		.interface = 0,
+		.bin = gen10_vdenc_vp9_dys,
+		.size = sizeof(gen10_vdenc_vp9_dys),
+		.bo = NULL
 	},
 };
 
@@ -65,11 +65,11 @@ static const uint32_t gen10_vdenc_vp9_streamin[][4] = {
 
 static struct i965_kernel vdenc_vp9_kernels_streamin[1] = {
 	{
-		"streamin",
-		0,
-		gen10_vdenc_vp9_streamin,
-		sizeof(gen10_vdenc_vp9_streamin),
-		NULL
+		.name = "streamin",
+		.interface = 0,
+		.bin = gen10_vdenc_vp9_streamin,
+		.size = sizeof(gen10_vdenc_vp9_streamin),
+		.bo = NULL
 	},
 };
 

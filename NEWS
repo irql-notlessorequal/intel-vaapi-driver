@@ -6,6 +6,7 @@ Version 2.4.4 - XX.XX.XXXX (IRQL fork)
 * Minor code cleanup.
 * Expose ARGB as a surface, attempt two.
 * Correctly handle VA_RT_FORMAT_YUV422 in GetSubsamplingFromFormat.
+* Optimized and cleaned up structs within the codebase.
 
 Version 2.4.3 - 12.Mar.2025 (IRQL fork)
 

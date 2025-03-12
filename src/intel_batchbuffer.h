@@ -8,12 +8,13 @@
 
 #include "intel_driver.h"
 
-struct intel_batchbuffer {
+struct intel_batchbuffer
+{
 	struct intel_driver_data *intel;
 	dri_bo *buffer;
-	unsigned int size;
 	unsigned char *map;
 	unsigned char *ptr;
+	unsigned int size;
 	int atomic;
 	int flag;
 

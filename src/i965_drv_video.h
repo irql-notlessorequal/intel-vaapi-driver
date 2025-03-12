@@ -187,12 +187,13 @@ struct i965_surface {
 	int flags;
 };
 
-struct i965_kernel {
+struct i965_kernel
+{
 	char *name;
-	int interface;
-	const uint32_t (*bin)[4];
-	int size;
 	dri_bo *bo;
+	const uint32_t (*bin)[4];
+	int interface;
+	int size;
 	unsigned int kernel_offset;
 };
 
@@ -306,11 +307,11 @@ struct encode_state {
 	struct object_surface *reference_objects[16]; /* Up to 2 reference surfaces are valid for MPEG-2,*/
 };
 
-struct proc_state {
+struct proc_state
+{
 	struct codec_state_base base;
-	struct buffer_store *pipeline_param;
-
 	VASurfaceID current_render_target;
+	struct buffer_store *pipeline_param;
 };
 
 #define CODEC_DEC       0
@@ -358,10 +359,14 @@ struct object_context {
 #define SURFACE_ALL_MASK        ((SURFACE_REFERENCED) | \
 								 (SURFACE_DERIVED))
 
-struct object_surface {
+struct object_surface
+{
 	struct object_base base;
 	VASurfaceStatus status;
 	VASubpictureID subpic[I965_MAX_SUBPIC_SUM];
+
+	VAGenericID wrapper_surface;
+
 	struct object_subpic *obj_subpic[I965_MAX_SUBPIC_SUM];
 	unsigned int subpic_render_idx;
 
@@ -376,6 +381,8 @@ struct object_surface {
 	unsigned int expected_format;
 	VAImageID locked_image_id;
 	VAImageID derived_image_id;
+	int exported_primefd;
+
 	void (*free_private_data)(void **data);
 	void *private_data;
 	unsigned int subsampling;
@@ -393,26 +400,23 @@ struct object_surface {
 	/* we need clear right and bottom border for NV12.
 	 * to avoid encode run to run issue*/
 	uint32_t border_cleared      : 1;
-
-	VAGenericID wrapper_surface;
-
-	int exported_primefd;
 };
 
-struct object_buffer {
+struct object_buffer
+{
 	struct object_base base;
 	struct buffer_store *buffer_store;
 	int max_num_elements;
 	int num_elements;
 	int size_element;
 	VABufferType type;
+	VAContextID context_id;
 
 	/* Export state */
 	unsigned int export_refcount;
 	VABufferInfo export_state;
 
 	VAGenericID wrapper_buffer;
-	VAContextID context_id;
 };
 
 struct object_image {
@@ -423,7 +427,8 @@ struct object_image {
 	VASurfaceID derived_surface;
 };
 
-struct object_subpic {
+struct object_subpic
+{
 	struct object_base base;
 	VAImageID image;
 	struct object_image *obj_image;
@@ -434,8 +439,9 @@ struct object_subpic {
 	int height;
 	int pitch;
 	float global_alpha;
-	dri_bo *bo;
 	unsigned int flags;
+
+	dri_bo *bo;
 };
 
 #define I965_RING_NULL  0

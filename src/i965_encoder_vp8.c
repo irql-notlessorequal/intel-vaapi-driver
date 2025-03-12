@@ -60,119 +60,119 @@
 
 struct i965_kernel vp8_kernels_brc_init_reset[NUM_VP8_BRC_RESET] = {
 	{
-		"VP8 BRC Init",
-		VP8_BRC_INIT,
-		NULL,
-		0,
-		NULL
+		.name = "VP8 BRC Init",
+		.interface = VP8_BRC_INIT,
+		.bin = NULL,
+		.size = 0,
+		.bo = NULL
 	},
 
 	{
-		"VP8 BRC Reset",
-		VP8_BRC_RESET,
-		NULL,
-		0,
-		NULL
+		.name = "VP8 BRC Reset",
+		.interface = VP8_BRC_RESET,
+		.bin = NULL,
+		.size = 0,
+		.bo = NULL
 	},
 };
 
 struct i965_kernel vp8_kernels_scaling[NUM_VP8_SCALING] = {
 	{
-		"VP8 SCALE 4X",
-		VP8_SCALING_4X,
-		NULL,
-		0,
-		NULL
+		.name = "VP8 SCALE 4X",
+		.interface = VP8_SCALING_4X,
+		.bin = NULL,
+		.size = 0,
+		.bo = NULL
 	},
 
 	{
-		"VP8 SCALE 16",
-		VP8_SCALING_16X,
-		NULL,
-		0,
-		NULL
+		.name = "VP8 SCALE 16",
+		.interface = VP8_SCALING_16X,
+		.bin = NULL,
+		.size = 0,
+		.bo = NULL
 	},
 };
 
 struct i965_kernel vp8_kernels_me[NUM_VP8_ME] = {
 	{
-		"VP8 ME 4X",
-		VP8_ME_4X,
-		NULL,
-		0,
-		NULL
+		.name = "VP8 ME 4X",
+		.interface = VP8_ME_4X,
+		.bin = NULL,
+		.size = 0,
+		.bo = NULL
 	},
 
 	{
-		"VP8 ME 16",
-		VP8_ME_16X,
-		NULL,
-		0,
-		NULL
+		.name = "VP8 ME 16",
+		.interface = VP8_ME_16X,
+		.bin = NULL,
+		.size = 0,
+		.bo = NULL
 	},
 };
 
 struct i965_kernel vp8_kernels_mbenc[NUM_VP8_MBENC] = {
 	{
-		"VP8 MBEnc I Frame Dist",
-		VP8_MBENC_I_FRAME_DIST,
-		NULL,
-		0,
-		NULL
+		.name = "VP8 MBEnc I Frame Dist",
+		.interface = VP8_MBENC_I_FRAME_DIST,
+		.bin = NULL,
+		.size = 0,
+		.bo = NULL
 	},
 
 	{
-		"VP8 MBEnc I Frame Luma",
-		VP8_MBENC_I_FRAME_LUMA,
-		NULL,
-		0,
-		NULL
+		.name = "VP8 MBEnc I Frame Luma",
+		.interface = VP8_MBENC_I_FRAME_LUMA,
+		.bin = NULL,
+		.size = 0,
+		.bo = NULL
 	},
 
 	{
-		"VP8 MBEnc I Frame Chroma",
-		VP8_MBENC_I_FRAME_CHROMA,
-		NULL,
-		0,
-		NULL
+		.name = "VP8 MBEnc I Frame Chroma",
+		.interface = VP8_MBENC_I_FRAME_CHROMA,
+		.bin = NULL,
+		.size = 0,
+		.bo = NULL
 	},
 
 	{
-		"VP8 MBEnc P Frame",
-		VP8_MBENC_P_FRAME,
-		NULL,
-		0,
-		NULL
+		.name = "VP8 MBEnc P Frame",
+		.interface = VP8_MBENC_P_FRAME,
+		.bin = NULL,
+		.size = 0,
+		.bo = NULL
 	},
 };
 
 struct i965_kernel vp8_kernels_mpu[NUM_VP8_MPU] = {
 	{
-		"VP8 MPU",
-		VP8_MPU,
-		NULL,
-		0,
-		NULL
+		.name = "VP8 MPU",
+		.interface = VP8_MPU,
+		.bin = NULL,
+		.size = 0,
+		.bo = NULL
 	},
 };
 
 struct i965_kernel vp8_kernels_tpu[NUM_VP8_TPU] = {
 	{
-		"VP8 TPU",
-		VP8_TPU,
-		NULL,
-		0,
-		NULL
+		.name = "VP8 TPU",
+		.interface = VP8_TPU,
+		.bin = NULL,
+		.size = 0,
+		.bo = NULL
 	},
 };
 
 struct i965_kernel vp8_kernels_brc_update[NUM_VP8_BRC_UPDATE] = {
 	{
-		"VP8 BRC Update",
-		VP8_BRC_UPDATE,
-		NULL,
-		0,
-		NULL
+		.name = "VP8 BRC Update",
+		.interface = VP8_BRC_UPDATE,
+		.bin = NULL,
+		.size = 0,
+		.bo = NULL
 	},
 };
 
@@ -3772,8 +3772,8 @@ static VAStatus
 i965_encoder_vp8_vme_mbenc(VADriverContextP ctx,
 						   struct encode_state *encode_state,
 						   struct intel_encoder_context *encoder_context,
-						   int is_phase2,
-						   int is_iframe_dist)
+						   bool is_phase2,
+						   bool is_iframe_dist)
 {
 	struct i965_encoder_vp8_context *vp8_context = encoder_context->vme_context;
 	struct i965_encoder_vp8_mbenc_context *mbenc_context = &vp8_context->mbenc_context;
