@@ -261,7 +261,7 @@ static struct pp_module pp_modules_gen8[] = {
 
 	{
 		{
-			"PA_NV12 module",
+			.name = "PA_NV12 module",
 			.interface = PP_PA_LOAD_SAVE_NV12,
 			.bin = pp_pa_load_save_nv12_gen8,
 			.size = sizeof(pp_pa_load_save_nv12_gen8),
