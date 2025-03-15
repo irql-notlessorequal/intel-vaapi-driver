@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="driver">
+  <id>libva-intel-driver</id>
+  <name>Intel VA-API driver (legacy)</name>
+  <summary>Intel GEN Graphics family video acceleration driver</summary>
+  <description><p>VA-API implementation for Intel G45 and HD Graphics family (IRQL fork).</p></description>
+  <keywords>
+    <keyword>Decode</keyword>
+    <keyword>Encode</keyword>
+    <keyword>HW</keyword>
+    <keyword>Intel</keyword>
+    <keyword>Media</keyword>
+    <keyword>VA-API</keyword>
+    <keyword>Video</keyword>
+    <keyword>av1</keyword>
+    <keyword>avc</keyword>
+    <keyword>driver</keyword>
+    <keyword>h264</keyword>
+    <keyword>h265</keyword>
+    <keyword>hevc</keyword>
+    <keyword>jpeg</keyword>
+    <keyword>mpeg2</keyword>
+    <keyword>vaapi</keyword>
+    <keyword>vc-1</keyword>
+    <keyword>vp8</keyword>
+    <keyword>vp9</keyword>
+  </keywords>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <url type="homepage">https://github.com/irql-notlessorequal/intel-vaapi-driver</url>
+  <update_contact>https://github.com/irql-notlessorequal/intel-vaapi-driver/issues/new?template=BLANK_ISSUE</update_contact>
+</component>
