@@ -29,7 +29,7 @@ rpmbuild \
 
 echo ''
 echo 'You can now install the built package:'
-echo "sudo dnf install $(find "$src/RPMS/x86_64" -name intel-vaapi-driver-2.4.3-\* -print -quit)"
+echo "sudo dnf install $(find "$src/RPMS/x86_64" -name "intel-vaapi-driver-$version"\* -print -quit)"
 
 echo ''
 echo 'To revert to the stock driver:'
