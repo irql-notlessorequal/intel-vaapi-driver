@@ -120,6 +120,15 @@ extern uint32_t g_intel_debug_option_flags;
 		}                                   \
 	} while (0)
 
+#define ASSERT_RET_MUTEX(value, mutex, fail_ret) do {    \
+		if (!(value)) {                     \
+			if (g_intel_debug_option_flags & VA_INTEL_DEBUG_OPTION_ASSERT)       \
+				assert(value);              \
+			_i965UnlockMutex(mutex);        \
+			return fail_ret;                \
+		}                                   \
+	} while (0)
+
 #define SET_BLOCKED_SIGSET()   do {     \
 		sigset_t bl_mask;               \
 		sigfillset(&bl_mask);           \
@@ -159,6 +168,8 @@ struct intel_device_info {
 
 	unsigned int urb_size;
 	unsigned int max_wm_threads;
+
+	unsigned int requires_lowres_workaround : 1;
 
 	unsigned int is_g4x         : 1; /* gen4 */
 	unsigned int is_ivybridge   : 1; /* gen7 */

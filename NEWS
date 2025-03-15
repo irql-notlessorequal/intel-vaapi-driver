@@ -6,6 +6,11 @@ Version 2.4.4 - XX.XX.XXXX (IRQL fork)
 * Minor code cleanup.
 * Expose ARGB as a surface, attempt two.
 * Correctly handle VA_RT_FORMAT_YUV422 in GetSubsamplingFromFormat.
+* Update SECURITY.md
+* Import an optimization from the iHD driver.
+* Fix a potential deadlock problem in i965_put_surface_x11
+* Import a workaround for low-resolution encoding on low-power Gen 8 and 9 hardware.
+* Move some defines into va_backend_compat, also fixes potential errors when using an older libva.
 
 Version 2.4.3 - 12.Mar.2025 (IRQL fork)
 

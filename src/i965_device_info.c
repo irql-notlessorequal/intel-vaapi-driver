@@ -938,6 +938,9 @@ static const struct intel_device_info bdw_device_info = {
 static const struct intel_device_info chv_device_info = {
 	.gen = 8,
 
+	/** https://github.com/intel/intel-vaapi-driver/issues/541 */
+	.requires_lowres_workaround = 1,
+
 	.urb_size = 4096,
 	.max_wm_threads = 64,       /* per PSD */
 
@@ -955,6 +958,9 @@ static const struct intel_device_info skl_device_info = {
 
 static const struct intel_device_info bxt_device_info = {
 	.gen = 9,
+
+	/** https://github.com/intel/intel-vaapi-driver/issues/541 */
+	.requires_lowres_workaround = 1,
 
 	.urb_size = 4096,
 	.max_wm_threads = 64,       /* per PSD */
@@ -975,6 +981,9 @@ static const struct intel_device_info glk_device_info = {
 
 	.urb_size = 4096,
 	.max_wm_threads = 64,       /* per PSD */
+
+	/** https://github.com/intel/intel-vaapi-driver/issues/541 */
+	.requires_lowres_workaround = 1,
 
 	.is_glklake = 1,
 };

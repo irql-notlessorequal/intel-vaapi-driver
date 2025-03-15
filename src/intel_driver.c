@@ -112,8 +112,8 @@ intel_driver_init(VADriverContextP ctx)
 	if ((env_str = getenv("VA_INTEL_DEBUG")))
 		g_intel_debug_option_flags = atoi(env_str);
 
-	if (g_intel_debug_option_flags)
-		fprintf(stderr, "g_intel_debug_option_flags:%x\n", g_intel_debug_option_flags);
+	if (g_intel_debug_option_flags & VA_INTEL_DEBUG_VERBOSE)
+		fprintf(stderr, "i965: Verbose logging enabled.\n");
 
 	ASSERT_RET(drm_state, false);
 	ASSERT_RET((VA_CHECK_DRM_AUTH_TYPE(ctx, VA_DRM_AUTH_DRI1) ||

@@ -30,22 +30,6 @@
 #include <va/va_backend.h>
 #include "va_backend_compat.h"
 
-#ifndef VA_FOURCC_ABGR
-#define VA_FOURCC_ABGR          VA_FOURCC('A', 'B', 'G', 'R')
-#endif
-
-#ifndef VA_FOURCC_R5G6B5
-#define VA_FOURCC_R5G6B5        VA_FOURCC('R','G','1', '6')
-#endif
-
-#ifndef VA_FOURCC_R8G8B8
-#define VA_FOURCC_R8G8B8        VA_FOURCC('R','G','2', '4')
-#endif
-
-#ifndef VA_FOURCC_I420
-#define VA_FOURCC_I420        VA_FOURCC('I','4','2', '0')
-#endif
-
 static inline int SubsampleForYUV422(int fourcc)
 {
 	switch (fourcc)

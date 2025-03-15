@@ -8,10 +8,12 @@ This is a fork with many changes, including but not limited to:
 - `i965_pci_ids`: Add CFL PCI ID found on Xeon W-1290P (https://github.com/intel/intel-vaapi-driver/pull/548)
 - Make wl_drm optional (https://github.com/intel/intel-vaapi-driver/pull/566)
 - Expose `VAConfigAttribMaxPictureWidth` and `VAConfigAttribMaxPictureHeight`.
-- Partial support for `vaSyncSurface2`.
-- Improved per-codec limits.
-- Improved hybrid codec support.
+- Full support for `vaSyncBuffer`, `vaSyncSurface2` and `vaMapBuffer2`. (enabling `async_depth` in FFMPEG)
+- More accurate per-codec limits.
+- Improved hybrid codec driver support.
 - Expose ARGB format support. (https://github.com/intel/intel-vaapi-driver/issues/500)
+
+and more, check the `NEWS` file for more changes.
 
 # Release schedule
 

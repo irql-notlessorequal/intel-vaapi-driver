@@ -2051,6 +2051,31 @@ i965_surface_external_memory(VADriverContextP ctx,
 	return VA_STATUS_SUCCESS;
 }
 
+static inline int AlignHeightForFormat(struct i965_driver_data *i965, int su_hint, int format, int height)
+{
+	switch (format)
+	{
+		case VA_FOURCC_NV12:
+		case VA_FOURCC_IMC3:
+		case VA_FOURCC_422H:
+		case VA_FOURCC_422V:
+		case VA_FOURCC_P010:
+		case VA_FOURCC_YUY2:
+		case VA_FOURCC_VYUY:
+		case VA_FOURCC_YVYU:
+		case VA_FOURCC_UYVY:
+			/**
+			 * The iHD driver claims that this is more performant.
+			 */
+			if (!(su_hint & VA_SURFACE_ATTRIB_USAGE_HINT_ENCODER) 
+				&& !(su_hint & VA_SURFACE_ATTRIB_USAGE_HINT_VPP_WRITE))
+				return ALIGN(height, 64);
+
+		default:
+			return ALIGN(height, i965->codec_info->min_linear_hpitch);
+	}
+}
+
 static VAStatus
 i965_CreateSurfaces2(
 	VADriverContextP    ctx,
@@ -2073,6 +2098,7 @@ i965_CreateSurfaces2(
 	VAStatus vaStatus = VA_STATUS_SUCCESS;
 	int expected_fourcc = 0;
 	int memory_type = I965_SURFACE_MEM_NATIVE; /* native */
+	int surface_usage_hint = VA_SURFACE_ATTRIB_USAGE_HINT_GENERIC;
 	VASurfaceAttribExternalBuffers *memory_attribute = NULL;
 
 	for (i = 0; i < num_attribs && attrib_list; i++) {
@@ -2080,6 +2106,12 @@ i965_CreateSurfaces2(
 			(attrib_list[i].flags & VA_SURFACE_ATTRIB_SETTABLE)) {
 			ASSERT_RET(attrib_list[i].value.type == VAGenericValueTypeInteger, VA_STATUS_ERROR_INVALID_PARAMETER);
 			expected_fourcc = attrib_list[i].value.value.i;
+		}
+
+		if ((attrib_list[i].type == VASurfaceAttribUsageHint) &&
+			(attrib_list[i].flags & VA_SURFACE_ATTRIB_SETTABLE)) {
+			ASSERT_RET(attrib_list[i].value.type == VAGenericValueTypeInteger, VA_STATUS_ERROR_INVALID_PARAMETER);
+			surface_usage_hint = attrib_list[i].value.value.i;
 		}
 
 		if ((attrib_list[i].type == VASurfaceAttribMemoryType) &&
@@ -2137,7 +2169,7 @@ i965_CreateSurfaces2(
 
 		default:
 		{
-			i965_log_debug(ctx, "Rejecting unsupported RT format: %#010x\n", format);
+			i965_log_debug(ctx, "i965_CreateSurfaces2: Rejecting unsupported RT format: %#010x\n", format);
 			return VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT;
 		}
 	}
@@ -2182,7 +2214,7 @@ i965_CreateSurfaces2(
 		assert(i965->codec_info->min_linear_wpitch);
 		assert(i965->codec_info->min_linear_hpitch);
 		obj_surface->width = ALIGN(width, i965->codec_info->min_linear_wpitch);
-		obj_surface->height = ALIGN(height, i965->codec_info->min_linear_hpitch);
+		obj_surface->height = AlignHeightForFormat(i965, surface_usage_hint, format, height);
 		obj_surface->flags = SURFACE_REFERENCED;
 		obj_surface->fourcc = 0;
 		obj_surface->expected_format = format;
@@ -2332,12 +2364,6 @@ i965_QueryImageFormats(VADriverContextP ctx,
 	for (n = 0; i965_image_formats_map[n].va_format.fourcc != 0; n++)
 	{
 		const i965_image_format_map_t * const m = &i965_image_formats_map[n];
-
-		/* Don't expose P010 if we don't support it. */
-		if (m->va_format.fourcc == VA_FOURCC_P010 && !i965->codec_info->has_vpp_p010)
-		{
-			continue;
-		}
 
 		if (format_list)
 			format_list[idx++] = m->va_format;
@@ -3262,18 +3288,6 @@ i965_BufferSetNumElements(VADriverContextP ctx,
 
 	return vaStatus;
 }
-
-#ifndef VA_MAPBUFFER_FLAG_DEFAULT
-#define VA_MAPBUFFER_FLAG_DEFAULT 0
-#endif
-
-#ifndef VA_MAPBUFFER_FLAG_READ
-#define VA_MAPBUFFER_FLAG_READ 1
-#endif
-
-#ifndef VA_MAPBUFFER_FLAG_WRITE
-#define VA_MAPBUFFER_FLAG_WRITE 2
-#endif
 
 VAStatus
 i965_MapBuffer(VADriverContextP ctx,
@@ -7483,6 +7497,8 @@ void i965_log_info(VADriverContextP ctx, const char *format, ...)
 		if (ret > 0)
 			ctx->info_callback(ctx, tmp);
 	}
+
+	va_end(vl);
 }
 
 void i965_log_debug(VADriverContextP ctx, const char *format, ...)
@@ -7493,20 +7509,8 @@ void i965_log_debug(VADriverContextP ctx, const char *format, ...)
 	va_list vl;
 
 	va_start(vl, format);
-
-	if (!ctx->info_callback) {
-		// No info callback: this message is only useful for developers,
-		// so just discard it.
-	} else {
-		// Put the message on the stack.  If it overruns the size of the
-		// then it will just be truncated - callers shouldn't be sending
-		// messages which are too long.
-		char tmp[1024];
-		int ret;
-		ret = vsnprintf(tmp, sizeof(tmp), format, vl);
-		if (ret > 0)
-			ctx->info_callback(ctx, tmp);
-	}
+	vfprintf(stderr, format, vl);
+	va_end(vl);
 }
 
 extern struct hw_codec_info *i965_get_codec_info(int devid);
