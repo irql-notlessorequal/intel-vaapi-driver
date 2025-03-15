@@ -28,9 +28,9 @@ rpmbuild \
   intel-vaapi-driver.spec
 
 echo ''
-echo 'You can now install built package:'
+echo 'You can now install the built package:'
 echo "sudo dnf install $(find "$src/RPMS/x86_64" -name intel-vaapi-driver-2.4.3-\* -print -quit)"
 
 echo ''
-echo 'To revert to stock driver:'
+echo 'To revert to the stock driver:'
 echo 'sudo dnf swap intel-vaapi-driver libva-intel-driver'
