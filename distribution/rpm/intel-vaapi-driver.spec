@@ -3,6 +3,7 @@
 %endif
 
 # Based on https://github.com/negativo17/intel-vaapi-driver/blob/master/intel-vaapi-driver.spec
+# and https://pkgs.rpmfusion.org/cgit/free/libva-intel-driver.git/tree/libva-intel-driver.spec
 Name:       intel-vaapi-driver
 Epoch:      1
 Version:    %{version}
@@ -11,7 +12,7 @@ Summary:    VA-API implementation for Intel G45 and HD Graphics family (IRQL for
 License:    MIT
 URL:        https://github.com/irql-notlessorequal/%{name}
 
-Source0:    https://github.com/irql-notlessorequal/%{name}/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
+Source0:    %{url}/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 Source1:    %{name}.metainfo.xml
 Source2:    %{name}.metainfo-chipsets.sh
 
@@ -19,6 +20,7 @@ ExclusiveArch:  %{ix86} x86_64
 
 BuildRequires:  gcc
 BuildRequires:  git
+# AppStream metadata generation
 BuildRequires:  libappstream-glib >= 0.6.3
 BuildRequires:  meson >= 0.43.0
 BuildRequires:  pkgconfig(egl)
