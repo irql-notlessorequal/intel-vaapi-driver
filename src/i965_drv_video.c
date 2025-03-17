@@ -5229,6 +5229,7 @@ VAStatus i965_DeriveImage(VADriverContextP ctx,
 	case VA_FOURCC_RGBX:
 	case VA_FOURCC_BGRA:
 	case VA_FOURCC_BGRX:
+	case VA_FOURCC_ARGB:
 		image->num_planes = 1;
 		image->pitches[0] = obj_surface->width;
 
@@ -5245,6 +5246,13 @@ VAStatus i965_DeriveImage(VADriverContextP ctx,
 			image->format.green_mask = 0x0000ff00;
 			image->format.blue_mask = 0x000000ff;
 			break;
+
+		case VA_FOURCC_ARGB:
+			image->format.red_mask = 0x0000ff00;
+			image->format.green_mask = 0x00ff0000;
+			image->format.blue_mask = 0xff000000;
+			break;			
+
 		default:
 			goto error;
 		}
@@ -5260,6 +5268,12 @@ VAStatus i965_DeriveImage(VADriverContextP ctx,
 			image->format.alpha_mask = 0x00000000;
 			image->format.depth = 24;
 			break;
+
+		case VA_FOURCC_ARGB:
+			image->format.alpha_mask = 0x000000ff;
+			image->format.depth = 32;
+			break;
+
 		default:
 			goto error;
 		}
