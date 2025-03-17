@@ -6399,6 +6399,9 @@ i965_QuerySurfaceAttributes(VADriverContextP ctx,
 							VASurfaceAttrib *attrib_list,
 							unsigned int *num_attribs)
 {
+	if (!ctx)
+		return VA_STATUS_ERROR_INVALID_CONTEXT;
+
 	VAStatus vaStatus = VA_STATUS_SUCCESS;
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
 	struct object_config *obj_config;
@@ -6427,6 +6430,12 @@ i965_QuerySurfaceAttributes(VADriverContextP ctx,
 
 	if (attribs == NULL)
 		return VA_STATUS_ERROR_ALLOCATION_FAILED;
+
+	if (!i965->codec_info->get_hw_formats)
+	{
+		i965_log_error(ctx, "i965_QuerySurfaceAttributes: get_hw_formats() is unavailable!\n");
+		return VA_STATUS_ERROR_UNKNOWN;
+	}
 
 	/**
 	 * We no longer have one massive function to query the formats.

@@ -2034,7 +2034,8 @@ void gen6_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
 
 		default:
 		{
-			assert(!"Unknown entrypoint for VPP");
+			i965_log_debug(ctx, "gen6_get_hw_formats: Ignoring unknown entrypoint %#010x\n", obj_config->entrypoint);
+			break;
 		}
 	}
 }

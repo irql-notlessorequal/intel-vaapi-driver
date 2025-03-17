@@ -368,7 +368,7 @@ void g4x_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
 {
 	if (obj_config->entrypoint != VAEntrypointVLD)
 	{
-		assert(!"Requested an invalid entrypoint for hardware");
+		i965_log_debug(ctx, "g4x_get_hw_formats: Ignoring unknown entrypoint %#010x\n", obj_config->entrypoint);
 		return;
 	}
 
@@ -432,7 +432,7 @@ void ironlake_get_hw_formats(VADriverContextP ctx, struct object_config *obj_con
 {
 	if (obj_config->entrypoint != VAEntrypointVLD)
 	{
-		assert(!"Requested an invalid entrypoint for hardware");
+		i965_log_debug(ctx, "ironlake_get_hw_formats: Ignoring unknown entrypoint %#010x\n", obj_config->entrypoint);
 		return;
 	}
 
