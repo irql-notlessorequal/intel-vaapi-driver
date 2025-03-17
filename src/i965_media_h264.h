@@ -45,10 +45,11 @@ struct i965_h264_context {
 		int i_flag;
 	} picture;
 
-	int enable_avc_ildb;
-	int use_avc_hw_scoreboard;
+	bool enable_avc_ildb;
+	bool use_avc_hw_scoreboard;
+	bool use_hw_w128;
+	bool is_g4x_context;
 
-	int use_hw_w128;
 	unsigned int weight128_luma_l0;
 	unsigned int weight128_luma_l1;
 	unsigned int weight128_chroma_l0;

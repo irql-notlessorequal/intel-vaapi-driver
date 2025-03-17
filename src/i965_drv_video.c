@@ -6234,7 +6234,17 @@ i965_GetSurfaceAttributes(
 					if (obj_config->profile == VAProfileMPEG2Simple ||
 						obj_config->profile == VAProfileMPEG2Main) {
 						attrib_list[i].value.value.i = VA_FOURCC_I420;
-					} else {
+					}
+#if defined(I965_H264_ENABLE_CTG)
+					else if (obj_config->profile == VAProfileH264ConstrainedBaseline ||
+						obj_config->profile == VAProfileH264Main ||
+						obj_config->profile == VAProfileH264High)
+					{
+						attrib_list[i].value.value.i = VA_FOURCC_NV12;
+					}
+#endif
+					else
+					{
 						assert(0);
 						attrib_list[i].flags = VA_SURFACE_ATTRIB_NOT_SUPPORTED;
 					}
@@ -6266,12 +6276,27 @@ i965_GetSurfaceAttributes(
 			} else {
 				if (IS_G4X(i965->intel.device_info)) {
 					if (obj_config->profile == VAProfileMPEG2Simple ||
-						obj_config->profile == VAProfileMPEG2Main) {
+						obj_config->profile == VAProfileMPEG2Main)
+					{
 						if (attrib_list[i].value.value.i != VA_FOURCC_I420) {
 							attrib_list[i].value.value.i = 0;
 							attrib_list[i].flags &= ~VA_SURFACE_ATTRIB_SETTABLE;
 						}
-					} else {
+					}
+#if defined(I965_H264_ENABLE_CTG)
+					else if (obj_config->profile == VAProfileH264ConstrainedBaseline ||
+						obj_config->profile == VAProfileH264Main ||
+						obj_config->profile == VAProfileH264High)
+					{
+						if (attrib_list[i].value.value.i != VA_FOURCC_NV12)
+						{
+							attrib_list[i].value.value.i = 0;
+							attrib_list[i].flags &= ~VA_SURFACE_ATTRIB_SETTABLE;
+						}
+					}
+#endif
+					else
+					{
 						assert(0);
 						attrib_list[i].flags = VA_SURFACE_ATTRIB_NOT_SUPPORTED;
 					}
@@ -6516,6 +6541,19 @@ i965_QuerySurfaceAttributes(VADriverContextP ctx,
 			attribs[i].value.value.i = VA_FOURCC_I420;
 			i++;
 		}
+
+#if defined(I965_H264_ENABLE_CTG)
+		if (obj_config->profile == VAProfileH264ConstrainedBaseline ||
+			obj_config->profile == VAProfileH264Main ||
+			obj_config->profile == VAProfileH264High)
+		{
+			attribs[i].type = VASurfaceAttribPixelFormat;
+			attribs[i].value.type = VAGenericValueTypeInteger;
+			attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[i].value.value.i = VA_FOURCC_NV12;
+			i++;			
+		}
+#endif
 	} else if (IS_IRONLAKE(i965->intel.device_info)) {
 		switch (obj_config->profile) {
 		case VAProfileMPEG2Simple:
