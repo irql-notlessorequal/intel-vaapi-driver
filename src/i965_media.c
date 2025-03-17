@@ -366,17 +366,13 @@ g4x_dec_hw_context_init(VADriverContextP ctx, struct object_config *obj_config)
 void g4x_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
 	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs)
 {
-	if (obj_config->entrypoint != VAEntrypointVLD)
-	{
-		i965_log_debug(ctx, "g4x_get_hw_formats: Ignoring unknown entrypoint %#010x\n", obj_config->entrypoint);
-		return;
-	}
-
 	switch (obj_config->profile)
 	{
 		case VAProfileMPEG2Simple:
 		case VAProfileMPEG2Main:
 		{
+			assert(obj_config->entrypoint == VAEntrypointVLD);
+
 			attribs[*i].type = VASurfaceAttribPixelFormat;
 			attribs[*i].value.type = VAGenericValueTypeInteger;
 			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
@@ -388,7 +384,9 @@ void g4x_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
 
 		default:
 		{
-			assert(!"Unknown VLD profile");
+			i965_log_debug(ctx, "g4x_get_hw_formats: Ignoring unknown entrypoint %#010x (profile %#010x)\n",
+				obj_config->entrypoint, obj_config->profile);
+			break;;
 		}
 	}
 }
@@ -430,17 +428,13 @@ ironlake_dec_hw_context_init(VADriverContextP ctx, struct object_config *obj_con
 void ironlake_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
 	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs)
 {
-	if (obj_config->entrypoint != VAEntrypointVLD)
-	{
-		i965_log_debug(ctx, "ironlake_get_hw_formats: Ignoring unknown entrypoint %#010x\n", obj_config->entrypoint);
-		return;
-	}
-
 	switch (obj_config->profile)
 	{
 		case VAProfileMPEG2Simple:
 		case VAProfileMPEG2Main:
 		{
+			assert(obj_config->entrypoint == VAEntrypointVLD);
+
 			attribs[*i].type = VASurfaceAttribPixelFormat;
 			attribs[*i].value.type = VAGenericValueTypeInteger;
 			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
@@ -454,6 +448,8 @@ void ironlake_get_hw_formats(VADriverContextP ctx, struct object_config *obj_con
 		case VAProfileH264Main:
 		case VAProfileH264High:
 		{
+			assert(obj_config->entrypoint == VAEntrypointVLD);
+
 			attribs[*i].type = VASurfaceAttribPixelFormat;
 			attribs[*i].value.type = VAGenericValueTypeInteger;
 			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
@@ -477,12 +473,25 @@ void ironlake_get_hw_formats(VADriverContextP ctx, struct object_config *obj_con
 			attribs[*i].value.value.i = VA_FOURCC_I420;
 			i++;
 
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_BGRA;
+			*i++;
+		
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_ARGB;
+
 			break;
 		}
 
 		default:
 		{
-			assert(!"Unknown VLD profile");
+			i965_log_debug(ctx, "ironlake_get_hw_formats: Ignoring unknown entrypoint %#010x (profile %#010x)\n",
+				obj_config->entrypoint, obj_config->profile);
+			break;
 		}
 	}
 }
