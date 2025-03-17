@@ -62,6 +62,11 @@ AC_ARG_ENABLE([hybrid-codec],
                     [build with hybrid codec support @<:@default=no@:>@])],
     [], [enable_hybrid_codec="no"])
 
+AC_ARG_ENABLE([h264-ctg],
+    [AC_HELP_STRING([--enable-h264-ctg],
+                    [build with experimental H.264 support for G45 @<:@default=no@:>@])],
+    [], [enable_h264_ctg="no"])
+
 AC_ARG_ENABLE([tests],
     [AC_HELP_STRING([--enable-tests],
                     [build tests @<:@default=no@:>@])],
@@ -129,6 +134,10 @@ fi
 
 if test "$enable_hybrid_codec" = "yes"; then
     AC_DEFINE([HAVE_HYBRID_CODEC], [1], [Defined to 1 if hybrid codec is needed])
+fi
+
+if test "$enable_h264_ctg" = "yes"; then
+    AC_DEFINE([I965_H264_ENABLE_CTG], [1], [Defined to 1 if H264 support on CTG is needed])
 fi
 
 AM_CONDITIONAL(ENABLE_TESTS, test "$enable_tests" = "yes")
