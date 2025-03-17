@@ -179,6 +179,8 @@ static struct hw_codec_info snb_hw_codec_info = {
 };
 
 static void gen7_hw_codec_preinit(VADriverContextP ctx, struct hw_codec_info *codec_info);
+static void gen7_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs);
 
 extern struct hw_context *gen7_dec_hw_context_init(VADriverContextP, struct object_config *);
 extern struct hw_context *gen7_enc_hw_context_init(VADriverContextP, struct object_config *);
@@ -189,6 +191,7 @@ static struct hw_codec_info ivb_hw_codec_info = {
 	.render_init = genx_render_init,
 	.post_processing_context_init = i965_post_processing_context_init,
 	.preinit_hw_codec = gen7_hw_codec_preinit,
+	.get_hw_formats = gen7_get_hw_formats,
 
 	.max_width = 4096,
 	.max_height = 4096,
@@ -242,6 +245,7 @@ static struct hw_codec_info hsw_hw_codec_info = {
 	.render_init = genx_render_init,
 	.post_processing_context_init = i965_post_processing_context_init,
 	.preinit_hw_codec = hsw_hw_codec_preinit,
+	.get_hw_formats = gen7_get_hw_formats,
 
 	.max_width = 4096,
 	.max_height = 4096,
