@@ -35,6 +35,7 @@
 #define CMD_MEDIA_INTERFACE_DESCRIPTOR_LOAD     CMD(2, 0, 2)
 #define CMD_MEDIA_GATEWAY_STATE                 CMD(2, 0, 3)
 #define CMD_MEDIA_STATE_FLUSH                   CMD(2, 0, 4)
+#define CMD_MEDIA_OBJECT_PRT                    CMD(2, 1, 2)
 #define CMD_MEDIA_OBJECT_WALKER                 CMD(2, 1, 3)
 
 #define CMD_PIPELINED_POINTERS                  CMD(3, 0, 0)
