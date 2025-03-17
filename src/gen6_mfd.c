@@ -1964,3 +1964,77 @@ gen6_dec_hw_context_init(VADriverContextP ctx, struct object_config *obj_config)
 
 	return (struct hw_context *)gen6_mfd_context;
 }
+
+void gen6_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs)
+{
+	switch (obj_config->entrypoint)
+	{
+		case VAEntrypointVLD:
+		{
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_NV12;
+			*i++;
+
+			break;
+		}
+
+		case VAEntrypointEncSlice:
+		case VAEntrypointVideoProc:
+		{
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_NV12;
+			*i++;
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_I420;
+			*i++;
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_YV12;
+			*i++;
+
+			if (obj_config->entrypoint == VAEntrypointVideoProc)
+			{
+				attribs[*i].type = VASurfaceAttribPixelFormat;
+				attribs[*i].value.type = VAGenericValueTypeInteger;
+				attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+				attribs[*i].value.value.i = VA_FOURCC_RGBA;
+				*i++;
+
+				attribs[*i].type = VASurfaceAttribPixelFormat;
+				attribs[*i].value.type = VAGenericValueTypeInteger;
+				attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+				attribs[*i].value.value.i = VA_FOURCC_BGRA;
+				*i++;
+
+				attribs[*i].type = VASurfaceAttribPixelFormat;
+				attribs[*i].value.type = VAGenericValueTypeInteger;
+				attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+				attribs[*i].value.value.i = VA_FOURCC_ARGB;
+				*i++;
+
+				attribs[*i].type = VASurfaceAttribPixelFormat;
+				attribs[*i].value.type = VAGenericValueTypeInteger;
+				attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+				attribs[*i].value.value.i = VA_FOURCC_YUY2;
+				*i++;
+			}
+
+			break;
+		}
+
+		default:
+		{
+			assert(!"Unknown entrypoint for VPP");
+		}
+	}
+}
