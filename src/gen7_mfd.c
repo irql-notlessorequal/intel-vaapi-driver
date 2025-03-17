@@ -3306,6 +3306,8 @@ inline void gen7_get_hw_dec_formats(VADriverContextP ctx, struct object_config *
 			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
 			attribs[*i].value.value.i = VA_FOURCC_NV12;
 			*i++;
+
+			break;
 		}
 	}
 }
