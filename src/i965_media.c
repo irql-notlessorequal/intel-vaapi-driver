@@ -363,6 +363,36 @@ g4x_dec_hw_context_init(VADriverContextP ctx, struct object_config *obj_config)
 	return (struct hw_context *)media_context;
 }
 
+void g4x_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs)
+{
+	if (obj_config->entrypoint != VAEntrypointVLD)
+	{
+		assert(!"Requested an invalid entrypoint for hardware");
+		return;
+	}
+
+	switch (obj_config->profile)
+	{
+		case VAProfileMPEG2Simple:
+		case VAProfileMPEG2Main:
+		{
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_I420;
+			*i++;
+
+			break;
+		}
+
+		default:
+		{
+			assert(!"Unknown VLD profile");
+		}
+	}
+}
+
 struct hw_context *
 ironlake_dec_hw_context_init(VADriverContextP ctx, struct object_config *obj_config)
 {
@@ -395,4 +425,64 @@ ironlake_dec_hw_context_init(VADriverContextP ctx, struct object_config *obj_con
 	}
 
 	return (struct hw_context *)media_context;
+}
+
+void ironlake_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs)
+{
+	if (obj_config->entrypoint != VAEntrypointVLD)
+	{
+		assert(!"Requested an invalid entrypoint for hardware");
+		return;
+	}
+
+	switch (obj_config->profile)
+	{
+		case VAProfileMPEG2Simple:
+		case VAProfileMPEG2Main:
+		{
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_I420;
+			*i++;
+
+			break;
+		}
+
+		case VAProfileH264ConstrainedBaseline:
+		case VAProfileH264Main:
+		case VAProfileH264High:
+		{
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_NV12;
+			*i++;
+
+			break;
+		}
+
+		case VAProfileNone:
+		{
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_NV12;
+			*i++;
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_I420;
+			i++;
+
+			break;
+		}
+
+		default:
+		{
+			assert(!"Unknown VLD profile");
+		}
+	}
 }

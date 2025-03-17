@@ -60,6 +60,10 @@
 
 extern struct hw_context *i965_proc_context_init(VADriverContextP, struct object_config *);
 extern struct hw_context *g4x_dec_hw_context_init(VADriverContextP, struct object_config *);
+
+extern void g4x_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs);
+
 extern bool genx_render_init(VADriverContextP);
 
 static struct hw_codec_info g4x_hw_codec_info = {
@@ -68,6 +72,7 @@ static struct hw_codec_info g4x_hw_codec_info = {
 	.proc_hw_context_init = NULL,
 	.render_init = genx_render_init,
 	.post_processing_context_init = NULL,
+	.get_hw_formats = g4x_get_hw_formats,
 
 	.max_width = 2048,
 	.max_height = 2048,
@@ -90,12 +95,16 @@ static struct hw_codec_info g4x_hw_codec_info = {
 extern struct hw_context *ironlake_dec_hw_context_init(VADriverContextP, struct object_config *);
 extern void i965_post_processing_context_init(VADriverContextP, void *, struct intel_batchbuffer *);
 
+extern void ironlake_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs);
+
 static struct hw_codec_info ilk_hw_codec_info = {
 	.dec_hw_context_init = ironlake_dec_hw_context_init,
 	.enc_hw_context_init = NULL,
 	.proc_hw_context_init = i965_proc_context_init,
 	.render_init = genx_render_init,
 	.post_processing_context_init = i965_post_processing_context_init,
+	.get_hw_formats = ironlake_get_hw_formats,
 
 	.max_width = 2048,
 	.max_height = 2048,
@@ -119,12 +128,12 @@ static struct hw_codec_info ilk_hw_codec_info = {
 };
 
 static void gen6_hw_codec_preinit(VADriverContextP ctx, struct hw_codec_info *codec_info);
-
 static void gen6_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
 	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs);
 
 extern struct hw_context *gen6_dec_hw_context_init(VADriverContextP, struct object_config *);
 extern struct hw_context *gen6_enc_hw_context_init(VADriverContextP, struct object_config *);
+
 static struct hw_codec_info snb_hw_codec_info = {
 	.dec_hw_context_init = gen6_dec_hw_context_init,
 	.enc_hw_context_init = gen6_enc_hw_context_init,
