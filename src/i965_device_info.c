@@ -847,6 +847,8 @@ static const struct intel_device_info g4x_device_info = {
 static const struct intel_device_info ilk_device_info = {
 	.gen = 5,
 
+	.hw_workarounds = HW_WORKAROUND_BROKEN_ARGB,
+
 	.urb_size = 1024,
 	.max_wm_threads = 72,       /* 12 * 6 */
 };
@@ -855,6 +857,8 @@ static const struct intel_device_info snb_gt1_device_info = {
 	.gen = 6,
 	.gt = 1,
 
+	.hw_workarounds = HW_WORKAROUND_BROKEN_ARGB,
+
 	.urb_size = 1024,
 	.max_wm_threads = 40,
 };
@@ -862,6 +866,8 @@ static const struct intel_device_info snb_gt1_device_info = {
 static const struct intel_device_info snb_gt2_device_info = {
 	.gen = 6,
 	.gt = 2,
+
+	.hw_workarounds = HW_WORKAROUND_BROKEN_ARGB,
 
 	.urb_size = 1024,
 	.max_wm_threads = 80,

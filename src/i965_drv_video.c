@@ -2152,7 +2152,14 @@ i965_CreateSurfaces2(
 	if (!expected_fourcc)
 	{
 		i965_GuessExpectedFourCC(format, &expected_fourcc);
-		i965_log_debug(ctx, "i965_CreateSurfaces2: No FOURCC defined, making a bold assumption instead!\n");
+		i965_log_debug(ctx, "(i965_CreateSurfaces2) No FOURCC defined, making a bold assumption instead!\n");
+	}
+
+	bool disable_tiling = false;
+	if (HAS_BROKEN_ARGB(i965->intel.device_info) && expected_fourcc == VA_FOURCC_ARGB)
+	{
+		i965_log_debug(ctx, "(i965_CreateSurfaces2) Working around broken ARGB support on platform.\n");
+		disable_tiling = true;
 	}
 
 	for (i = 0; i < num_surfaces; i++) {
@@ -2168,7 +2175,7 @@ i965_CreateSurfaces2(
 		obj_surface->status = VASurfaceReady;
 		obj_surface->orig_width = width;
 		obj_surface->orig_height = height;
-		obj_surface->user_disable_tiling = false;
+		obj_surface->user_disable_tiling = disable_tiling;
 		obj_surface->user_h_stride_set = false;
 		obj_surface->user_v_stride_set = false;
 		obj_surface->border_cleared = false;
@@ -7118,6 +7125,11 @@ i965_ExportSurfaceHandle(VADriverContextP ctx, VASurfaceID surface_id,
 
 	if (drm_intel_bo_get_tiling(obj_surface->bo, &tiling, &swizzle))
 		tiling = I915_TILING_NONE;
+
+	if (HAS_BROKEN_ARGB(i965->intel.device_info) && obj_surface->fourcc == VA_FOURCC_ARGB)
+	{
+		i965_log_debug(ctx, "(vaExportSurfaceHandle) TODO: Dump the ALPHA channel of the BO, then clear it.\n");
+	}
 
 	VADRMPRIMESurfaceDescriptor *desc = (VADRMPRIMESurfaceDescriptor *)descriptor;
 

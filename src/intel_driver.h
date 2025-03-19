@@ -160,6 +160,14 @@ struct intel_device_info {
 	unsigned int urb_size;
 	unsigned int max_wm_threads;
 
+/**
+ * DRM_FORMAT_ARGB8888 seems to be done incorrectly on these generations of hardware.
+ * 
+ * As a workaround, make sure to strip out the alpha channel from the BO when exported.
+ */
+#define HW_WORKAROUND_BROKEN_ARGB	(1 << 2)
+	uint32_t hw_workarounds;
+
 	unsigned int is_g4x         : 1; /* gen4 */
 	unsigned int is_ivybridge   : 1; /* gen7 */
 	unsigned int is_baytrail    : 1; /* gen7 */
@@ -247,5 +255,7 @@ struct intel_region {
 #define IS_GLK(device_info)             (device_info->is_glklake)
 
 #define IS_GEN10(device_info)           (device_info->gen == 10)
+
+#define HAS_BROKEN_ARGB(device_info)	(device_info->hw_workarounds & HW_WORKAROUND_BROKEN_ARGB)
 
 #endif /* _INTEL_DRIVER_H_ */
