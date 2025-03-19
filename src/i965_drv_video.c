@@ -2209,12 +2209,27 @@ i965_CreateSurfaces2(
 				if (!(memory_attribute->flags & VA_SURFACE_EXTBUF_DESC_ENABLE_TILING))
 					obj_surface->user_disable_tiling = true;
 
-				if (memory_attribute->pixel_format) {
+				if (memory_attribute->pixel_format)
+				{
 					if (expected_fourcc)
 						ASSERT_RET(memory_attribute->pixel_format == expected_fourcc, VA_STATUS_ERROR_INVALID_PARAMETER);
 					else
 						expected_fourcc = memory_attribute->pixel_format;
+
+					/**
+					 * Update the subsampling if our EXPECTED_FOURCC got changed.
+					 */
+					obj_surface->subsampling = GetSubsamplingFromFormat(format, expected_fourcc);
+
+					/**
+					 * Make sure that we also handle the workaround.
+					 */
+					if (HAS_BROKEN_ARGB(i965->intel.device_info) && expected_fourcc == VA_FOURCC_ARGB)
+					{
+						obj_surface->user_disable_tiling = true;
+					}
 				}
+				
 				ASSERT_RET(expected_fourcc, VA_STATUS_ERROR_INVALID_PARAMETER);
 				if (memory_attribute->pitches[0]) {
 					int bpp_1stplane = bpp_1stplane_by_fourcc(expected_fourcc);
@@ -7531,20 +7546,8 @@ void i965_log_debug(VADriverContextP ctx, const char *format, ...)
 	va_list vl;
 
 	va_start(vl, format);
-
-	if (!ctx->info_callback) {
-		// No info callback: this message is only useful for developers,
-		// so just discard it.
-	} else {
-		// Put the message on the stack.  If it overruns the size of the
-		// then it will just be truncated - callers shouldn't be sending
-		// messages which are too long.
-		char tmp[1024];
-		int ret;
-		ret = vsnprintf(tmp, sizeof(tmp), format, vl);
-		if (ret > 0)
-			ctx->info_callback(ctx, tmp);
-	}
+	vfprintf(stderr, format, vl);
+	va_end(vl);
 }
 
 extern struct hw_codec_info *i965_get_codec_info(int devid);
