@@ -7132,6 +7132,19 @@ i965_ExportSurfaceHandle(VADriverContextP ctx, VASurfaceID surface_id,
 		}
 	}
 
+	if (HAS_BROKEN_ARGB(i965->intel.device_info) && obj_surface->fourcc == VA_FOURCC_ARGB)
+	{
+		/**
+		 * We need to clear the alpha channel before it gets exported to the hardware,
+		 * my assumption is that it's either a HW issue or a Mesa issue.
+		 * 
+		 * As a test, make everything gray instead.
+		 */
+		dri_bo_map(obj_surface->bo, 1);
+		memset(obj_surface->bo->virtual, 100, obj_surface->bo->size);
+		dri_bo_unmap(obj_surface->bo);
+	}
+
 	if (drm_intel_bo_gem_export_to_prime(obj_surface->bo, &fd))
 	{
 		i965_log_debug(ctx, "vaExportSurfaceHandle: drm_intel_bo_gem_export_to_prime() returned an error.\n");
@@ -7140,11 +7153,6 @@ i965_ExportSurfaceHandle(VADriverContextP ctx, VASurfaceID surface_id,
 
 	if (drm_intel_bo_get_tiling(obj_surface->bo, &tiling, &swizzle))
 		tiling = I915_TILING_NONE;
-
-	if (HAS_BROKEN_ARGB(i965->intel.device_info) && obj_surface->fourcc == VA_FOURCC_ARGB)
-	{
-		i965_log_debug(ctx, "(vaExportSurfaceHandle) TODO: Dump the ALPHA channel of the BO, then clear it.\n");
-	}
 
 	VADRMPRIMESurfaceDescriptor *desc = (VADRMPRIMESurfaceDescriptor *)descriptor;
 

@@ -644,7 +644,6 @@ i965_subpic_render_cc_unit(VADriverContextP ctx)
 	/*alpha test reference*/
 	cc_state->cc7.alpha_ref.f = 0.0 ;
 
-
 	dri_bo_emit_reloc(render_state->cc.state,
 					  I915_GEM_DOMAIN_INSTRUCTION, 0,
 					  0,
