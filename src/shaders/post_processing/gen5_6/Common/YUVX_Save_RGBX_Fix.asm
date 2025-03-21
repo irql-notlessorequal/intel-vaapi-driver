@@ -195,6 +195,7 @@
     // R
     mov (8) ubDEST_RGBX(0,ROW_NUM*64+2   )<4>  REG2(r,nTEMP1, 0)<0;8,1>:ub
     mov (8) ubDEST_RGBX(0,ROW_NUM*64+2+32)<4>  REG2(r,nTEMP1, 8)<0;8,1>:ub
+
 #if (!ONE_ROW_DEBUG)    
     }
 #endif

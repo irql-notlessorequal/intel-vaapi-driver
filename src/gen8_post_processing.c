@@ -318,6 +318,18 @@ static struct pp_module pp_modules_gen8[] = {
 
 		gen8_pp_plx_avs_initialize,
 	},
+
+	{
+		{
+			"NV12_RGBA module",
+			PP_NV12_LOAD_SAVE_RGBA,
+			pp_nv12_load_save_rgbx_gen8,
+			sizeof(pp_nv12_load_save_rgbx_gen8),
+			NULL,
+		},
+
+		gen8_pp_plx_avs_initialize,
+	},
 };
 
 #define MAX_SCALING_SURFACES    16

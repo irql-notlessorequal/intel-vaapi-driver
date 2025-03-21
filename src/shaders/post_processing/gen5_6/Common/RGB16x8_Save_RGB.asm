@@ -49,6 +49,12 @@
 
 #include "RGB16x8_Save_RGB.inc"
 
+#if defined(FORCE_ALPHA_TO_ONE)
+	$for (0, 0; <nY_NUM_OF_ROWS; 1, 2) {
+		mov (8)	udDEST_ARGB(%2,3)<4>	255:ud		// Set ALPHA to 255 (opaque)
+	}
+#endif
+
     shl (1) rMSGSRC.0<1>:d      wORIX<0;1,0>:w            2:w  { NoDDClr }             // H. block origin need to be quadrupled
     mov (1) rMSGSRC.1<1>:d      wORIY<0;1,0>:w                 { NoDDClr, NoDDChk }    // Block origin (1st quadrant)
     mov (1) rMSGSRC.2<1>:ud     nDPW_BLOCK_SIZE_ARGB:ud        { NoDDChk }             // Block width and height (32x8)

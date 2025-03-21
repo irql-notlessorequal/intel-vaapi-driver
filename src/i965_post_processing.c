@@ -131,6 +131,10 @@ static const uint32_t pp_nv12_load_save_rgbx_gen5[][4] = {
 #include "shaders/post_processing/gen5_6/nv12_load_save_rgbx.g4b.gen5"
 };
 
+static const uint32_t pp_nv12_load_save_rgba_gen5[][4] = {
+#include "shaders/post_processing/gen5_6/nv12_load_save_rgba.g4b.gen5"
+};
+
 static VAStatus pp_null_initialize(VADriverContextP ctx, struct i965_post_processing_context *pp_context,
 								   const struct i965_surface *src_surface,
 								   const VARectangle *src_rect,
@@ -366,6 +370,18 @@ static struct pp_module pp_modules_gen5[] = {
 
 		pp_plx_load_save_plx_initialize,
 	},
+
+	{
+		{
+			"NV12_RGBA module",
+			PP_NV12_LOAD_SAVE_RGBA,
+			pp_nv12_load_save_rgba_gen5,
+			sizeof(pp_nv12_load_save_rgba_gen5),
+			NULL,
+		},
+
+		pp_plx_load_save_plx_initialize,
+	},
 };
 
 static const uint32_t pp_null_gen6[][4] = {
@@ -430,6 +446,10 @@ static const uint32_t pp_rgbx_load_save_nv12_gen6[][4] = {
 
 static const uint32_t pp_nv12_load_save_rgbx_gen6[][4] = {
 #include "shaders/post_processing/gen5_6/nv12_load_save_rgbx.g6b"
+};
+
+static const uint32_t pp_nv12_load_save_rgba_gen6[][4] = {
+#include "shaders/post_processing/gen5_6/nv12_load_save_rgba.g6b"
 };
 
 static struct pp_module pp_modules_gen6[] = {
@@ -618,6 +638,18 @@ static struct pp_module pp_modules_gen6[] = {
 			PP_NV12_LOAD_SAVE_RGBX,
 			pp_nv12_load_save_rgbx_gen6,
 			sizeof(pp_nv12_load_save_rgbx_gen6),
+			NULL,
+		},
+
+		pp_plx_load_save_plx_initialize,
+	},
+
+	{
+		{
+			"NV12_RGBA module",
+			PP_NV12_LOAD_SAVE_RGBA,
+			pp_nv12_load_save_rgba_gen6,
+			sizeof(pp_nv12_load_save_rgba_gen6),
 			NULL,
 		},
 
@@ -892,6 +924,18 @@ static struct pp_module pp_modules_gen7[] = {
 		gen7_pp_plx_avs_initialize,
 	},
 
+	{
+		{
+			"NV12_RGBA module",
+			PP_NV12_LOAD_SAVE_RGBA,
+			pp_nv12_load_save_rgbx_gen7,
+			sizeof(pp_nv12_load_save_rgbx_gen7),
+			NULL,
+		},
+
+		gen7_pp_plx_avs_initialize,
+	},
+
 };
 
 static const uint32_t pp_null_gen75[][4] = {
@@ -1135,6 +1179,18 @@ static struct pp_module pp_modules_gen75[] = {
 		{
 			"NV12_RGBX module",
 			PP_NV12_LOAD_SAVE_RGBX,
+			pp_nv12_load_save_rgbx_gen75,
+			sizeof(pp_nv12_load_save_rgbx_gen75),
+			NULL,
+		},
+
+		gen7_pp_plx_avs_initialize,
+	},
+
+	{
+		{
+			"NV12_RGBA module",
+			PP_NV12_LOAD_SAVE_RGBA,
 			pp_nv12_load_save_rgbx_gen75,
 			sizeof(pp_nv12_load_save_rgbx_gen75),
 			NULL,
@@ -5248,7 +5304,6 @@ i965_image_pl2_processing(VADriverContextP ctx,
 	case VA_FOURCC_BGRA:
 	case VA_FOURCC_RGBX:
 	case VA_FOURCC_RGBA:
-	case VA_FOURCC_ARGB:
 		vaStatus = i965_post_processing_internal(ctx, i965->pp_context,
 												 src_surface,
 												 src_rect,
@@ -5843,12 +5898,15 @@ pp_get_kernel_index(uint32_t src_fourcc, uint32_t dst_fourcc, uint32_t pp_ops,
 			pp_index = PP_NV12_LOAD_SAVE_PA;
 			break;
 		case VA_FOURCC_RGBX:
-		case VA_FOURCC_RGBA:
 		case VA_FOURCC_BGRX:
-		case VA_FOURCC_BGRA:
-		case VA_FOURCC_ARGB:
+		case VA_FOURCC_RGBA:
 			pp_index = PP_NV12_LOAD_SAVE_RGBX;
 			break;
+
+		case VA_FOURCC_BGRA:
+			pp_index = PP_NV12_LOAD_SAVE_RGBA;
+			break;
+
 		}
 		break;
 	case VA_FOURCC_I420:
@@ -6010,6 +6068,7 @@ i965_proc_picture_fast(VADriverContextP ctx,
 
 	pp_index = pp_get_kernel_index(src_obj_surface->fourcc,
 								   dst_obj_surface->fourcc, pp_ops, filter_flags);
+
 	if (pp_index < 0)
 		return VA_STATUS_ERROR_UNIMPLEMENTED;
 

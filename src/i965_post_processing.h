@@ -56,6 +56,14 @@ enum {
 	PP_PA_LOAD_SAVE_PA,
 	PP_RGBX_LOAD_SAVE_NV12,
 	PP_NV12_LOAD_SAVE_RGBX,
+	/**
+	 * Used only by ILK/SNB to workaround
+	 * broken ARGB handling in the regular shader.
+	 * 
+	 * For IVB and newer, this is the same
+	 * as `PP_NV12_LOAD_SAVE_RGBX`
+	 */
+	PP_NV12_LOAD_SAVE_RGBA,
 	NUM_PP_MODULES,
 };
 
