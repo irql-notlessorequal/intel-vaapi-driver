@@ -214,6 +214,10 @@ avc_ensure_surface_bo(
 		return VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT;
 	}
 
+	i965_log_debug(ctx,
+		"avc_ensure_surface_bo: { surface_fourcc=%#010x hw_fourcc=%#010x }\n",
+		obj_surface->fourcc, fourcc);
+
 	/* Determine the HW surface format, bound to VA config needs */
 	if ((decode_state->base.chroma_formats & chroma_format) == chroma_format)
 		hw_fourcc = fourcc;

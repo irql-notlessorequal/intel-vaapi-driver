@@ -212,7 +212,7 @@ i965_media_decode_init(VADriverContextP ctx,
 
 	/* constant buffer */
 	dri_bo_unreference(media_context->curbe.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "constant buffer",
 					  4096, 64);
 	assert(bo);
@@ -226,7 +226,7 @@ i965_media_decode_init(VADriverContextP ctx,
 
 	/* binding table */
 	dri_bo_unreference(media_context->binding_table.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "binding table",
 					  MAX_MEDIA_SURFACES * sizeof(unsigned int), 32);
 	assert(bo);
@@ -234,7 +234,7 @@ i965_media_decode_init(VADriverContextP ctx,
 
 	/* interface descriptor remapping table */
 	dri_bo_unreference(media_context->idrt.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "interface discriptor",
 					  MAX_INTERFACE_DESC * sizeof(struct i965_interface_descriptor), 16);
 	assert(bo);
@@ -242,7 +242,7 @@ i965_media_decode_init(VADriverContextP ctx,
 
 	/* vfe state */
 	dri_bo_unreference(media_context->vfe_state.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "vfe state",
 					  sizeof(struct i965_vfe_state), 32);
 	assert(bo);

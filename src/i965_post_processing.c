@@ -33,6 +33,8 @@
 
 #include "intel_batchbuffer.h"
 #include "intel_driver.h"
+#include "intel_memman.h"
+
 #include "i965_defines.h"
 #include "i965_structs.h"
 #include "i965_drv_video.h"
@@ -3586,7 +3588,7 @@ pp_nv12_dn_initialize(VADriverContextP ctx, struct i965_post_processing_context 
 	h = obj_surface->height;
 
 	if (pp_dn_context->stmm_bo == NULL) {
-		pp_dn_context->stmm_bo = dri_bo_alloc(i965->intel.bufmgr,
+		pp_dn_context->stmm_bo = memman_bo_alloc(i965->intel.bufmgr,
 											  "STMM surface",
 											  w * h,
 											  4096);
@@ -4005,7 +4007,7 @@ gen7_pp_nv12_dn_initialize(VADriverContextP ctx, struct i965_post_processing_con
 	h = obj_surface->height;
 
 	if (pp_dn_context->stmm_bo == NULL) {
-		pp_dn_context->stmm_bo = dri_bo_alloc(i965->intel.bufmgr,
+		pp_dn_context->stmm_bo = memman_bo_alloc(i965->intel.bufmgr,
 											  "STMM surface",
 											  w * h,
 											  4096);
@@ -4174,7 +4176,7 @@ ironlake_pp_initialize(
 	int static_param_size, inline_param_size;
 
 	dri_bo_unreference(pp_context->surface_state_binding_table.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "surface state & binding table",
 					  (SURFACE_STATE_PADDED_SIZE + sizeof(unsigned int)) * MAX_PP_SURFACES,
 					  4096);
@@ -4182,7 +4184,7 @@ ironlake_pp_initialize(
 	pp_context->surface_state_binding_table.bo = bo;
 
 	dri_bo_unreference(pp_context->curbe.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "constant buffer",
 					  4096,
 					  4096);
@@ -4190,7 +4192,7 @@ ironlake_pp_initialize(
 	pp_context->curbe.bo = bo;
 
 	dri_bo_unreference(pp_context->idrt.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "interface discriptor",
 					  sizeof(struct i965_interface_descriptor),
 					  4096);
@@ -4199,7 +4201,7 @@ ironlake_pp_initialize(
 	pp_context->idrt.num_interface_descriptors = 0;
 
 	dri_bo_unreference(pp_context->sampler_state_table.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "sampler state table",
 					  4096,
 					  4096);
@@ -4210,7 +4212,7 @@ ironlake_pp_initialize(
 	pp_context->sampler_state_table.bo = bo;
 
 	dri_bo_unreference(pp_context->sampler_state_table.bo_8x8);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "sampler 8x8 state ",
 					  4096,
 					  4096);
@@ -4218,7 +4220,7 @@ ironlake_pp_initialize(
 	pp_context->sampler_state_table.bo_8x8 = bo;
 
 	dri_bo_unreference(pp_context->sampler_state_table.bo_8x8_uv);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "sampler 8x8 state ",
 					  4096,
 					  4096);
@@ -4226,7 +4228,7 @@ ironlake_pp_initialize(
 	pp_context->sampler_state_table.bo_8x8_uv = bo;
 
 	dri_bo_unreference(pp_context->vfe_state.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "vfe state",
 					  sizeof(struct i965_vfe_state),
 					  4096);
@@ -4305,7 +4307,7 @@ gen6_pp_initialize(
 	int static_param_size, inline_param_size;
 
 	dri_bo_unreference(pp_context->surface_state_binding_table.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "surface state & binding table",
 					  (SURFACE_STATE_PADDED_SIZE + sizeof(unsigned int)) * MAX_PP_SURFACES,
 					  4096);
@@ -4313,7 +4315,7 @@ gen6_pp_initialize(
 	pp_context->surface_state_binding_table.bo = bo;
 
 	dri_bo_unreference(pp_context->curbe.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "constant buffer",
 					  4096,
 					  4096);
@@ -4321,7 +4323,7 @@ gen6_pp_initialize(
 	pp_context->curbe.bo = bo;
 
 	dri_bo_unreference(pp_context->idrt.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "interface discriptor",
 					  sizeof(struct gen6_interface_descriptor_data),
 					  4096);
@@ -4330,7 +4332,7 @@ gen6_pp_initialize(
 	pp_context->idrt.num_interface_descriptors = 0;
 
 	dri_bo_unreference(pp_context->sampler_state_table.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "sampler state table",
 					  4096,
 					  4096);
@@ -4341,7 +4343,7 @@ gen6_pp_initialize(
 	pp_context->sampler_state_table.bo = bo;
 
 	dri_bo_unreference(pp_context->sampler_state_table.bo_8x8);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "sampler 8x8 state ",
 					  4096,
 					  4096);
@@ -4349,7 +4351,7 @@ gen6_pp_initialize(
 	pp_context->sampler_state_table.bo_8x8 = bo;
 
 	dri_bo_unreference(pp_context->sampler_state_table.bo_8x8_uv);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "sampler 8x8 state ",
 					  4096,
 					  4096);
@@ -4357,7 +4359,7 @@ gen6_pp_initialize(
 	pp_context->sampler_state_table.bo_8x8_uv = bo;
 
 	dri_bo_unreference(pp_context->vfe_state.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "vfe state",
 					  sizeof(struct i965_vfe_state),
 					  4096);
@@ -4640,7 +4642,7 @@ gen6_pp_object_walker(VADriverContextP ctx,
 	x_steps = pp_context->pp_x_steps(pp_context->private_context);
 	y_steps = pp_context->pp_y_steps(pp_context->private_context);
 	command_length_in_dws = 6 + (param_size >> 2);
-	command_buffer = dri_bo_alloc(i965->intel.bufmgr,
+	command_buffer = memman_bo_alloc(i965->intel.bufmgr,
 								  "command objects buffer",
 								  command_length_in_dws * 4 * x_steps * y_steps + 8,
 								  4096);
@@ -4755,6 +4757,8 @@ i965_post_processing_internal(
 )
 {
 	VAStatus va_status;
+
+	i965_log_debug(ctx, "i965_post_processing_internal({ pp_index=%d })\n", pp_index);
 
 	if (pp_context && pp_context->intel_post_processing) {
 		va_status = (pp_context->intel_post_processing)(ctx, pp_context,
@@ -5711,7 +5715,7 @@ i965_post_processing_context_init(VADriverContextP ctx,
 		struct pp_module *pp_module = &pp_context->pp_modules[i];
 		dri_bo_unreference(pp_module->kernel.bo);
 		if (pp_module->kernel.bin && pp_module->kernel.size) {
-			pp_module->kernel.bo = dri_bo_alloc(i965->intel.bufmgr,
+			pp_module->kernel.bo = memman_bo_alloc(i965->intel.bufmgr,
 												pp_module->kernel.name,
 												pp_module->kernel.size,
 												4096);
@@ -5783,6 +5787,10 @@ pp_get_kernel_index(uint32_t src_fourcc, uint32_t dst_fourcc, uint32_t pp_ops,
 					uint32_t filter_flags)
 {
 	int pp_index = -1;
+
+	i965_log_debug(NULL,
+		"pp_get_kernel_index: { src_fourcc=%#010x dst_fourcc=%#010x filter_flags=%#010x }\n",
+		src_fourcc, dst_fourcc, filter_flags);
 
 	if (!dst_fourcc)
 		dst_fourcc = src_fourcc;
@@ -6041,6 +6049,11 @@ i965_proc_picture(VADriverContextP ctx,
 	obj_surface = SURFACE(proc_state->current_render_target);
 	if (!obj_surface)
 		return VA_STATUS_ERROR_INVALID_SURFACE;
+
+	i965_log_debug(ctx,
+		"i965_proc_picture: { surface_fmt=%#010x surface_fourcc=%#010x output_background_color=%u }\n",
+		obj_surface->expected_format, obj_surface->fourcc,
+		pipeline_param->output_background_color);
 
 	if (!obj_surface->bo) {
 		unsigned int expected_format = obj_surface->expected_format;

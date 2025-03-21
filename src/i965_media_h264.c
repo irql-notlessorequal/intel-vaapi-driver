@@ -297,7 +297,7 @@ i965_media_h264_surface_state(VADriverContextP ctx,
 
 	assert(obj_surface->bo);
 
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "surface state",
 					  sizeof(struct i965_surface_state), 32);
 	assert(bo);
@@ -778,7 +778,7 @@ i965_media_h264_decode_init(VADriverContextP ctx,
 													 i965_h264_context->picture.height_in_mbs);
 
 	dri_bo_unreference(i965_h264_context->avc_it_command_mb_info.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "avc it command mb info",
 					  i965_h264_context->avc_it_command_mb_info.mbs * MB_CMD_IN_BYTES * (1 + i965_h264_context->use_avc_hw_scoreboard) + 8,
 					  0x1000);
@@ -786,7 +786,7 @@ i965_media_h264_decode_init(VADriverContextP ctx,
 	i965_h264_context->avc_it_command_mb_info.bo = bo;
 
 	dri_bo_unreference(i965_h264_context->avc_it_data.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "avc it data",
 					  i965_h264_context->avc_it_command_mb_info.mbs *
 					  0x800 *
@@ -801,7 +801,7 @@ i965_media_h264_decode_init(VADriverContextP ctx,
 	media_context->indirect_object.offset = i965_h264_context->avc_it_data.write_offset;
 
 	dri_bo_unreference(i965_h264_context->avc_ildb_data.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "AVC-ILDB Data Buffer",
 					  i965_h264_context->avc_it_command_mb_info.mbs * 64 * 2,
 					  0x1000);
@@ -821,7 +821,7 @@ i965_media_h264_decode_init(VADriverContextP ctx,
 	/* for Media pipeline */
 	media_context->extended_state.enabled = 1;
 	dri_bo_unreference(media_context->extended_state.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "extended vfe state",
 					  sizeof(struct i965_vfe_state_ex), 32);
 	assert(bo);
@@ -859,7 +859,7 @@ i965_media_h264_dec_context_init(VADriverContextP ctx, struct i965_media_context
 
 	for (i = 0; i < NUM_H264_AVC_KERNELS; i++) {
 		struct i965_kernel *kernel = &i965_h264_context->avc_kernels[i];
-		kernel->bo = dri_bo_alloc(i965->intel.bufmgr,
+		kernel->bo = memman_bo_alloc(i965->intel.bufmgr,
 								  kernel->name,
 								  kernel->size, 0x1000);
 		assert(kernel->bo);

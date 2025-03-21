@@ -30,6 +30,7 @@
 #include <assert.h>
 
 #include "intel_batchbuffer.h"
+#include "intel_memman.h"
 
 #define MAX_BATCH_SIZE      0x400000
 
@@ -54,7 +55,7 @@ intel_batchbuffer_reset(struct intel_batchbuffer *batch, int buffer_size)
 		   ring_flag == I915_EXEC_VEBOX);
 
 	dri_bo_unreference(batch->buffer);
-	batch->buffer = dri_bo_alloc(intel->bufmgr,
+	batch->buffer = memman_bo_alloc(intel->bufmgr,
 								 "batch buffer",
 								 batch_size,
 								 0x1000);
@@ -102,7 +103,7 @@ intel_batchbuffer_new(struct intel_driver_data *intel, int flag, int buffer_size
 
 	if (IS_GEN6(intel->device_info) &&
 		flag == I915_EXEC_RENDER)
-		batch->wa_render_bo = dri_bo_alloc(intel->bufmgr,
+		batch->wa_render_bo = memman_bo_alloc(intel->bufmgr,
 										   "wa scratch",
 										   4096,
 										   4096);

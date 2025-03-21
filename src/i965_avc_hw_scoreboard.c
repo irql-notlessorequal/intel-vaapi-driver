@@ -380,7 +380,7 @@ i965_avc_hw_scoreboard_decode_init(VADriverContextP ctx, void *h264_context)
 		dri_bo *bo;
 
 		if (avc_hw_scoreboard_context->curbe.bo == NULL) {
-			bo = dri_bo_alloc(i965->intel.bufmgr,
+			bo = memman_bo_alloc(i965->intel.bufmgr,
 							  "constant buffer",
 							  4096, 64);
 			assert(bo);
@@ -394,28 +394,28 @@ i965_avc_hw_scoreboard_decode_init(VADriverContextP ctx, void *h264_context)
 		dri_bo_reference(avc_hw_scoreboard_context->surface.s_bo);
 
 		dri_bo_unreference(avc_hw_scoreboard_context->surface.ss_bo);
-		bo = dri_bo_alloc(i965->intel.bufmgr,
+		bo = memman_bo_alloc(i965->intel.bufmgr,
 						  "surface state",
 						  sizeof(struct i965_surface_state), 32);
 		assert(bo);
 		avc_hw_scoreboard_context->surface.ss_bo = bo;
 
 		dri_bo_unreference(avc_hw_scoreboard_context->binding_table.bo);
-		bo = dri_bo_alloc(i965->intel.bufmgr,
+		bo = memman_bo_alloc(i965->intel.bufmgr,
 						  "binding table",
 						  MAX_MEDIA_SURFACES * sizeof(unsigned int), 32);
 		assert(bo);
 		avc_hw_scoreboard_context->binding_table.bo = bo;
 
 		dri_bo_unreference(avc_hw_scoreboard_context->idrt.bo);
-		bo = dri_bo_alloc(i965->intel.bufmgr,
+		bo = memman_bo_alloc(i965->intel.bufmgr,
 						  "interface discriptor",
 						  MAX_INTERFACE_DESC * sizeof(struct i965_interface_descriptor), 16);
 		assert(bo);
 		avc_hw_scoreboard_context->idrt.bo = bo;
 
 		dri_bo_unreference(avc_hw_scoreboard_context->vfe_state.bo);
-		bo = dri_bo_alloc(i965->intel.bufmgr,
+		bo = memman_bo_alloc(i965->intel.bufmgr,
 						  "vfe state",
 						  sizeof(struct i965_vfe_state), 32);
 		assert(bo);

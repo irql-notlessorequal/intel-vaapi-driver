@@ -561,28 +561,28 @@ i965_avc_ildb_decode_init(VADriverContextP ctx, void *h264_context)
 	int i;
 
 	dri_bo_unreference(avc_ildb_context->curbe.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "constant buffer",
 					  4096, 64);
 	assert(bo);
 	avc_ildb_context->curbe.bo = bo;
 
 	dri_bo_unreference(avc_ildb_context->binding_table.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "binding table",
 					  NUM_AVC_ILDB_SURFACES * sizeof(unsigned int), 32);
 	assert(bo);
 	avc_ildb_context->binding_table.bo = bo;
 
 	dri_bo_unreference(avc_ildb_context->idrt.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "interface discriptor",
 					  NUM_AVC_ILDB_INTERFACES * sizeof(struct i965_interface_descriptor), 16);
 	assert(bo);
 	avc_ildb_context->idrt.bo = bo;
 
 	dri_bo_unreference(avc_ildb_context->vfe_state.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "vfe state",
 					  sizeof(struct i965_vfe_state), 32);
 	assert(bo);
@@ -603,7 +603,7 @@ i965_avc_ildb_decode_init(VADriverContextP ctx, void *h264_context)
 		avc_ildb_context->surface[i].s_bo = NULL;
 
 		dri_bo_unreference(avc_ildb_context->surface[i].ss_bo);
-		bo = dri_bo_alloc(i965->intel.bufmgr,
+		bo = memman_bo_alloc(i965->intel.bufmgr,
 						  "surface state",
 						  sizeof(struct i965_surface_state), 32);
 		assert(bo);

@@ -34,6 +34,8 @@
 #include <math.h>
 
 #include "intel_batchbuffer.h"
+#include "intel_memman.h"
+
 #include "i965_defines.h"
 #include "i965_structs.h"
 #include "i965_drv_video.h"
@@ -699,12 +701,12 @@ VAStatus intel_mfc_avc_prepare(VADriverContextP ctx,
 		gen6_avc_surface = calloc(sizeof(GenAvcSurface), 1);
 		assert(gen6_avc_surface);
 		gen6_avc_surface->dmv_top =
-			dri_bo_alloc(i965->intel.bufmgr,
+			memman_bo_alloc(i965->intel.bufmgr,
 						 "Buffer",
 						 68 * width_in_mbs * height_in_mbs,
 						 64);
 		gen6_avc_surface->dmv_bottom =
-			dri_bo_alloc(i965->intel.bufmgr,
+			memman_bo_alloc(i965->intel.bufmgr,
 						 "Buffer",
 						 68 * width_in_mbs * height_in_mbs,
 						 64);
@@ -746,12 +748,12 @@ VAStatus intel_mfc_avc_prepare(VADriverContextP ctx,
 				gen6_avc_surface = calloc(sizeof(GenAvcSurface), 1);
 				assert(gen6_avc_surface);
 				gen6_avc_surface->dmv_top =
-					dri_bo_alloc(i965->intel.bufmgr,
+					memman_bo_alloc(i965->intel.bufmgr,
 								 "Buffer",
 								 68 * width_in_mbs * height_in_mbs,
 								 64);
 				gen6_avc_surface->dmv_bottom =
-					dri_bo_alloc(i965->intel.bufmgr,
+					memman_bo_alloc(i965->intel.bufmgr,
 								 "Buffer",
 								 68 * width_in_mbs * height_in_mbs,
 								 64);
@@ -1843,7 +1845,7 @@ intel_h264_initialize_mbmv_cost(VADriverContextP ctx,
 	}
 
 	/* It is enough to allocate 32 bytes for each qp. */
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "cost_table ",
 					  QP_MAX * 32,
 					  64);

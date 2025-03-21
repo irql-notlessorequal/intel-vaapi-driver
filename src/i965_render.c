@@ -41,6 +41,8 @@
 
 #include "intel_batchbuffer.h"
 #include "intel_driver.h"
+#include "intel_memman.h"
+
 #include "i965_defines.h"
 #include "i965_drv_video.h"
 #include "i965_structs.h"
@@ -1635,7 +1637,7 @@ i965_render_initialize(VADriverContextP ctx)
 
 	/* VERTEX BUFFER */
 	dri_bo_unreference(render_state->vb.vertex_buffer);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "vertex buffer",
 					  4096,
 					  4096);
@@ -1644,7 +1646,7 @@ i965_render_initialize(VADriverContextP ctx)
 
 	/* VS */
 	dri_bo_unreference(render_state->vs.state);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "vs state",
 					  sizeof(struct i965_vs_unit_state),
 					  64);
@@ -1655,7 +1657,7 @@ i965_render_initialize(VADriverContextP ctx)
 	/* CLIP */
 	/* SF */
 	dri_bo_unreference(render_state->sf.state);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "sf state",
 					  sizeof(struct i965_sf_unit_state),
 					  64);
@@ -1664,7 +1666,7 @@ i965_render_initialize(VADriverContextP ctx)
 
 	/* WM */
 	dri_bo_unreference(render_state->wm.surface_state_binding_table_bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "surface state & binding table",
 					  (SURFACE_STATE_PADDED_SIZE + sizeof(unsigned int)) * MAX_RENDER_SURFACES,
 					  4096);
@@ -1672,7 +1674,7 @@ i965_render_initialize(VADriverContextP ctx)
 	render_state->wm.surface_state_binding_table_bo = bo;
 
 	dri_bo_unreference(render_state->wm.sampler);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "sampler state",
 					  MAX_SAMPLERS * sizeof(struct i965_sampler_state),
 					  64);
@@ -1681,7 +1683,7 @@ i965_render_initialize(VADriverContextP ctx)
 	render_state->wm.sampler_count = 0;
 
 	dri_bo_unreference(render_state->wm.state);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "wm state",
 					  sizeof(struct i965_wm_unit_state),
 					  64);
@@ -1690,7 +1692,7 @@ i965_render_initialize(VADriverContextP ctx)
 
 	/* COLOR CALCULATOR */
 	dri_bo_unreference(render_state->cc.state);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "color calc state",
 					  sizeof(struct i965_cc_unit_state),
 					  64);
@@ -1698,7 +1700,7 @@ i965_render_initialize(VADriverContextP ctx)
 	render_state->cc.state = bo;
 
 	dri_bo_unreference(render_state->cc.viewport);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "cc viewport",
 					  sizeof(struct i965_cc_viewport),
 					  64);
@@ -1758,7 +1760,7 @@ gen6_render_initialize(VADriverContextP ctx)
 
 	/* VERTEX BUFFER */
 	dri_bo_unreference(render_state->vb.vertex_buffer);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "vertex buffer",
 					  4096,
 					  4096);
@@ -1767,7 +1769,7 @@ gen6_render_initialize(VADriverContextP ctx)
 
 	/* WM */
 	dri_bo_unreference(render_state->wm.surface_state_binding_table_bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "surface state & binding table",
 					  (SURFACE_STATE_PADDED_SIZE + sizeof(unsigned int)) * MAX_RENDER_SURFACES,
 					  4096);
@@ -1775,7 +1777,7 @@ gen6_render_initialize(VADriverContextP ctx)
 	render_state->wm.surface_state_binding_table_bo = bo;
 
 	dri_bo_unreference(render_state->wm.sampler);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "sampler state",
 					  MAX_SAMPLERS * sizeof(struct i965_sampler_state),
 					  4096);
@@ -1785,7 +1787,7 @@ gen6_render_initialize(VADriverContextP ctx)
 
 	/* COLOR CALCULATOR */
 	dri_bo_unreference(render_state->cc.state);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "color calc state",
 					  sizeof(struct gen6_color_calc_state),
 					  4096);
@@ -1794,7 +1796,7 @@ gen6_render_initialize(VADriverContextP ctx)
 
 	/* CC VIEWPORT */
 	dri_bo_unreference(render_state->cc.viewport);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "cc viewport",
 					  sizeof(struct i965_cc_viewport),
 					  4096);
@@ -1803,7 +1805,7 @@ gen6_render_initialize(VADriverContextP ctx)
 
 	/* BLEND STATE */
 	dri_bo_unreference(render_state->cc.blend);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "blend state",
 					  sizeof(struct gen6_blend_state),
 					  4096);
@@ -1812,7 +1814,7 @@ gen6_render_initialize(VADriverContextP ctx)
 
 	/* DEPTH & STENCIL STATE */
 	dri_bo_unreference(render_state->cc.depth_stencil);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "depth & stencil state",
 					  sizeof(struct gen6_depth_stencil_state),
 					  4096);
@@ -2324,7 +2326,7 @@ gen7_render_initialize(VADriverContextP ctx)
 
 	/* VERTEX BUFFER */
 	dri_bo_unreference(render_state->vb.vertex_buffer);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "vertex buffer",
 					  4096,
 					  4096);
@@ -2333,7 +2335,7 @@ gen7_render_initialize(VADriverContextP ctx)
 
 	/* WM */
 	dri_bo_unreference(render_state->wm.surface_state_binding_table_bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "surface state & binding table",
 					  (SURFACE_STATE_PADDED_SIZE + sizeof(unsigned int)) * MAX_RENDER_SURFACES,
 					  4096);
@@ -2341,7 +2343,7 @@ gen7_render_initialize(VADriverContextP ctx)
 	render_state->wm.surface_state_binding_table_bo = bo;
 
 	dri_bo_unreference(render_state->wm.sampler);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "sampler state",
 					  MAX_SAMPLERS * sizeof(struct gen7_sampler_state),
 					  4096);
@@ -2351,7 +2353,7 @@ gen7_render_initialize(VADriverContextP ctx)
 
 	/* COLOR CALCULATOR */
 	dri_bo_unreference(render_state->cc.state);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "color calc state",
 					  sizeof(struct gen6_color_calc_state),
 					  4096);
@@ -2360,7 +2362,7 @@ gen7_render_initialize(VADriverContextP ctx)
 
 	/* CC VIEWPORT */
 	dri_bo_unreference(render_state->cc.viewport);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "cc viewport",
 					  sizeof(struct i965_cc_viewport),
 					  4096);
@@ -2369,7 +2371,7 @@ gen7_render_initialize(VADriverContextP ctx)
 
 	/* BLEND STATE */
 	dri_bo_unreference(render_state->cc.blend);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "blend state",
 					  sizeof(struct gen6_blend_state),
 					  4096);
@@ -2378,7 +2380,7 @@ gen7_render_initialize(VADriverContextP ctx)
 
 	/* DEPTH & STENCIL STATE */
 	dri_bo_unreference(render_state->cc.depth_stencil);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "depth & stencil state",
 					  sizeof(struct gen6_depth_stencil_state),
 					  4096);
@@ -3238,7 +3240,7 @@ genx_render_init(VADriverContextP ctx)
 		if (!kernel->size)
 			continue;
 
-		kernel->bo = dri_bo_alloc(i965->intel.bufmgr,
+		kernel->bo = memman_bo_alloc(i965->intel.bufmgr,
 								  kernel->name,
 								  kernel->size, 0x1000);
 		assert(kernel->bo);
@@ -3246,7 +3248,7 @@ genx_render_init(VADriverContextP ctx)
 	}
 
 	/* constant buffer */
-	render_state->curbe.bo = dri_bo_alloc(i965->intel.bufmgr,
+	render_state->curbe.bo = memman_bo_alloc(i965->intel.bufmgr,
 										  "constant buffer",
 										  4096, 64);
 	assert(render_state->curbe.bo);

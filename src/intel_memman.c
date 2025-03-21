@@ -29,6 +29,7 @@
 
 #include <assert.h>
 
+#include "intel_compiler.h"
 #include "intel_driver.h"
 
 Bool
@@ -41,7 +42,12 @@ intel_memman_init(struct intel_driver_data *intel)
 
 	intel_bufmgr_gem_enable_reuse(intel->bufmgr);
 
-	if (g_intel_debug_option_flags & VA_INTEL_DEBUG_OPTION_DUMP_AUB) {
+	/**
+	 * TODO: Replace this with a local version if possible since the libdrm
+	 * APIs do nothing since 2015.
+	 */
+	if (unlikely(g_intel_debug_option_flags & VA_INTEL_DEBUG_OPTION_DUMP_AUB))
+	{
 		drm_intel_bufmgr_gem_set_aub_filename(intel->bufmgr,
 											  "va.aub");
 		drm_intel_bufmgr_gem_set_aub_dump(intel->bufmgr, 1);
@@ -56,4 +62,17 @@ intel_memman_terminate(struct intel_driver_data *intel)
 	if (intel->bufmgr)
 		drm_intel_bufmgr_destroy(intel->bufmgr);
 	return True;
+}
+
+drm_intel_bo *memman_bo_alloc(drm_intel_bufmgr *bufmgr, const char *name,
+	unsigned long size, unsigned int alignment)
+{
+	if (unlikely(g_intel_debug_option_flags & VA_INTEL_DEBUG_PRINT_ALLOCS))
+	{
+		fprintf(stderr,
+			"[memman] allocating '%s' with size %lu (aligned to %u)\n",
+			name, size, alignment);
+	}
+
+	return drm_intel_bo_alloc(bufmgr, name, size, alignment);
 }

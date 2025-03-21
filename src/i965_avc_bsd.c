@@ -29,6 +29,7 @@
 
 #include "intel_batchbuffer.h"
 #include "intel_driver.h"
+#include "intel_memman.h"
 
 #include "i965_defines.h"
 #include "i965_drv_video.h"
@@ -61,7 +62,7 @@ i965_avc_bsd_init_avc_bsd_surface(VADriverContextP ctx,
                                         !pic_param->seq_fields.bits.direct_8x8_inference_flag);
 
     if (avc_bsd_surface->dmv_top == NULL) {
-        avc_bsd_surface->dmv_top = dri_bo_alloc(i965->intel.bufmgr,
+        avc_bsd_surface->dmv_top = memman_bo_alloc(i965->intel.bufmgr,
                                                 "direct mv w/r buffer",
                                                 DMV_SIZE,
                                                 0x1000);
@@ -69,7 +70,7 @@ i965_avc_bsd_init_avc_bsd_surface(VADriverContextP ctx,
 
     if (avc_bsd_surface->dmv_bottom_flag &&
         avc_bsd_surface->dmv_bottom == NULL) {
-        avc_bsd_surface->dmv_bottom = dri_bo_alloc(i965->intel.bufmgr,
+        avc_bsd_surface->dmv_bottom = memman_bo_alloc(i965->intel.bufmgr,
                                                    "direct mv w/r buffer",
                                                    DMV_SIZE,
                                                    0x1000);
@@ -873,7 +874,7 @@ i965_avc_bsd_decode_init(VADriverContextP ctx, void *h264_context)
     i965_avc_bsd_context = &i965_h264_context->i965_avc_bsd_context;
 
     dri_bo_unreference(i965_avc_bsd_context->bsd_raw_store.bo);
-    bo = dri_bo_alloc(i965->intel.bufmgr,
+    bo = memman_bo_alloc(i965->intel.bufmgr,
                       "bsd raw store",
                       0x3000, /* at least 11520 bytes to support 120 MBs per row */
                       64);
@@ -881,7 +882,7 @@ i965_avc_bsd_decode_init(VADriverContextP ctx, void *h264_context)
     i965_avc_bsd_context->bsd_raw_store.bo = bo;
 
     dri_bo_unreference(i965_avc_bsd_context->mpr_row_store.bo);
-    bo = dri_bo_alloc(i965->intel.bufmgr,
+    bo = memman_bo_alloc(i965->intel.bufmgr,
                       "mpr row store",
                       0x2000, /* at least 7680 bytes to support 120 MBs per row */
                       64);

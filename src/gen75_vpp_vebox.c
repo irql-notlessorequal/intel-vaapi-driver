@@ -39,6 +39,8 @@
 #include "gen75_vpp_vebox.h"
 #include "intel_media.h"
 
+#include "intel_memman.h"
+
 #include "i965_post_processing.h"
 
 #define PI  3.1415926
@@ -1277,7 +1279,7 @@ gen75_vebox_ensure_surfaces_storage(VADriverContextP ctx,
 
 	/* Allocate DNDI state table  */
 	drm_intel_bo_unreference(proc_ctx->dndi_state_table.bo);
-	bo = drm_intel_bo_alloc(i965->intel.bufmgr, "vebox: dndi state Buffer",
+	bo = memman_bo_alloc(i965->intel.bufmgr, "vebox: dndi state Buffer",
 							0x1000, 0x1000);
 	proc_ctx->dndi_state_table.bo = bo;
 	if (!bo)
@@ -1285,7 +1287,7 @@ gen75_vebox_ensure_surfaces_storage(VADriverContextP ctx,
 
 	/* Allocate IECP state table  */
 	drm_intel_bo_unreference(proc_ctx->iecp_state_table.bo);
-	bo = drm_intel_bo_alloc(i965->intel.bufmgr, "vebox: iecp state Buffer",
+	bo = memman_bo_alloc(i965->intel.bufmgr, "vebox: iecp state Buffer",
 							0x1000, 0x1000);
 	proc_ctx->iecp_state_table.bo = bo;
 	if (!bo)
@@ -1293,7 +1295,7 @@ gen75_vebox_ensure_surfaces_storage(VADriverContextP ctx,
 
 	/* Allocate Gamut state table  */
 	drm_intel_bo_unreference(proc_ctx->gamut_state_table.bo);
-	bo = drm_intel_bo_alloc(i965->intel.bufmgr, "vebox: gamut state Buffer",
+	bo = memman_bo_alloc(i965->intel.bufmgr, "vebox: gamut state Buffer",
 							0x1000, 0x1000);
 	proc_ctx->gamut_state_table.bo = bo;
 	if (!bo)
@@ -1301,7 +1303,7 @@ gen75_vebox_ensure_surfaces_storage(VADriverContextP ctx,
 
 	/* Allocate vertex state table  */
 	drm_intel_bo_unreference(proc_ctx->vertex_state_table.bo);
-	bo = drm_intel_bo_alloc(i965->intel.bufmgr, "vebox: vertex state Buffer",
+	bo = memman_bo_alloc(i965->intel.bufmgr, "vebox: vertex state Buffer",
 							0x1000, 0x1000);
 	proc_ctx->vertex_state_table.bo = bo;
 	if (!bo)

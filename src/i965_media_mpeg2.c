@@ -466,7 +466,7 @@ i965_media_mpeg2_surface_state(VADriverContextP ctx,
 	dri_bo *bo;
 	uint32_t write_domain, read_domain;
 
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "surface state",
 					  sizeof(struct i965_surface_state), 32);
 	assert(bo);
@@ -964,7 +964,7 @@ i965_media_mpeg2_decode_init(VADriverContextP ctx,
 
 	media_context->extended_state.enabled = 1;
 	dri_bo_unreference(media_context->extended_state.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
+	bo = memman_bo_alloc(i965->intel.bufmgr,
 					  "vld state",
 					  sizeof(struct i965_vld_state), 32);
 	assert(bo);
@@ -996,7 +996,7 @@ i965_media_mpeg2_dec_context_init(VADriverContextP ctx, struct i965_media_contex
 
 	for (i = 0; i < NUM_MPEG2_VLD_KERNELS; i++) {
 		struct i965_kernel *kernel = &i965_mpeg2_context->vld_kernels[i];
-		kernel->bo = dri_bo_alloc(i965->intel.bufmgr,
+		kernel->bo = memman_bo_alloc(i965->intel.bufmgr,
 								  kernel->name,
 								  kernel->size, 64);
 		assert(kernel->bo);

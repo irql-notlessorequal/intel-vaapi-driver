@@ -2152,14 +2152,7 @@ i965_CreateSurfaces2(
 	if (!expected_fourcc)
 	{
 		i965_GuessExpectedFourCC(format, &expected_fourcc);
-		i965_log_debug(ctx, "(i965_CreateSurfaces2) No FOURCC defined, making a bold assumption instead!\n");
-	}
-
-	bool disable_tiling = false;
-	if (HAS_BROKEN_ARGB(i965->intel.device_info) && expected_fourcc == VA_FOURCC_ARGB)
-	{
-		i965_log_debug(ctx, "(i965_CreateSurfaces2) Working around broken ARGB support on platform.\n");
-		disable_tiling = true;
+		i965_log_debug(ctx, "i965_CreateSurfaces2: No FOURCC defined, making a bold assumption instead!\n");
 	}
 
 	for (i = 0; i < num_surfaces; i++) {
@@ -2175,7 +2168,7 @@ i965_CreateSurfaces2(
 		obj_surface->status = VASurfaceReady;
 		obj_surface->orig_width = width;
 		obj_surface->orig_height = height;
-		obj_surface->user_disable_tiling = disable_tiling;
+		obj_surface->user_disable_tiling = false;
 		obj_surface->user_h_stride_set = false;
 		obj_surface->user_v_stride_set = false;
 		obj_surface->border_cleared = false;
@@ -2212,21 +2205,17 @@ i965_CreateSurfaces2(
 				if (memory_attribute->pixel_format)
 				{
 					if (expected_fourcc)
+					{
 						ASSERT_RET(memory_attribute->pixel_format == expected_fourcc, VA_STATUS_ERROR_INVALID_PARAMETER);
+					}
 					else
+					{
 						expected_fourcc = memory_attribute->pixel_format;
 
-					/**
-					 * Update the subsampling if our EXPECTED_FOURCC got changed.
-					 */
-					obj_surface->subsampling = GetSubsamplingFromFormat(format, expected_fourcc);
-
-					/**
-					 * Make sure that we also handle the workaround.
-					 */
-					if (HAS_BROKEN_ARGB(i965->intel.device_info) && expected_fourcc == VA_FOURCC_ARGB)
-					{
-						obj_surface->user_disable_tiling = true;
+						/**
+					 	  * Update the subsampling if our EXPECTED_FOURCC got changed.
+					 	  */
+						obj_surface->subsampling = GetSubsamplingFromFormat(format, expected_fourcc);
 					}
 				}
 				
@@ -2264,7 +2253,7 @@ i965_CreateSurfaces2(
 			break;
 
 		default:
-			i965_log_debug(ctx, "i965_CreateSurfaces2: Unknown memory type %d, expect explosion?\n", memory_type);
+			assert(!"Unknown internal memory type representation.");
 			break;
 
 		}
@@ -3174,10 +3163,10 @@ i965_create_buffer_internal(VADriverContextP ctx,
 		 * So it is enough to allocate one 64 byte bo
 		 */
 		if (wrapper_flag)
-			buffer_store->bo = dri_bo_alloc(i965->intel.bufmgr, "Bogus buffer",
+			buffer_store->bo = memman_bo_alloc(i965->intel.bufmgr, "Bogus buffer",
 											64, 64);
 		else
-			buffer_store->bo = dri_bo_alloc(i965->intel.bufmgr,
+			buffer_store->bo = memman_bo_alloc(i965->intel.bufmgr,
 											"Buffer",
 											size * num_elements, 64);
 		assert(buffer_store->bo);
@@ -4382,6 +4371,13 @@ i965_SyncSurface(VADriverContextP ctx,
 	if (obj_surface->bo)
 		drm_intel_bo_wait_rendering(obj_surface->bo);
 
+	/**
+	 * TODO: Should this be the point where I purge the alpha channel for ARGB (BGRA)
+	 */
+	i965_log_debug(ctx,
+		"i965_SyncSurface: Synchronizing surface: { status=%d fourcc=%#010x }",
+		obj_surface->status, obj_surface->fourcc);
+
 	return VA_STATUS_SUCCESS;
 }
 
@@ -4880,6 +4876,10 @@ i965_check_alloc_surface_bo(VADriverContextP ctx,
 
 		region_height = obj_surface->height;
 
+		i965_log_debug(ctx,
+			"i965_check_alloc_surface_bo: Creating tiled surface with fourcc %#010x and sub-sampling %u\n",
+			fourcc, subsampling);
+
 		switch (fourcc) {
 		case VA_FOURCC_NV12:
 		case VA_FOURCC_P010:
@@ -5119,7 +5119,7 @@ i965_check_alloc_surface_bo(VADriverContextP ctx,
 		assert(tiling_mode == I915_TILING_Y);
 		assert(pitch == obj_surface->width);
 	} else {
-		obj_surface->bo = dri_bo_alloc(i965->intel.bufmgr,
+		obj_surface->bo = memman_bo_alloc(i965->intel.bufmgr,
 									   "vaapi surface",
 									   obj_surface->size,
 									   0x1000);
@@ -7130,19 +7130,6 @@ i965_ExportSurfaceHandle(VADriverContextP ctx, VASurfaceID surface_id,
 				return VA_STATUS_ERROR_INVALID_SURFACE;
 			}
 		}
-	}
-
-	if (HAS_BROKEN_ARGB(i965->intel.device_info) && obj_surface->fourcc == VA_FOURCC_ARGB)
-	{
-		/**
-		 * We need to clear the alpha channel before it gets exported to the hardware,
-		 * my assumption is that it's either a HW issue or a Mesa issue.
-		 * 
-		 * As a test, make everything gray instead.
-		 */
-		dri_bo_map(obj_surface->bo, 1);
-		memset(obj_surface->bo->virtual, 100, obj_surface->bo->size);
-		dri_bo_unmap(obj_surface->bo);
 	}
 
 	if (drm_intel_bo_gem_export_to_prime(obj_surface->bo, &fd))

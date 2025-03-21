@@ -33,12 +33,14 @@
 #include <va/va_dec_hevc.h>
 #include <intel_bufmgr.h>
 
+#include "intel_memman.h"
+
 #define MAX_GEN_REFERENCE_FRAMES 16
 #define MAX_GEN_HCP_REFERENCE_FRAMES    8
 
 #define ALLOC_GEN_BUFFER(gen_buffer, string, size) do {         \
 		dri_bo_unreference(gen_buffer->bo);                     \
-		gen_buffer->bo = dri_bo_alloc(i965->intel.bufmgr,       \
+		gen_buffer->bo = memman_bo_alloc(i965->intel.bufmgr,       \
 									  string,                   \
 									  size,                     \
 									  0x1000);                  \
