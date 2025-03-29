@@ -23,7 +23,8 @@ enum {
 
 #define NUM_H264_AVC_KERNELS    2
 
-struct i965_h264_context {
+struct i965_h264_context
+{
 	struct {
 		dri_bo *bo;
 		unsigned int mbs;
@@ -45,10 +46,11 @@ struct i965_h264_context {
 		int i_flag;
 	} picture;
 
-	int enable_avc_ildb;
-	int use_avc_hw_scoreboard;
+    bool is_g4x_context;
+	bool enable_avc_ildb;
+    bool use_avc_hw_scoreboard;
+	bool use_hw_w128;
 
-	int use_hw_w128;
 	unsigned int weight128_luma_l0;
 	unsigned int weight128_luma_l1;
 	unsigned int weight128_chroma_l0;

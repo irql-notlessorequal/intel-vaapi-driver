@@ -63,25 +63,25 @@ static const unsigned int gen75_gpe_sharpening_unmask[][4] = {
 };
 static struct i965_kernel gen75_vpp_sharpening_kernels[] = {
 	{
-		"vpp: sharpening(horizontal blur)",
-		VPP_GPE_SHARPENING,
-		gen75_gpe_sharpening_h_blur,
-		sizeof(gen75_gpe_sharpening_h_blur),
-		NULL
+		.name = "vpp: sharpening(horizontal blur)",
+		.interface = VPP_GPE_SHARPENING,
+		.bin = gen75_gpe_sharpening_h_blur,
+		.size = sizeof(gen75_gpe_sharpening_h_blur),
+		.bo = NULL
 	},
 	{
-		"vpp: sharpening(vertical blur)",
-		VPP_GPE_SHARPENING,
-		gen75_gpe_sharpening_v_blur,
-		sizeof(gen75_gpe_sharpening_v_blur),
-		NULL
+		.name = "vpp: sharpening(vertical blur)",
+		.interface = VPP_GPE_SHARPENING,
+		.bin = gen75_gpe_sharpening_v_blur,
+		.size = sizeof(gen75_gpe_sharpening_v_blur),
+		.bo = NULL
 	},
 	{
-		"vpp: sharpening(unmask)",
-		VPP_GPE_SHARPENING,
-		gen75_gpe_sharpening_unmask,
-		sizeof(gen75_gpe_sharpening_unmask),
-		NULL
+		.name = "vpp: sharpening(unmask)",
+		.interface = VPP_GPE_SHARPENING,
+		.bin = gen75_gpe_sharpening_unmask,
+		.size = sizeof(gen75_gpe_sharpening_unmask),
+		.bo = NULL
 	},
 };
 
@@ -98,25 +98,25 @@ static const unsigned int gen8_gpe_sharpening_unmask[][4] = {
 
 static struct i965_kernel gen8_vpp_sharpening_kernels[] = {
 	{
-		"vpp: sharpening(horizontal blur)",
-		VPP_GPE_SHARPENING,
-		gen8_gpe_sharpening_h_blur,
-		sizeof(gen8_gpe_sharpening_h_blur),
-		NULL
+		.name = "vpp: sharpening(horizontal blur)",
+		.interface = VPP_GPE_SHARPENING,
+		.bin = gen8_gpe_sharpening_h_blur,
+		.size = sizeof(gen8_gpe_sharpening_h_blur),
+		.bo = NULL
 	},
 	{
-		"vpp: sharpening(vertical blur)",
-		VPP_GPE_SHARPENING,
-		gen8_gpe_sharpening_v_blur,
-		sizeof(gen8_gpe_sharpening_v_blur),
-		NULL
+		.name = "vpp: sharpening(vertical blur)",
+		.interface = VPP_GPE_SHARPENING,
+		.bin = gen8_gpe_sharpening_v_blur,
+		.size = sizeof(gen8_gpe_sharpening_v_blur),
+		.bo = NULL
 	},
 	{
-		"vpp: sharpening(unmask)",
-		VPP_GPE_SHARPENING,
-		gen8_gpe_sharpening_unmask,
-		sizeof(gen8_gpe_sharpening_unmask),
-		NULL
+		.name = "vpp: sharpening(unmask)",
+		.interface = VPP_GPE_SHARPENING,
+		.bin = gen8_gpe_sharpening_unmask,
+		.size = sizeof(gen8_gpe_sharpening_unmask),
+		.bo = NULL
 	},
 };
 

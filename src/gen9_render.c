@@ -86,34 +86,34 @@ enum {
 
 static struct i965_kernel render_kernels_gen9[] = {
 	{
-		"SF",
-		SF_KERNEL,
-		sf_kernel_static_gen9,
-		sizeof(sf_kernel_static_gen9),
-		NULL
+		.name = "SF",
+		.interface = SF_KERNEL,
+		.bin = sf_kernel_static_gen9,
+		.size = sizeof(sf_kernel_static_gen9),
+		.bo = NULL
 	},
 	{
-		"PS",
-		PS_KERNEL,
-		ps_kernel_static_gen9,
-		sizeof(ps_kernel_static_gen9),
-		NULL
-	},
-
-	{
-		"PS_SUBPIC",
-		PS_SUBPIC_KERNEL,
-		ps_subpic_kernel_static_gen9,
-		sizeof(ps_subpic_kernel_static_gen9),
-		NULL
+		.name = "PS",
+		.interface = PS_KERNEL,
+		.bin = ps_kernel_static_gen9,
+		.size = sizeof(ps_kernel_static_gen9),
+		.bo = NULL
 	},
 
 	{
-		"PS_CLEAR",
-		PS_CLEAR_KERNEL,
-		ps_clear_kernel_static_gen9,
-		sizeof(ps_clear_kernel_static_gen9),
-		NULL
+		.name = "PS_SUBPIC",
+		.interface = PS_SUBPIC_KERNEL,
+		.bin = ps_subpic_kernel_static_gen9,
+		.size = sizeof(ps_subpic_kernel_static_gen9),
+		.bo = NULL
+	},
+
+	{
+		.name = "PS_CLEAR",
+		.interface = PS_CLEAR_KERNEL,
+		.bin = ps_clear_kernel_static_gen9,
+		.size = sizeof(ps_clear_kernel_static_gen9),
+		.bo = NULL
 	}
 };
 

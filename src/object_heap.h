@@ -38,15 +38,16 @@ struct object_base {
 	int next_free;
 };
 
-struct object_heap {
+struct object_heap
+{
+	void **bucket;
+	int num_buckets;
 	int object_size;
 	int id_offset;
 	int next_free;
 	int heap_size;
 	int heap_increment;
 	_I965Mutex mutex;
-	void **bucket;
-	int num_buckets;
 };
 
 typedef int object_heap_iterator;
