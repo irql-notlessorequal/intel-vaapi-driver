@@ -32,6 +32,8 @@
 #include <dlfcn.h>
 #include <drm_fourcc.h>
 
+#include "hashmap.h"
+
 #ifdef HAVE_VA_X11
 # include "i965_output_x11.h"
 #endif
@@ -131,62 +133,109 @@ static int get_sampling_from_fourcc(unsigned int fourcc);
 #define I_I             2
 #define I_SI            (I_S | I_I)
 
-#define DEF_FOUCC_INFO(FOURCC, FORMAT, SUB, FLAG)       { VA_FOURCC_##FOURCC, I965_COLOR_##FORMAT, SUBSAMPLE_##SUB, FLAG, I_##FOURCC }
-#define DEF_YUV(FOURCC, SUB, FLAG)                      DEF_FOUCC_INFO(FOURCC, YUV, SUB, FLAG)
-#define DEF_RGB(FOURCC, SUB, FLAG)                      DEF_FOUCC_INFO(FOURCC, RGB, SUB, FLAG)
-#define DEF_INDEX(FOURCC, SUB, FLAG)                    DEF_FOUCC_INFO(FOURCC, INDEX, SUB, FLAG)
+#define DEF_FOURCC_INFO(FOURCC, FORMAT, SUB, FLAG)       { VA_FOURCC_##FOURCC, I965_COLOR_##FORMAT, SUBSAMPLE_##SUB, FLAG, I_##FOURCC }
+#define DEF_YUV(FOURCC, SUB, FLAG)                      DEF_FOURCC_INFO(FOURCC, YUV, SUB, FLAG)
+#define DEF_RGB(FOURCC, SUB, FLAG)                      DEF_FOURCC_INFO(FOURCC, RGB, SUB, FLAG)
+#define DEF_INDEX(FOURCC, SUB, FLAG)                    DEF_FOURCC_INFO(FOURCC, INDEX, SUB, FLAG)
 
-static const i965_fourcc_info i965_fourcc_infos[] = {
-	DEF_YUV(NV12, YUV420, I_SI),
-	DEF_YUV(I420, YUV420, I_SI),
-	DEF_YUV(IYUV, YUV420, I_S),
-	DEF_YUV(IMC3, YUV420, I_S),
-	DEF_YUV(YV12, YUV420, I_SI),
-	DEF_YUV(IMC1, YUV420, I_S),
+/**
+ * Hashmap representation of FOURCCs.
+ * 
+ * Should in theory be slightly faster than the
+ * current O(n) queries for every surface.
+ */
+static struct hashmap* i965_fourcc_infos;
 
-	DEF_YUV(P010, YUV420, I_SI),
-	DEF_YUV(I010, YUV420, I_S),
+static uint64_t i965_hashmap_generate_hash(const void *item, uint64_t seed0, uint64_t seed1)
+{
+	const i965_fourcc_info *entry = item;
+	if (entry)
+	{
+		return entry->fourcc;
+	}
+	else
+	{
+		return (uint64_t)item;
+	}
+}
 
-	DEF_YUV(422H, YUV422H, I_SI),
-	DEF_YUV(422V, YUV422V, I_S),
-	DEF_YUV(YV16, YUV422H, I_S),
-	DEF_YUV(YUY2, YUV422H, I_SI),
-	DEF_YUV(UYVY, YUV422H, I_SI),
+static inline struct hashmap* i965_generate_fourcc_hashmap()
+{
+	const i965_fourcc_info internal_i965_fourcc_infos[] =
+	{
+		DEF_YUV(NV12, YUV420, I_SI),
+		DEF_YUV(I420, YUV420, I_SI),
+		DEF_YUV(IYUV, YUV420, I_S),
+		DEF_YUV(IMC3, YUV420, I_S),
+		DEF_YUV(YV12, YUV420, I_SI),
+		DEF_YUV(IMC1, YUV420, I_S),
+	
+		DEF_YUV(P010, YUV420, I_SI),
+		DEF_YUV(I010, YUV420, I_S),
+	
+		DEF_YUV(422H, YUV422H, I_SI),
+		DEF_YUV(422V, YUV422V, I_S),
+		DEF_YUV(YV16, YUV422H, I_S),
+		DEF_YUV(YUY2, YUV422H, I_SI),
+		DEF_YUV(UYVY, YUV422H, I_SI),
+	
+		DEF_YUV(444P, YUV444, I_S),
+	
+		DEF_YUV(411P, YUV411, I_S),
+	
+		DEF_YUV(Y800, YUV400, I_S),
+	
+		DEF_RGB(RGBA, RGBX, I_SI),
+		DEF_RGB(RGBX, RGBX, I_SI),
+		DEF_RGB(BGRA, RGBX, I_SI),
+		DEF_RGB(BGRX, RGBX, I_SI),
+	
+		DEF_RGB(ARGB, RGBX, I_SI),
+		DEF_RGB(ABGR, RGBX, I_I),
+	
+		DEF_INDEX(IA88, RGBX, I_I),
+		DEF_INDEX(AI88, RGBX, I_I),
+	
+		DEF_INDEX(IA44, RGBX, I_I),
+		DEF_INDEX(AI44, RGBX, I_I)
+	};
 
-	DEF_YUV(444P, YUV444, I_S),
+	struct hashmap *fourcc_map = hashmap_new(
+		sizeof(const i965_fourcc_info),
+		0,
+		0,
+		0,
+		/**
+		 * Required function, no escaping it.
+		 */
+		i965_hashmap_generate_hash,
+		/**
+		 * We don't need to provide a compare function
+		 * with this implementation since we use the
+		 * FOURCC (an unsigned int) as the hash value.
+		 */
+		NULL,
+		NULL,
+		NULL
+	);
 
-	DEF_YUV(411P, YUV411, I_S),
+	assert(fourcc_map);
 
-	DEF_YUV(Y800, YUV400, I_S),
+	for (int i = 0; i < ARRAY_ELEMS(internal_i965_fourcc_infos); i++)
+	{
+		const i965_fourcc_info * const info = &internal_i965_fourcc_infos[i];
+		const void* ret = hashmap_set_with_hash(fourcc_map, info, info->fourcc);
+		assert(ret == NULL);
+	}
 
-	DEF_RGB(RGBA, RGBX, I_SI),
-	DEF_RGB(RGBX, RGBX, I_SI),
-	DEF_RGB(BGRA, RGBX, I_SI),
-	DEF_RGB(BGRX, RGBX, I_SI),
-
-	DEF_RGB(ARGB, RGBX, I_SI),
-	DEF_RGB(ABGR, RGBX, I_I),
-
-	DEF_INDEX(IA88, RGBX, I_I),
-	DEF_INDEX(AI88, RGBX, I_I),
-
-	DEF_INDEX(IA44, RGBX, I_I),
-	DEF_INDEX(AI44, RGBX, I_I)
-};
+	return fourcc_map;
+}
 
 const i965_fourcc_info *
 get_fourcc_info(unsigned int fourcc)
 {
-	unsigned int i;
-
-	for (i = 0; i < ARRAY_ELEMS(i965_fourcc_infos); i++) {
-		const i965_fourcc_info * const info = &i965_fourcc_infos[i];
-
-		if (info->fourcc == fourcc)
-			return info;
-	}
-
-	return NULL;
+	assert(i965_fourcc_infos);
+	return hashmap_get_with_hash(i965_fourcc_infos, NULL, fourcc);
 }
 
 static int
@@ -7924,6 +7973,15 @@ i965_Terminate(VADriverContextP ctx)
 		ctx->pDriverData = NULL;
 	}
 
+	/**
+	 * Make sure we free the hashmap with the FOURCCs.
+	 */
+	if (i965_fourcc_infos)
+	{
+		hashmap_free(i965_fourcc_infos);
+		i965_fourcc_infos = NULL;
+	}
+
 	return VA_STATUS_SUCCESS;
 }
 
@@ -8020,9 +8078,14 @@ VA_DRIVER_INIT_FUNC(VADriverContextP ctx)
 	vtable_vpp->vaQueryVideoProcFilterCaps = i965_QueryVideoProcFilterCaps;
 	vtable_vpp->vaQueryVideoProcPipelineCaps = i965_QueryVideoProcPipelineCaps;
 
+	/* FOURCC HashMap setup */
+	i965_fourcc_infos = i965_generate_fourcc_hashmap();
+
+	/* Driver CTX setup */
 	i965 = (struct i965_driver_data *)calloc(1, sizeof(*i965));
 
-	if (i965 == NULL) {
+	if (i965 == NULL)
+	{
 		ctx->pDriverData = NULL;
 
 		return VA_STATUS_ERROR_ALLOCATION_FAILED;

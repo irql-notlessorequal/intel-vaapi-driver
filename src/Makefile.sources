@@ -1,4 +1,5 @@
 source_c = \
+	hashmap.c \
 	dso_utils.c \
 	gen6_mfc.c \
 	gen6_mfc_common.c \
@@ -76,6 +77,7 @@ source_c = \
 	$(NULL)
 
 source_h = \
+	hashmap.h \
 	dso_utils.h \
 	gen6_mfc.h \
 	gen6_mfd.h \

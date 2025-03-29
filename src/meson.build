@@ -38,6 +38,7 @@ version_file = configure_file(
   configuration : version_cfg)
 
 sources = [
+  'hashmap.c',
   'dso_utils.c',
   'gen6_mfc.c',
   'gen6_mfc_common.c',
@@ -115,6 +116,7 @@ sources = [
 ]
 
 headers = [
+  'hashmap.h',
   'dso_utils.h',
   'gen6_mfc.h',
   'gen6_mfd.h',
