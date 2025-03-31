@@ -476,6 +476,17 @@ void ironlake_get_hw_formats(VADriverContextP ctx, struct object_config *obj_con
 			attribs[*i].type = VASurfaceAttribPixelFormat;
 			attribs[*i].value.type = VAGenericValueTypeInteger;
 			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_RGBX;
+			(*i)++;
+
+			/**
+			 * BGRA and ARGB isn't supported natively via VPP on ILK,
+			 * we need to use a workaround shader to make it possible.
+			 */
+			
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
 			attribs[*i].value.value.i = VA_FOURCC_BGRA;
 			(*i)++;
 		
