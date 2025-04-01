@@ -2096,10 +2096,120 @@ i965_CreateSurfaces2(
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
 	int i, j;
 	VAStatus vaStatus = VA_STATUS_SUCCESS;
-	int expected_fourcc = 0;
 	int memory_type = I965_SURFACE_MEM_NATIVE; /* native */
 	int surface_usage_hint = VA_SURFACE_ATTRIB_USAGE_HINT_GENERIC;
 	VASurfaceAttribExternalBuffers *memory_attribute = NULL;
+
+	int32_t expected_fourcc = VA_FOURCC_NV12;
+	switch (format)
+	{
+	case VA_RT_FORMAT_YUV420:
+		expected_fourcc = VA_FOURCC_NV12;
+		break;
+	case VA_RT_FORMAT_YUV422:
+		expected_fourcc = VA_FOURCC_YUY2;
+		break;
+	case VA_RT_FORMAT_YUV444:
+		expected_fourcc = VA_FOURCC_444P;
+		break;
+	case VA_RT_FORMAT_YUV411:
+		expected_fourcc = VA_FOURCC_411P;
+		break;
+	case VA_RT_FORMAT_YUV400:
+		expected_fourcc = VA_FOURCC_Y800;
+		break;
+#ifdef VA_RT_FORMAT_YUV420_10BPP
+	case VA_RT_FORMAT_YUV420_10BPP:
+		expected_fourcc = VA_FOURCC_P010;
+		break;
+#else
+	case VA_RT_FORMAT_YUV420_10:
+		expected_fourcc = VA_FOURCC_P010;
+		break;
+#endif
+#if 0
+	case VA_RT_FORMAT_RGB16:
+		expected_fourcc = VA_FOURCC_R5G6B5;
+		break;
+#endif
+	/**
+	 * We need to lie to Chromium and do ARGB instead of BGRA.
+	 */
+	case VA_RT_FORMAT_RGB32:
+		expected_fourcc = VA_FOURCC_ARGB;
+		break;
+#if 0
+	case VA_RT_FORMAT_RGBP:
+		expected_fourcc = VA_FOURCC_RGBP;
+		break;
+#endif
+#ifdef VA_RT_FORMAT_RGB32_10BPP
+	case VA_RT_FORMAT_RGB32_10BPP:
+		expected_fourcc = VA_FOURCC_BGRA;
+		break;
+#else
+	case VA_RT_FORMAT_RGB32_10:
+		expected_fourcc = VA_FOURCC_BGRA;
+		break;
+#endif
+	case VA_FOURCC_NV12:
+		expected_fourcc = VA_FOURCC_NV12;
+		break;
+#if 0
+	case VA_FOURCC_ABGR:
+		expected_fourcc = VA_FOURCC_ABGR;
+		break;
+#endif
+	case VA_FOURCC_ARGB:
+		expected_fourcc = VA_FOURCC_ARGB;
+		break;
+#if 0
+	case VA_FOURCC_XBGR:
+		expected_fourcc = VA_FOURCC_XBGR;
+		break;
+	case VA_FOURCC_XRGB:
+		expected_fourcc = VA_FOURCC_XRGB;
+		break;
+#endif
+	case VA_FOURCC_RGBX:
+		expected_fourcc = VA_FOURCC_RGBX;
+		break;
+	case VA_FOURCC_RGBA:
+		expected_fourcc = VA_FOURCC_RGBA;
+		break;
+#if 0
+	case VA_FOURCC_R5G6B5:
+		expected_fourcc = VA_FOURCC_R5G6B5;
+		break;
+	case VA_FOURCC_R8G8B8:
+		expected_fourcc = VA_FOURCC_R8G8B8;
+		break;
+#endif
+	case VA_FOURCC_YUY2:
+		expected_fourcc = VA_FOURCC_YUY2;
+		break;
+	case VA_FOURCC_YV12:
+		expected_fourcc = VA_FOURCC_YV12;
+		break;
+	case VA_FOURCC_422H:
+		expected_fourcc = VA_FOURCC_422H;
+		break;
+	case VA_FOURCC_422V:
+		expected_fourcc = VA_FOURCC_422V;
+		break;
+	case VA_FOURCC_P010:
+		expected_fourcc = VA_FOURCC_P010;
+		break;
+	case VA_FOURCC_I420:
+		expected_fourcc = VA_FOURCC_I420;
+		break;
+	case VA_FOURCC_UYVY:
+		expected_fourcc = VA_FOURCC_UYVY;
+		break;
+	default:
+		i965_log_debug(ctx, "i965_CreateSurfaces2: Unknown format for FOURCC %#010x\n", format);
+		return VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT;
+	}
 
 	for (i = 0; i < num_attribs && attrib_list; i++) {
 		if ((attrib_list[i].type == VASurfaceAttribPixelFormat) &&
@@ -2146,45 +2256,6 @@ i965_CreateSurfaces2(
 			ASSERT_RET(attrib_list[i].value.type == VAGenericValueTypePointer, VA_STATUS_ERROR_INVALID_PARAMETER);
 			memory_attribute = (VASurfaceAttribExternalBuffers *)attrib_list[i].value.value.p;
 		}
-	}
-
-	/* support 420 & 422 & RGB32 format, 422 and RGB32 are only used
-	 * for post-processing (including color conversion) */
-	switch (format)
-	{
-		case VA_RT_FORMAT_YUV420:
-		case VA_RT_FORMAT_YUV422:
-		case VA_RT_FORMAT_YUV444:
-		case VA_RT_FORMAT_YUV411:
-		case VA_RT_FORMAT_YUV400:
-		case VA_RT_FORMAT_RGB32:
-			break;
-
-		case VA_RT_FORMAT_YUV420_10BPP:
-			/**
-			 * Only allow this format if we support it.
-			 */
-			if (i965->codec_info->has_vpp_p010)
-				break;
-
-		default:
-		{
-			i965_log_debug(ctx, "i965_CreateSurfaces2: Rejecting unsupported RT format: %#010x\n", format);
-			return VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT;
-		}
-	}
-
-	/**
-	 * Chromium doesn't provide a FOURCC to this function,
-	 * this will cause it to explode later on as we need a BO
-	 * when exporting the surface via vaExportSurfaceHandle.
-	 * 
-	 * Do what the iHD does and guess now.
-	 */
-	if (!expected_fourcc)
-	{
-		i965_GuessExpectedFourCC(format, &expected_fourcc);
-		i965_log_debug(ctx, "i965_CreateSurfaces2: No FOURCC defined, making a bold assumption instead!\n");
 	}
 
 	for (i = 0; i < num_surfaces; i++) {
