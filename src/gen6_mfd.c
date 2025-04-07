@@ -1964,3 +1964,83 @@ gen6_dec_hw_context_init(VADriverContextP ctx, struct object_config *obj_config)
 
 	return (struct hw_context *)gen6_mfd_context;
 }
+
+void gen6_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs)
+{
+	switch (obj_config->entrypoint)
+	{
+		case VAEntrypointVLD:
+		{
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_NV12;
+			(*i)++;
+
+			break;
+		}
+
+		case VAEntrypointEncSlice:
+		case VAEntrypointVideoProc:
+		{
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_NV12;
+			(*i)++;
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_I420;
+			(*i)++;
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_YV12;
+			(*i)++;
+
+			if (obj_config->entrypoint == VAEntrypointVideoProc)
+			{
+				attribs[*i].type = VASurfaceAttribPixelFormat;
+				attribs[*i].value.type = VAGenericValueTypeInteger;
+				attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+				attribs[*i].value.value.i = VA_FOURCC_YUY2;
+				(*i)++;
+
+				attribs[*i].type = VASurfaceAttribPixelFormat;
+				attribs[*i].value.type = VAGenericValueTypeInteger;
+				attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+				attribs[*i].value.value.i = VA_FOURCC_RGBX;
+				(*i)++;
+
+				/**
+				 * BGRA and ARGB isn't supported natively via VPP on SNB,
+				 * we need to use a workaround shader to make it possible.
+				 */
+
+				attribs[*i].type = VASurfaceAttribPixelFormat;
+				attribs[*i].value.type = VAGenericValueTypeInteger;
+				attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+				attribs[*i].value.value.i = VA_FOURCC_BGRA;
+				(*i)++;
+
+				attribs[*i].type = VASurfaceAttribPixelFormat;
+				attribs[*i].value.type = VAGenericValueTypeInteger;
+				attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+				attribs[*i].value.value.i = VA_FOURCC_ARGB;
+				(*i)++;
+			}
+
+			break;
+		}
+
+		default:
+		{
+			i965_log_debug(ctx, "gen6_get_hw_formats: Ignoring unknown entrypoint %#010x\n", obj_config->entrypoint);
+			break;
+		}
+	}
+}
