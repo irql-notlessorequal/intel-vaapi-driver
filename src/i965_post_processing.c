@@ -5979,15 +5979,37 @@ i965_proc_picture_fast(VADriverContextP ctx,
 	dst_surface.type  = I965_SURFACE_TYPE_SURFACE;
 	dst_surface.flags = I965_SURFACE_FLAG_FRAME;
 
-	/* Validate "fast-path" processing capabilities */
-	if (!IS_GEN7(i965->intel.device_info)) {
+	/**
+	 * Previously this would check for `GEN < 7` but since CTG
+	 * lacks VPP and I don't plan to implement it, we can safely
+	 * just rely on the workaround flag which is present on SNB
+	 * and ILK.
+	 *
+	 * Validate "fast-path" processing capabilities
+	 */
+	if (unlikely(i965->intel.device_info->driver_workarounds & HW_WORKAROUND_INVALID_RGBX_SHADER_USE))
+	{
+		if ((pp_ops & PP_OP_CHANGE_FORMAT) &&
+			(dst_obj_surface->fourcc == VA_FOURCC_ARGB || dst_obj_surface->fourcc == VA_FOURCC_BGRA))
+		{
+			i965_log_debug(ctx, "Refusing fast path for VPP as we need to workaround a shader issue.");
+			return VA_STATUS_ERROR_UNIMPLEMENTED;
+		}
+
 		if ((pp_ops & PP_OP_CHANGE_FORMAT) && (pp_ops & PP_OP_CHANGE_SIZE))
-			return VA_STATUS_ERROR_UNIMPLEMENTED; // temporary surface is needed
+		{
+			i965_log_debug(ctx, "Refusing fast path for VPP as we need a temporary surface.");
+			return VA_STATUS_ERROR_UNIMPLEMENTED;
+		}
 	}
-	if (pipeline_param->pipeline_flags & VA_PROC_PIPELINE_FAST) {
+
+	if (pipeline_param->pipeline_flags & VA_PROC_PIPELINE_FAST)
+	{
 		filter_flags &= ~VA_FILTER_SCALING_MASK;
 		filter_flags |= VA_FILTER_SCALING_FAST;
-	} else {
+	}
+	else
+	{
 		if (pp_ops & PP_OP_COMPLEX)
 			return VA_STATUS_ERROR_UNIMPLEMENTED; // full pipeline is needed
 		if ((filter_flags & VA_FILTER_SCALING_MASK) > VA_FILTER_SCALING_HQ)
@@ -6253,7 +6275,8 @@ i965_proc_picture(VADriverContextP ctx,
 	}
 
 	int csc_needed = 0;
-	if (obj_surface->fourcc && obj_surface->fourcc !=  VA_FOURCC_NV12) {
+	if (obj_surface->fourcc && obj_surface->fourcc != VA_FOURCC_NV12)
+	{
 		csc_needed = 1;
 		out_surface_id = VA_INVALID_ID;
 		status = i965_CreateSurfaces(ctx,
@@ -6268,7 +6291,9 @@ i965_proc_picture(VADriverContextP ctx,
 		assert(csc_surface);
 		i965_check_alloc_surface_bo(ctx, csc_surface, !!tiling, VA_FOURCC_NV12, SUBSAMPLE_YUV420);
 		dst_surface.base = (struct object_base *)csc_surface;
-	} else {
+	}
+	else
+	{
 		i965_check_alloc_surface_bo(ctx, obj_surface, !!tiling, VA_FOURCC_NV12, SUBSAMPLE_YUV420);
 		dst_surface.base = (struct object_base *)obj_surface;
 	}
