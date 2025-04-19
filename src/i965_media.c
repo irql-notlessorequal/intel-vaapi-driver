@@ -382,6 +382,23 @@ void g4x_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
 			break;
 		}
 
+#if defined(I965_H264_ENABLE_CTG)
+		case VAProfileH264ConstrainedBaseline:
+		case VAProfileH264Main:
+		case VAProfileH264High:
+		{
+			assert(obj_config->entrypoint == VAEntrypointVLD);
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_NV12;
+			(*i)++;
+
+			break;
+		}
+#endif
+
 		default:
 		{
 			i965_log_debug(ctx, "g4x_get_hw_formats: Ignoring unknown entrypoint %#010x (profile %#010x)\n",
@@ -472,6 +489,14 @@ void ironlake_get_hw_formats(VADriverContextP ctx, struct object_config *obj_con
 			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
 			attribs[*i].value.value.i = VA_FOURCC_I420;
 			(*i)++;
+
+			/**
+			 * The VAAPI driver previously didn't claim support for RGBX,
+			 * even though we do have the shaders for processing it,
+			 * make it possible.
+			 *
+			 * Even if it's untested.
+			 */
 
 			attribs[*i].type = VASurfaceAttribPixelFormat;
 			attribs[*i].value.type = VAGenericValueTypeInteger;
