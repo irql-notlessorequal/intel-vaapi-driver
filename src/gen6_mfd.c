@@ -1981,8 +1981,46 @@ void gen6_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
 			break;
 		}
 
-		case VAEntrypointEncSlice:
 		case VAEntrypointVideoProc:
+		{
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_YUY2;
+			(*i)++;
+
+			/**
+			 * Previously the driver claimed to support RGBA on SNB,
+			 * this however isn't true since the conversion shader does
+			 * NOT support the alpha channel.
+			 *
+			 * This also applies to BGRA and ARGB which would mean that
+			 * we need to use a workaround shader to make it possible
+			 * to use these formats.
+			 */
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_RGBX;
+			(*i)++;
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_BGRA;
+			(*i)++;
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_ARGB;
+			(*i)++;
+
+			FALLTHROUGH;
+		}
+
+		case VAEntrypointEncSlice:
 		{
 			attribs[*i].type = VASurfaceAttribPixelFormat;
 			attribs[*i].value.type = VAGenericValueTypeInteger;
@@ -2001,38 +2039,6 @@ void gen6_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
 			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
 			attribs[*i].value.value.i = VA_FOURCC_YV12;
 			(*i)++;
-
-			if (obj_config->entrypoint == VAEntrypointVideoProc)
-			{
-				attribs[*i].type = VASurfaceAttribPixelFormat;
-				attribs[*i].value.type = VAGenericValueTypeInteger;
-				attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[*i].value.value.i = VA_FOURCC_YUY2;
-				(*i)++;
-
-				attribs[*i].type = VASurfaceAttribPixelFormat;
-				attribs[*i].value.type = VAGenericValueTypeInteger;
-				attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[*i].value.value.i = VA_FOURCC_RGBX;
-				(*i)++;
-
-				/**
-				 * BGRA and ARGB isn't supported natively via VPP on SNB,
-				 * we need to use a workaround shader to make it possible.
-				 */
-
-				attribs[*i].type = VASurfaceAttribPixelFormat;
-				attribs[*i].value.type = VAGenericValueTypeInteger;
-				attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[*i].value.value.i = VA_FOURCC_BGRA;
-				(*i)++;
-
-				attribs[*i].type = VASurfaceAttribPixelFormat;
-				attribs[*i].value.type = VAGenericValueTypeInteger;
-				attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
-				attribs[*i].value.value.i = VA_FOURCC_ARGB;
-				(*i)++;
-			}
 
 			break;
 		}
