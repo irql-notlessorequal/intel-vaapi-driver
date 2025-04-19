@@ -3702,7 +3702,7 @@ gen8_dec_hw_context_init(VADriverContextP ctx, struct object_config *obj_config)
 	return (struct hw_context *)gen7_mfd_context;
 }
 
-inline void gen8_get_hw_dec_formats(VADriverContextP ctx, struct object_config *obj_config,
+static inline void gen8_get_hw_dec_formats(VADriverContextP ctx, struct object_config *obj_config,
 	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs)
 {
 	switch (obj_config->profile)
@@ -3782,7 +3782,7 @@ inline void gen8_get_hw_dec_formats(VADriverContextP ctx, struct object_config *
 	}
 }
 
-inline void gen8_get_hw_enc_formats(VADriverContextP ctx, struct object_config *obj_config,
+static inline void gen8_get_hw_enc_formats(VADriverContextP ctx, struct object_config *obj_config,
 	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs)
 {
 	switch (obj_config->profile)
@@ -3859,7 +3859,7 @@ inline void gen8_get_hw_enc_formats(VADriverContextP ctx, struct object_config *
 	}
 }
 
-inline void gen8_get_hw_vpp_formats(VADriverContextP ctx, struct object_config *obj_config,
+static inline void gen8_get_hw_vpp_formats(VADriverContextP ctx, struct object_config *obj_config,
 	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs)
 {
 	attribs[*i].type = VASurfaceAttribPixelFormat;
