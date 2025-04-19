@@ -3331,7 +3331,11 @@ inline void gen7_get_hw_enc_formats(VADriverContextP ctx, struct object_config *
 	attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
 	attribs[*i].value.value.i = VA_FOURCC_IMC3;
 	(*i)++;
+}
 
+inline void gen7_get_hw_vpp_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs)
+{
 	attribs[*i].type = VASurfaceAttribPixelFormat;
 	attribs[*i].value.type = VAGenericValueTypeInteger;
 	attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
@@ -3392,8 +3396,18 @@ void gen7_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
 			break;
 		}
 
-		case VAEntrypointEncSlice:
 		case VAEntrypointVideoProc:
+		{
+			gen7_get_hw_vpp_formats(ctx, obj_config, data, i, attribs);
+
+			/**
+			 * We also support the encoding formats
+			 * in the VPP for IVB and HSW.
+			 */
+			FALLTHROUGH;
+		}
+
+		case VAEntrypointEncSlice:
 		{
 			gen7_get_hw_enc_formats(ctx, obj_config, data, i, attribs);
 			break;
