@@ -3292,13 +3292,6 @@ inline void gen7_get_hw_dec_formats(VADriverContextP ctx, struct object_config *
 			break;
 		}
 
-		/**
-		 * I know why MPV is trying to probe P010.
-		 * Why Intel!?!
-		 */
-		case VAProfileHEVCMain10:
-			break;
-
 		default:
 		{
 			attribs[*i].type = VASurfaceAttribPixelFormat;
