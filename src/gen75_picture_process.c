@@ -84,8 +84,10 @@ gen75_vpp_vebox(VADriverContextP ctx,
 		va_status = gen8_vebox_process_picture(ctx, proc_ctx->vpp_vebox_ctx);
 	else if (IS_GEN9(i965->intel.device_info))
 		va_status = gen9_vebox_process_picture(ctx, proc_ctx->vpp_vebox_ctx);
+#if defined(ENABLE_GEN10_SUPPORT)
 	else if (IS_GEN10(i965->intel.device_info))
 		va_status = gen10_vebox_process_picture(ctx, proc_ctx->vpp_vebox_ctx);
+#endif
 
 	return va_status;
 }
