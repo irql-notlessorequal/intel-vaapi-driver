@@ -3,6 +3,14 @@ Copyright (C) 2009-2023 Intel Corporation
 
 Version 2.4.5 - XX.XX.XXXX (IRQL fork)
 
+* Expose RGBX as a VPP format on ILK
+* Expose RGBA/BGRA as a VPP format on ILK
+
+    Ironlake is affected by the same issue as Sandybridge with
+    these formats, meaning that a workaround is needed for Chromium.
+
+* Don't advertise VAProfileHEVCMain10 format support on HSW and IVB.
+
 Version 2.4.4 - 06.Apr.2025 (IRQL fork)
 
 * Add RPM packaging (Thanks @sergiorussia)

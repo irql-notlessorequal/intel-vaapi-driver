@@ -60,6 +60,10 @@
 
 extern struct hw_context *i965_proc_context_init(VADriverContextP, struct object_config *);
 extern struct hw_context *g4x_dec_hw_context_init(VADriverContextP, struct object_config *);
+
+extern void g4x_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs);
+
 extern bool genx_render_init(VADriverContextP);
 
 static struct hw_codec_info g4x_hw_codec_info = {
@@ -68,6 +72,7 @@ static struct hw_codec_info g4x_hw_codec_info = {
 	.proc_hw_context_init = NULL,
 	.render_init = genx_render_init,
 	.post_processing_context_init = NULL,
+	.get_hw_formats = g4x_get_hw_formats,
 
 	.max_width = 2048,
 	.max_height = 2048,
@@ -90,12 +95,16 @@ static struct hw_codec_info g4x_hw_codec_info = {
 extern struct hw_context *ironlake_dec_hw_context_init(VADriverContextP, struct object_config *);
 extern void i965_post_processing_context_init(VADriverContextP, void *, struct intel_batchbuffer *);
 
+extern void ironlake_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs);
+
 static struct hw_codec_info ilk_hw_codec_info = {
 	.dec_hw_context_init = ironlake_dec_hw_context_init,
 	.enc_hw_context_init = NULL,
 	.proc_hw_context_init = i965_proc_context_init,
 	.render_init = genx_render_init,
 	.post_processing_context_init = i965_post_processing_context_init,
+	.get_hw_formats = ironlake_get_hw_formats,
 
 	.max_width = 2048,
 	.max_height = 2048,
@@ -119,9 +128,12 @@ static struct hw_codec_info ilk_hw_codec_info = {
 };
 
 static void gen6_hw_codec_preinit(VADriverContextP ctx, struct hw_codec_info *codec_info);
+static void gen6_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs);
 
 extern struct hw_context *gen6_dec_hw_context_init(VADriverContextP, struct object_config *);
 extern struct hw_context *gen6_enc_hw_context_init(VADriverContextP, struct object_config *);
+
 static struct hw_codec_info snb_hw_codec_info = {
 	.dec_hw_context_init = gen6_dec_hw_context_init,
 	.enc_hw_context_init = gen6_enc_hw_context_init,
@@ -129,6 +141,7 @@ static struct hw_codec_info snb_hw_codec_info = {
 	.render_init = genx_render_init,
 	.post_processing_context_init = i965_post_processing_context_init,
 	.preinit_hw_codec = gen6_hw_codec_preinit,
+	.get_hw_formats = gen6_get_hw_formats,
 
 	.max_width = 2048,
 	.max_height = 2048,
@@ -166,6 +179,8 @@ static struct hw_codec_info snb_hw_codec_info = {
 };
 
 static void gen7_hw_codec_preinit(VADriverContextP ctx, struct hw_codec_info *codec_info);
+static void gen7_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs);
 
 extern struct hw_context *gen7_dec_hw_context_init(VADriverContextP, struct object_config *);
 extern struct hw_context *gen7_enc_hw_context_init(VADriverContextP, struct object_config *);
@@ -176,6 +191,7 @@ static struct hw_codec_info ivb_hw_codec_info = {
 	.render_init = genx_render_init,
 	.post_processing_context_init = i965_post_processing_context_init,
 	.preinit_hw_codec = gen7_hw_codec_preinit,
+	.get_hw_formats = gen7_get_hw_formats,
 
 	.max_width = 4096,
 	.max_height = 4096,
@@ -229,6 +245,7 @@ static struct hw_codec_info hsw_hw_codec_info = {
 	.render_init = genx_render_init,
 	.post_processing_context_init = i965_post_processing_context_init,
 	.preinit_hw_codec = hsw_hw_codec_preinit,
+	.get_hw_formats = gen7_get_hw_formats,
 
 	.max_width = 4096,
 	.max_height = 4096,
@@ -278,12 +295,17 @@ static struct hw_codec_info hsw_hw_codec_info = {
 extern struct hw_context *gen8_dec_hw_context_init(VADriverContextP, struct object_config *);
 extern struct hw_context *gen8_enc_hw_context_init(VADriverContextP, struct object_config *);
 extern void gen8_post_processing_context_init(VADriverContextP, void *, struct intel_batchbuffer *);
+
+static void gen8_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs);
+
 static struct hw_codec_info bdw_hw_codec_info = {
 	.dec_hw_context_init = gen8_dec_hw_context_init,
 	.enc_hw_context_init = gen8_enc_hw_context_init,
 	.proc_hw_context_init = gen75_proc_context_init,
 	.render_init = gen8_render_init,
 	.post_processing_context_init = gen8_post_processing_context_init,
+	.get_hw_formats = gen8_get_hw_formats,
 
 	.max_width = 4096,
 	.max_height = 4096,
@@ -332,12 +354,14 @@ static struct hw_codec_info bdw_hw_codec_info = {
 };
 
 extern struct hw_context *gen9_dec_hw_context_init(VADriverContextP, struct object_config *);
+
 static struct hw_codec_info chv_hw_codec_info = {
 	.dec_hw_context_init = gen9_dec_hw_context_init,
 	.enc_hw_context_init = gen8_enc_hw_context_init,
 	.proc_hw_context_init = gen75_proc_context_init,
 	.render_init = gen8_render_init,
 	.post_processing_context_init = gen8_post_processing_context_init,
+	.get_hw_formats = gen8_get_hw_formats,
 
 	.max_width = 4096,
 	.max_height = 4096,
@@ -402,6 +426,7 @@ static struct hw_codec_info skl_hw_codec_info = {
 	.post_processing_context_init = gen9_post_processing_context_init,
 	.max_resolution = gen9_max_resolution,
 	.preinit_hw_codec = gen9_hw_codec_preinit,
+	.get_hw_formats = gen8_get_hw_formats,
 
 	.max_width = 4096,	/* default. See max_resolution */
 	.max_height = 4096, /* default. See max_resolution */
@@ -466,6 +491,7 @@ static struct hw_codec_info bxt_hw_codec_info = {
 	.post_processing_context_init = gen9_post_processing_context_init,
 	.max_resolution = gen9_max_resolution,
 	.preinit_hw_codec = gen9_hw_codec_preinit,
+	.get_hw_formats = gen8_get_hw_formats,
 
 	.max_width = 4096,	/* default. See max_resolution */
 	.max_height = 4096, /* default. See max_resolution */
@@ -533,6 +559,7 @@ static struct hw_codec_info kbl_hw_codec_info = {
 	.post_processing_context_init = gen9_post_processing_context_init,
 	.max_resolution = gen9_max_resolution,
 	.preinit_hw_codec = gen9_hw_codec_preinit,
+	.get_hw_formats = gen8_get_hw_formats,
 
 	.max_width = 4096,	/* default. See max_resolution */
 	.max_height = 4096, /* default. See max_resolution */
@@ -606,7 +633,7 @@ static struct hw_codec_info glk_hw_codec_info = {
 	.proc_hw_context_init = gen75_proc_context_init,
 	.render_init = gen9_render_init,
 	.post_processing_context_init = gen9_post_processing_context_init,
-
+	.get_hw_formats = gen8_get_hw_formats,
 	.max_resolution = gen9_max_resolution,
 	.preinit_hw_codec = gen9_hw_codec_preinit,
 
@@ -684,6 +711,7 @@ static struct hw_codec_info cfl_hw_codec_info = {
 	.post_processing_context_init = gen9_post_processing_context_init,
 	.max_resolution = gen9_max_resolution,
 	.preinit_hw_codec = gen9_hw_codec_preinit,
+	.get_hw_formats = gen8_get_hw_formats,
 
 	.max_width = 4096,	/* default. See max_resolution */
 	.max_height = 4096, /* default. See max_resolution */
@@ -759,6 +787,7 @@ static struct hw_codec_info cnl_hw_codec_info = {
 	.post_processing_context_init = gen9_post_processing_context_init,
 	.max_resolution = gen9_max_resolution,
 	.preinit_hw_codec = gen9_hw_codec_preinit,
+	.get_hw_formats = gen8_get_hw_formats,
 
 	.max_width = 4096,	/* default. See max_resolution */
 	.max_height = 4096, /* default. See max_resolution */

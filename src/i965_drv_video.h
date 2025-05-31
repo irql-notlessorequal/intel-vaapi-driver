@@ -457,6 +457,7 @@ struct hw_codec_info {
 	bool (*render_init)(VADriverContextP);
 	void (*post_processing_context_init)(VADriverContextP, void *, struct intel_batchbuffer *);
 	void (*preinit_hw_codec)(VADriverContextP, struct hw_codec_info *);
+	void (*get_hw_formats)(VADriverContextP, struct object_config *, struct i965_driver_data *, int *, VASurfaceAttrib *);
 
 	/**
 	 * Allows HW info to support per-codec max resolution.  If this functor is

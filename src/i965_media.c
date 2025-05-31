@@ -363,6 +363,51 @@ g4x_dec_hw_context_init(VADriverContextP ctx, struct object_config *obj_config)
 	return (struct hw_context *)media_context;
 }
 
+void g4x_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs)
+{
+	switch (obj_config->profile)
+	{
+		case VAProfileMPEG2Simple:
+		case VAProfileMPEG2Main:
+		{
+			assert(obj_config->entrypoint == VAEntrypointVLD);
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_I420;
+			(*i)++;
+
+			break;
+		}
+
+#if defined(I965_H264_ENABLE_CTG)
+		case VAProfileH264ConstrainedBaseline:
+		case VAProfileH264Main:
+		case VAProfileH264High:
+		{
+			assert(obj_config->entrypoint == VAEntrypointVLD);
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_NV12;
+			(*i)++;
+
+			break;
+		}
+#endif
+
+		default:
+		{
+			i965_log_debug(ctx, "g4x_get_hw_formats: Ignoring unknown entrypoint %#010x (profile %#010x)\n",
+				obj_config->entrypoint, obj_config->profile);
+			break;;
+		}
+	}
+}
+
 struct hw_context *
 ironlake_dec_hw_context_init(VADriverContextP ctx, struct object_config *obj_config)
 {
@@ -395,4 +440,95 @@ ironlake_dec_hw_context_init(VADriverContextP ctx, struct object_config *obj_con
 	}
 
 	return (struct hw_context *)media_context;
+}
+
+void ironlake_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs)
+{
+	switch (obj_config->profile)
+	{
+		case VAProfileMPEG2Simple:
+		case VAProfileMPEG2Main:
+		{
+			assert(obj_config->entrypoint == VAEntrypointVLD);
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_I420;
+			(*i)++;
+
+			break;
+		}
+
+		case VAProfileH264ConstrainedBaseline:
+		case VAProfileH264Main:
+		case VAProfileH264High:
+		{
+			assert(obj_config->entrypoint == VAEntrypointVLD);
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_NV12;
+			(*i)++;
+
+			break;
+		}
+
+		case VAProfileNone:
+		{
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_NV12;
+			(*i)++;
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_I420;
+			(*i)++;
+
+			/**
+			 * The VAAPI driver previously didn't claim support for RGBX,
+			 * even though we do have the shaders for processing it,
+			 * make it possible.
+			 *
+			 * Even if it's untested.
+			 */
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_RGBX;
+			(*i)++;
+
+			/**
+			 * BGRA and ARGB isn't supported natively via VPP on ILK,
+			 * we need to use a workaround shader to make it possible.
+			 */
+			
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_BGRA;
+			(*i)++;
+		
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_ARGB;
+			(*i)++;
+
+			break;
+		}
+
+		default:
+		{
+			i965_log_debug(ctx, "ironlake_get_hw_formats: Ignoring unknown entrypoint %#010x (profile %#010x)\n",
+				obj_config->entrypoint, obj_config->profile);
+			break;
+		}
+	}
 }

@@ -3701,3 +3701,299 @@ gen8_dec_hw_context_init(VADriverContextP ctx, struct object_config *obj_config)
 	gen7_mfd_context->driver_context = ctx;
 	return (struct hw_context *)gen7_mfd_context;
 }
+
+static inline void gen8_get_hw_dec_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs)
+{
+	switch (obj_config->profile)
+	{
+		case VAProfileJPEGBaseline:
+		{
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_IMC3;
+			(*i)++;
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_IMC1;
+			(*i)++;
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_Y800;
+			(*i)++;
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_411P;
+			(*i)++;
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_422H;
+			(*i)++;
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_422V;
+			(*i)++;
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_444P;
+			(*i)++;
+			
+			break;
+		}
+
+		case VAProfileHEVCMain10:
+		case VAProfileVP9Profile2:
+		{
+			if (!data->codec_info->has_vpp_p010)
+				break;
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_P010;
+			(*i)++;
+
+			FALLTHROUGH;
+		}
+
+		default:
+		{
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_NV12;
+			(*i)++;
+
+			break;
+		}
+	}
+}
+
+static inline void gen8_get_hw_enc_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs)
+{
+	switch (obj_config->profile)
+	{
+		case VAProfileHEVCMain10:
+		{
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_P010;
+			(*i)++;
+
+			break;
+		}
+
+		case VAProfileJPEGBaseline:
+		{
+			if (obj_config->entrypoint == VAEntrypointEncPicture)
+			{
+				attribs[*i].type = VASurfaceAttribPixelFormat;
+				attribs[*i].value.type = VAGenericValueTypeInteger;
+				attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+				attribs[*i].value.value.i = VA_FOURCC_YUY2;
+				(*i)++;
+
+				attribs[*i].type = VASurfaceAttribPixelFormat;
+				attribs[*i].value.type = VAGenericValueTypeInteger;
+				attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+				attribs[*i].value.value.i = VA_FOURCC_UYVY;
+				(*i)++;
+
+				attribs[*i].type = VASurfaceAttribPixelFormat;
+				attribs[*i].value.type = VAGenericValueTypeInteger;
+				attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+				attribs[*i].value.value.i = VA_FOURCC_YV16;
+				(*i)++;
+
+				attribs[*i].type = VASurfaceAttribPixelFormat;
+				attribs[*i].value.type = VAGenericValueTypeInteger;
+				attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+				attribs[*i].value.value.i = VA_FOURCC_Y800;
+				(*i)++;
+			}
+
+			FALLTHROUGH;
+		}
+
+		default:
+		{
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_NV12;
+			(*i)++;
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_I420;
+			(*i)++;
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_YV12;
+			(*i)++;
+
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_IMC3;
+			(*i)++;
+		}
+	}
+}
+
+static inline void gen8_get_hw_vpp_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs)
+{
+	attribs[*i].type = VASurfaceAttribPixelFormat;
+	attribs[*i].value.type = VAGenericValueTypeInteger;
+	attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+	attribs[*i].value.value.i = VA_FOURCC_NV12;
+	(*i)++;
+
+	attribs[*i].type = VASurfaceAttribPixelFormat;
+	attribs[*i].value.type = VAGenericValueTypeInteger;
+	attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+	attribs[*i].value.value.i = VA_FOURCC_I420;
+	(*i)++;
+
+	attribs[*i].type = VASurfaceAttribPixelFormat;
+	attribs[*i].value.type = VAGenericValueTypeInteger;
+	attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+	attribs[*i].value.value.i = VA_FOURCC_YV12;
+	(*i)++;
+
+	attribs[*i].type = VASurfaceAttribPixelFormat;
+	attribs[*i].value.type = VAGenericValueTypeInteger;
+	attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+	attribs[*i].value.value.i = VA_FOURCC_IMC3;
+	(*i)++;
+
+	attribs[*i].type = VASurfaceAttribPixelFormat;
+	attribs[*i].value.type = VAGenericValueTypeInteger;
+	attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+	attribs[*i].value.value.i = VA_FOURCC_RGBA;
+	(*i)++;
+
+	attribs[*i].type = VASurfaceAttribPixelFormat;
+	attribs[*i].value.type = VAGenericValueTypeInteger;
+	attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+	attribs[*i].value.value.i = VA_FOURCC_RGBX;
+	(*i)++;
+
+	attribs[*i].type = VASurfaceAttribPixelFormat;
+	attribs[*i].value.type = VAGenericValueTypeInteger;
+	attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+	attribs[*i].value.value.i = VA_FOURCC_BGRA;
+	(*i)++;
+
+	attribs[*i].type = VASurfaceAttribPixelFormat;
+	attribs[*i].value.type = VAGenericValueTypeInteger;
+	attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+	attribs[*i].value.value.i = VA_FOURCC_BGRX;
+	(*i)++;
+
+	attribs[*i].type = VASurfaceAttribPixelFormat;
+	attribs[*i].value.type = VAGenericValueTypeInteger;
+	attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+	attribs[*i].value.value.i = VA_FOURCC_ARGB;
+	(*i)++;
+
+	attribs[*i].type = VASurfaceAttribPixelFormat;
+	attribs[*i].value.type = VAGenericValueTypeInteger;
+	attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+	attribs[*i].value.value.i = VA_FOURCC_YUY2;
+	(*i)++;
+
+	attribs[*i].type = VASurfaceAttribPixelFormat;
+	attribs[*i].value.type = VAGenericValueTypeInteger;
+	attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+	attribs[*i].value.value.i = VA_FOURCC_UYVY;
+	(*i)++;
+
+	attribs[*i].type = VASurfaceAttribPixelFormat;
+	attribs[*i].value.type = VAGenericValueTypeInteger;
+	attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+	attribs[*i].value.value.i = VA_FOURCC_YV16;
+	(*i)++;
+
+	/**
+	 * KBL/GLK or newer.
+	 */
+	if (data->codec_info->has_vpp_p010)
+	{
+		attribs[*i].type = VASurfaceAttribPixelFormat;
+		attribs[*i].value.type = VAGenericValueTypeInteger;
+		attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+		attribs[*i].value.value.i = VA_FOURCC_P010;
+		(*i)++;
+
+		attribs[*i].type = VASurfaceAttribPixelFormat;
+		attribs[*i].value.type = VAGenericValueTypeInteger;
+		attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+		attribs[*i].value.value.i = VA_FOURCC_I010;
+		(*i)++;
+	}
+}
+
+void gen8_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs)
+{
+	switch (obj_config->entrypoint)
+	{
+		case VAEntrypointVLD:
+		{
+			gen8_get_hw_dec_formats(ctx, obj_config, data, i, attribs);
+			break;
+		}
+
+		case VAEntrypointEncSlice:
+		case VAEntrypointEncSliceLP:
+		case VAEntrypointEncPicture:
+		case VAEntrypointFEI:
+		{
+			gen8_get_hw_enc_formats(ctx, obj_config, data, i, attribs);
+			break;
+		}
+
+		case VAEntrypointVideoProc:
+		{
+			gen8_get_hw_vpp_formats(ctx, obj_config, data, i, attribs);
+			break;			
+		}
+
+		case VAEntrypointStats:
+		{
+			attribs[*i].type = VASurfaceAttribPixelFormat;
+			attribs[*i].value.type = VAGenericValueTypeInteger;
+			attribs[*i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
+			attribs[*i].value.value.i = VA_FOURCC_NV12;
+			(*i)++;
+
+			break;
+		}
+
+		default:
+		{
+			i965_log_debug(ctx, "gen8_get_hw_formats: Ignoring unknown entrypoint %#010x\n", obj_config->entrypoint);
+			break;
+		}
+	}
+}
