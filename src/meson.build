@@ -6,6 +6,7 @@ config_cfg.set('INTEL_DRIVER_MINOR_VERSION', intel_vaapi_driver_minor_version)
 config_cfg.set('INTEL_DRIVER_MICRO_VERSION', intel_vaapi_driver_micro_version)
 config_cfg.set('INTEL_DRIVER_PRE_VERSION', intel_vaapi_driver_pre_version)
 config_cfg.set10('HAVE_HYBRID_CODEC', get_option('enable_hybrid_codec'))
+config_cfg.set10('ENABLE_GEN10_SUPPORT', get_option('enable_gen10_support'))
 if WITH_X11
   config_cfg.set('HAVE_VA_X11', 1)
 endif
