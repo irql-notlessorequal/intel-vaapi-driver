@@ -10,6 +10,12 @@ Version 2.4.5 - XX.XX.XXXX (IRQL fork)
     these formats, meaning that a workaround is needed for Chromium.
 
 * Don't advertise VAProfileHEVCMain10 format support on HSW and IVB.
+* Disabled Gen 10 (Cannon Lake) support by default.
+
+    The graphics hardware was never released and all support
+    for it in Mesa and Linux was removed between 2020 and 2021.
+
+    A build time option remains if someone for some reason needs it.
 
 Version 2.4.4 - 06.Apr.2025 (IRQL fork)
 
