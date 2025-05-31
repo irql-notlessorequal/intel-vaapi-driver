@@ -1,29 +1,3 @@
-if ENABLE_GEN10_SUPPORT
-    GEN10_SOURCES = \
-	    gen10_encoder_vp8.c \
-	    gen10_hcp_common.c \
-	    gen10_hevc_enc_kernels_binary.c \
-	    gen10_hevc_enc_common.c \
-	    gen10_hevc_encoder.c \
-	    gen10_huc_common.c \
-	    gen10_vdenc_common.c \
-	    gen10_vdenc_vp9.c \
-
-    GEN10_HEADERS = \
-	    gen10_hcp_common.h \
-	    gen10_hevc_enc_kernel.h \
-	    gen10_hevc_enc_kernels_binary.h \
-	    gen10_hevc_enc_common.h \
-	    gen10_hevc_encoder.h \
-	    gen10_hevc_enc_const_def.h \
-	    gen10_huc_common.h \
-	    gen10_vdenc_common.h \
-	    gen10_vdenc_vp9.h \
-else
-    GEN10_SOURCES=
-    GEN10_HEADERS=
-endif
-
 source_c = \
 	dso_utils.c \
 	gen6_mfc.c \
@@ -91,7 +65,19 @@ source_c = \
 	gen9_hevc_enc_kernels_binary.c \
 	gen9_hevc_encoder.c \
 	gen9_hevc_enc_utils.c \
-	$(GEN10_SOURCES) $(NULL)
+	$(NULL)
+
+if USE_GEN10_SUPPORT
+source_c +=  \
+    gen10_encoder_vp8.c \
+    gen10_hcp_common.c \
+    gen10_hevc_enc_kernels_binary.c \
+    gen10_hevc_enc_common.c \
+    gen10_hevc_encoder.c \
+    gen10_huc_common.c \
+    gen10_vdenc_common.c \
+    gen10_vdenc_vp9.c
+endif
 
 source_h = \
 	dso_utils.h \
@@ -159,4 +145,17 @@ source_h = \
 	gen9_hevc_enc_kernels_binary.h \
 	gen9_hevc_enc_utils.h \
 	gen9_hevc_encoder.h \
-	$(GEN10_HEADERS) $(NULL)
+	$(NULL)
+
+if USE_GEN10_SUPPORT
+source_h +=  \
+    gen10_hcp_common.h \
+    gen10_hevc_enc_kernel.h \
+    gen10_hevc_enc_kernels_binary.h \
+    gen10_hevc_enc_common.h \
+    gen10_hevc_encoder.h \
+    gen10_hevc_enc_const_def.h \
+    gen10_huc_common.h \
+    gen10_vdenc_common.h \
+    gen10_vdenc_vp9.h
+endif

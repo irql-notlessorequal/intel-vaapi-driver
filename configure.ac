@@ -140,6 +140,7 @@ if test "enable_gen10_support" = "yes"; then
     AC_DEFINE([ENABLE_GEN10_SUPPORT], [1], [Defined to 1 if Cannon Lake ES support is needed])
 fi
 
+AM_CONDITIONAL(USE_GEN10_SUPPORT, test "enable_gen10_support" = "yes")
 AM_CONDITIONAL(ENABLE_TESTS, test "$enable_tests" = "yes")
 
 VA_VERSION=`$PKG_CONFIG --modversion libva`
