@@ -57,6 +57,8 @@
 #define MBENC_KERNEL_BASE GEN9_AVC_KERNEL_MBENC_QUALITY_I
 #define GPE_RESOURCE_ALIGNMENT 4  /* 4 means 16 = 1 << 4) */
 
+#define REQUIRES_LP_WORKAROUND(i965) i965->intel.device_info->driver_workarounds & HW_WORKAROUND_USE_ALTERNATE_SEARCH_TABLE
+
 #define OUT_BUFFER_2DW(batch, bo, is_target, delta)  do {               \
 		if (bo) {                                                       \
 			OUT_BCS_RELOC64(batch,                                        \
@@ -3538,9 +3540,12 @@ gen9_avc_set_curbe_mbenc(VADriverContextP ctx,
 	VAEncSliceParameterBufferH264 * slice_param = avc_state->slice_param[0];
 	VAEncPictureParameterBufferH264  *pic_param = avc_state->pic_param;
 	VASurfaceID surface_id;
-	struct object_surface *obj_surface;
 
-	struct mbenc_param * curbe_param = (struct mbenc_param *)param ;
+	struct object_surface *obj_surface;
+	struct mbenc_param * curbe_param = (struct mbenc_param *)param;
+
+	bool use_lp_workaround = REQUIRES_LP_WORKAROUND(i965);
+
 	unsigned char qp = 0;
 	unsigned char me_method = 0;
 	unsigned int mbenc_i_frame_dist_in_use = curbe_param->mbenc_i_frame_dist_in_use;
@@ -3822,8 +3827,18 @@ gen9_avc_set_curbe_mbenc(VADriverContextP ctx,
 	} else if (generic_state->frame_type == SLICE_TYPE_P) {
 		cmd.g9->dw1.max_num_mvs = i965_avc_get_max_mv_per_2mb(avc_state->seq_param->level_idc) / 2;
 		cmd.g9->dw3.bme_disable_fbr = 1;
-		cmd.g9->dw5.ref_width = gen9_avc_search_x[preset];
-		cmd.g9->dw5.ref_height = gen9_avc_search_y[preset];
+
+		if (use_lp_workaround)
+		{
+			cmd.g9->dw5.ref_width = gen9_workaround_avc_search_x[preset];
+			cmd.g9->dw5.ref_height = gen9_workaround_avc_search_y[preset];
+		}
+		else
+		{
+			cmd.g9->dw5.ref_width = gen9_avc_search_x[preset];
+			cmd.g9->dw5.ref_height = gen9_avc_search_y[preset];
+		}
+
 		cmd.g9->dw7.non_skip_zmv_added = 1;
 		cmd.g9->dw7.non_skip_mode_added = 1;
 		cmd.g9->dw7.skip_center_mask = 1;
@@ -3831,8 +3846,18 @@ gen9_avc_set_curbe_mbenc(VADriverContextP ctx,
 		cmd.g9->dw47.max_vmv_r = i965_avc_get_max_mv_len(avc_state->seq_param->level_idc) * 4;//frame onlys
 		cmd.g9->dw36.hme_combine_overlap = 1;
 		cmd.g9->dw36.num_ref_idx_l0_minus_one = (avc_state->multi_pre_enable) ? slice_param->num_ref_idx_l0_active_minus1 : 0;
-		cmd.g9->dw39.ref_width = gen9_avc_search_x[preset];
-		cmd.g9->dw39.ref_height = gen9_avc_search_y[preset];
+
+		if (use_lp_workaround)
+		{
+			cmd.g9->dw39.ref_width = gen9_workaround_avc_search_x[preset];
+			cmd.g9->dw39.ref_height = gen9_workaround_avc_search_y[preset];
+		}
+		else
+		{
+			cmd.g9->dw39.ref_width = gen9_avc_search_x[preset];
+			cmd.g9->dw39.ref_height = gen9_avc_search_y[preset];
+		}
+
 		cmd.g9->dw34.enable_direct_bias_adjustment = 0;
 		cmd.g9->dw34.enable_global_motion_bias_adjustment = avc_state->global_motion_bias_adjustment_enable;
 		if (is_g9 && avc_state->global_motion_bias_adjustment_enable)
@@ -6854,15 +6879,17 @@ gen8_avc_set_curbe_mbenc(VADriverContextP ctx,
 	VAEncSliceParameterBufferH264 * slice_param = avc_state->slice_param[0];
 	VAEncPictureParameterBufferH264  *pic_param = avc_state->pic_param;
 	VASurfaceID surface_id;
-	struct object_surface *obj_surface;
 
-	struct mbenc_param * curbe_param = (struct mbenc_param *)param ;
+	struct object_surface *obj_surface;
+	struct mbenc_param * curbe_param = (struct mbenc_param *)param;
+
+	bool use_lp_workaround = REQUIRES_LP_WORKAROUND(i965);
+
 	unsigned char qp = 0;
 	unsigned char me_method = 0;
 	unsigned int mbenc_i_frame_dist_in_use = curbe_param->mbenc_i_frame_dist_in_use;
 	unsigned int table_idx = 0;
 	unsigned int curbe_size = 0;
-
 	unsigned int preset = generic_state->preset;
 
 	cmd = (gen8_avc_mbenc_curbe_data *)i965_gpe_context_map_curbe(gpe_context);
@@ -7051,8 +7078,18 @@ gen8_avc_set_curbe_mbenc(VADriverContextP ctx,
 	} else if (generic_state->frame_type == SLICE_TYPE_P) {
 		cmd->dw1.max_num_mvs = i965_avc_get_max_mv_per_2mb(avc_state->seq_param->level_idc) / 2;
 		cmd->dw3.bme_disable_fbr = 1;
-		cmd->dw5.ref_width = gen9_avc_search_x[preset];
-		cmd->dw5.ref_height = gen9_avc_search_y[preset];
+
+		if (use_lp_workaround)
+		{
+			cmd->dw5.ref_width = gen9_workaround_avc_search_x[preset];
+			cmd->dw5.ref_height = gen9_workaround_avc_search_y[preset];
+		}
+		else
+		{
+			cmd->dw5.ref_width = gen9_avc_search_x[preset];
+			cmd->dw5.ref_height = gen9_avc_search_y[preset];
+		}
+
 		cmd->dw7.non_skip_zmv_added = 1;
 		cmd->dw7.non_skip_mode_added = 1;
 		cmd->dw7.skip_center_mask = 1;
@@ -7060,8 +7097,18 @@ gen8_avc_set_curbe_mbenc(VADriverContextP ctx,
 		cmd->dw47.max_vmv_r = i965_avc_get_max_mv_len(avc_state->seq_param->level_idc) * 4;//frame onlys
 		cmd->dw36.hme_combine_overlap = 1;
 		cmd->dw36.num_ref_idx_l0_minus_one = (avc_state->multi_pre_enable) ? slice_param->num_ref_idx_l0_active_minus1 : 0;
-		cmd->dw39.ref_width = gen9_avc_search_x[preset];
-		cmd->dw39.ref_height = gen9_avc_search_y[preset];
+
+		if (use_lp_workaround)
+		{
+			cmd->dw39.ref_width = gen9_workaround_avc_search_x[preset];
+			cmd->dw39.ref_height = gen9_workaround_avc_search_y[preset];
+		}
+		else
+		{
+			cmd->dw39.ref_width = gen9_avc_search_x[preset];
+			cmd->dw39.ref_height = gen9_avc_search_y[preset];
+		}
+
 		cmd->dw34.enable_direct_bias_adjustment = 0;
 		cmd->dw34.enable_global_motion_bias_adjustment = avc_state->global_motion_bias_adjustment_enable;
 		if (avc_state->global_motion_bias_adjustment_enable)

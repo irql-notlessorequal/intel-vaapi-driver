@@ -120,6 +120,15 @@ extern uint32_t g_intel_debug_option_flags;
 		}                                   \
 	} while (0)
 
+#define ASSERT_RET_MUTEX(value, mutex, fail_ret) do {    \
+		if (!(value)) {                     \
+			if (g_intel_debug_option_flags & VA_INTEL_DEBUG_OPTION_ASSERT)       \
+				assert(value);              \
+			_i965UnlockMutex(mutex);        \
+			return fail_ret;                \
+		}                                   \
+	} while (0)
+
 #define SET_BLOCKED_SIGSET()   do {     \
 		sigset_t bl_mask;               \
 		sigfillset(&bl_mask);           \
@@ -159,6 +168,31 @@ struct intel_device_info {
 
 	unsigned int urb_size;
 	unsigned int max_wm_threads;
+
+/**
+ * Low-Power Intel hardware has a known defect on this driver
+ * where low-resolution encoding may produce duplicate frames
+ * at a specified quality and bitrate.
+ * 
+ * Use an alternate lookup table for H.264 to avoid such issue.
+ * 
+ * See https://github.com/intel/intel-vaapi-driver/issues/541
+ * for more information.
+ */
+#define HW_WORKAROUND_USE_ALTERNATE_SEARCH_TABLE				(1 << 1)
+/**
+ * ILK and SNB only has a RGBX capable VPP shader for converting NV12
+ * into RGBA.
+ * 
+ * The driver for some reason tries to reuse this shader for BGRA and other
+ * formats with alpha in them, causing them to explode horribly.
+ * 
+ * To be fair this is my fault since I'm the one that exposed BGRA to Chromium.
+ * 
+ * Currently provides no functionality.
+ */
+#define HW_WORKAROUND_INVALID_RGBX_SHADER_USE					(1 << 2)
+	uint32_t driver_workarounds;
 
 	unsigned int is_g4x         : 1; /* gen4 */
 	unsigned int is_ivybridge   : 1; /* gen7 */

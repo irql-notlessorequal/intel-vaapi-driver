@@ -1,5 +1,7 @@
 # Security Policy
-Intel is committed to rapidly addressing security vulnerabilities affecting our customers and providing clear guidance on the solution, impact, severity and mitigation.
 
-## Reporting a Vulnerability
-Please report any security vulnerabilities in this project utilizing the guidelines [here](https://www.intel.com/content/www/us/en/security-center/vulnerability-handling-guidelines.html).
+As this is a community fork that is controlled by one person, I wish to keep the driver mainly safe even if it's old C code that would probably give any code analysis tool a seizure.
+
+If you discover a vulnerability and wish to inform me through confidential means, please open an issue requesting for a direct line of communication.
+
+I will be more than happy to provide various means.

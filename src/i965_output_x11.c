@@ -131,7 +131,10 @@ i965_put_surface_x11(
 
 	/* Currently don't support DRI1 */
 	if (!VA_CHECK_DRM_AUTH_TYPE(ctx, VA_DRM_AUTH_DRI2))
+	{
+		i965_log_debug(ctx, "i965_put_surface_x11: Not authenticated via VA_DRM_AUTH_DRI2.\n");
 		return VA_STATUS_ERROR_UNKNOWN;
+	}
 
 	/* Some broken sources such as H.264 conformance case FM2_SVA_C
 	 * will get here
@@ -147,15 +150,15 @@ i965_put_surface_x11(
 	_i965LockMutex(&i965->render_mutex);
 
 	dri_drawable = dri_vtable->get_drawable(ctx, (Drawable)draw);
-	ASSERT_RET(dri_drawable, VA_STATUS_ERROR_ALLOCATION_FAILED);
+	ASSERT_RET_MUTEX(dri_drawable, &i965->render_mutex, VA_STATUS_ERROR_ALLOCATION_FAILED);
 
 	buffer = dri_vtable->get_rendering_buffer(ctx, dri_drawable);
-	ASSERT_RET(buffer, VA_STATUS_ERROR_ALLOCATION_FAILED);
+	ASSERT_RET_MUTEX(buffer, &i965->render_mutex, VA_STATUS_ERROR_ALLOCATION_FAILED);
 
 	dest_region = render_state->draw_region;
 	if (dest_region == NULL) {
 		dest_region = (struct intel_region *)calloc(1, sizeof(*dest_region));
-		ASSERT_RET(dest_region, VA_STATUS_ERROR_ALLOCATION_FAILED);
+		ASSERT_RET_MUTEX(dest_region, &i965->render_mutex, VA_STATUS_ERROR_ALLOCATION_FAILED);
 		render_state->draw_region = dest_region;
 	}
 
@@ -172,10 +175,10 @@ i965_put_surface_x11(
 		dest_region->pitch = buffer->dri2.pitch;
 
 		dest_region->bo = intel_bo_gem_create_from_name(i965->intel.bufmgr, "rendering buffer", buffer->dri2.name);
-		ASSERT_RET(dest_region->bo, VA_STATUS_ERROR_UNKNOWN);
+		ASSERT_RET_MUTEX(dest_region->bo, &i965->render_mutex, VA_STATUS_ERROR_UNKNOWN);
 
 		ret = dri_bo_get_tiling(dest_region->bo, &(dest_region->tiling), &(dest_region->swizzle));
-		ASSERT_RET((ret == 0), VA_STATUS_ERROR_UNKNOWN);
+		ASSERT_RET_MUTEX((ret == 0), &i965->render_mutex, VA_STATUS_ERROR_UNKNOWN);
 	}
 
 	dest_region->x = dri_drawable->x;

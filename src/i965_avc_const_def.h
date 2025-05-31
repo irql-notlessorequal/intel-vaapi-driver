@@ -116,6 +116,10 @@ extern const unsigned int gen9_avc_hme_combine_len[PRESET_NUM];
 
 extern const unsigned int gen9_avc_search_x[PRESET_NUM];
 extern const unsigned int gen9_avc_search_y[PRESET_NUM];
+
+extern const unsigned int gen9_workaround_avc_search_x[PRESET_NUM];
+extern const unsigned int gen9_workaround_avc_search_y[PRESET_NUM];
+
 extern const unsigned int gen9_avc_b_search_x[PRESET_NUM];
 extern const unsigned int gen9_avc_b_search_y[PRESET_NUM];
 extern const unsigned char gen9_avc_enable_adaptive_tx_decision[PRESET_NUM];

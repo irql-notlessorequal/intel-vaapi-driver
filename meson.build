@@ -1,6 +1,6 @@
 project(
   'intel-vaapi-driver', 'c',
-  version : '2.4.4.1',
+  version : '2.4.5.1',
   meson_version : '>= 0.43.0',
   default_options : [ 'warning_level=1',
                       'buildtype=debugoptimized' ])

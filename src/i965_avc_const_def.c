@@ -1028,6 +1028,13 @@ const unsigned int gen9_avc_search_y[PRESET_NUM] = {
 	0, 40, 40, 40, 40, 40, 40, 28
 };
 
+const unsigned int gen9_workaround_avc_search_x[PRESET_NUM] = {
+	0, 48, 48, 48, 48, 48, 48, 48
+};
+const unsigned int gen9_workaround_avc_search_y[PRESET_NUM] = {
+	0, 40, 40, 40, 40, 40, 40, 40
+};
+
 const unsigned int gen9_avc_b_search_x[PRESET_NUM] = {
 	0, 32, 32, 32, 32, 32, 32, 24
 };
