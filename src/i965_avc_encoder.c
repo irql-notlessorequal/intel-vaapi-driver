@@ -9451,12 +9451,14 @@ gen9_mfc_avc_pipe_buf_addr_state(VADriverContextP ctx, struct intel_encoder_cont
 	/* the DW 62-64 is the buffer */
 	OUT_BUFFER_3DW(batch, NULL, 0, 0, 0);
 
+#if defined(ENABLE_GEN10_SUPPORT)
 	/*65-67 for CNL */
 	if (IS_GEN10(i965->intel.device_info)) {
 		OUT_BCS_BATCH(batch, 0);
 		OUT_BCS_BATCH(batch, 0);
 		OUT_BCS_BATCH(batch, 0);
 	}
+#endif
 
 	ADVANCE_BCS_BATCH(batch);
 }
@@ -11165,11 +11167,14 @@ gen9_avc_vme_context_init(VADriverContextP ctx, struct intel_encoder_context *en
 			   IS_GLK(i965->intel.device_info)) {
 		generic_ctx->enc_kernel_ptr = (void *)kbl_avc_encoder_kernels;
 		generic_ctx->enc_kernel_size = sizeof(kbl_avc_encoder_kernels);
+#if defined(ENABLE_GEN10_SUPPORT)
 	} else if (IS_GEN10(i965->intel.device_info)) {
 		generic_ctx->enc_kernel_ptr = (void *)cnl_avc_encoder_kernels;
 		generic_ctx->enc_kernel_size = sizeof(cnl_avc_encoder_kernels);
-	} else
+#endif
+	} else {
 		goto allocate_structure_failed;
+	}
 
 	/* initialize misc ? */
 	avc_ctx->ctx = ctx;
@@ -11385,8 +11390,10 @@ gen9_avc_vme_context_init(VADriverContextP ctx, struct intel_encoder_context *en
 		avc_state->lambda_table_enable = 1;
 		avc_state->brc_split_enable = 1;
 
+#if defined(ENABLE_GEN10_SUPPORT)
 		if (IS_GEN10(i965->intel.device_info))
 			avc_state->adaptive_transform_decision_enable = 1;// CNL
+#endif
 	}
 
 	avc_state->num_refs[0] = 0;
