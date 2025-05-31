@@ -9403,8 +9403,10 @@ gen9_mfc_avc_pipe_buf_addr_state(VADriverContextP ctx, struct intel_encoder_cont
 	int i;
 	unsigned int cmd_len = 65;
 
+#if defined(ENABLE_GEN10_SUPPORT)
 	if (IS_GEN10(i965->intel.device_info))
 		cmd_len = 68;
+#endif
 
 	BEGIN_BCS_BATCH(batch, cmd_len);
 
