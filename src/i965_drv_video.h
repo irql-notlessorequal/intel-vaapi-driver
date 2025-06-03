@@ -676,6 +676,7 @@ extern VAStatus i965_CreateSurfaces(VADriverContextP ctx,
 #define I965_SURFACE_MEM_NATIVE             0
 #define I965_SURFACE_MEM_GEM_FLINK          1
 #define I965_SURFACE_MEM_DRM_PRIME          2
+#define I965_SURFACE_MEM_DRM_PRIME_2        3
 
 void
 i965_destroy_surface_storage(struct object_surface *obj_surface);
