@@ -595,8 +595,11 @@ i965_avc_ildb_decode_init(VADriverContextP ctx, void *h264_context)
 	avc_ildb_context->urb.vfe_start = 0;
 	avc_ildb_context->urb.cs_start = avc_ildb_context->urb.vfe_start +
 									 avc_ildb_context->urb.num_vfe_entries * avc_ildb_context->urb.size_vfe_entry;
+
+#if !defined(I965_H264_ENABLE_CTG)
 	assert(avc_ildb_context->urb.cs_start +
 		   avc_ildb_context->urb.num_cs_entries * avc_ildb_context->urb.size_cs_entry <= i965->intel.device_info->urb_size);
+#endif
 
 	for (i = 0; i < NUM_AVC_ILDB_SURFACES; i++) {
 		dri_bo_unreference(avc_ildb_context->surface[i].s_bo);

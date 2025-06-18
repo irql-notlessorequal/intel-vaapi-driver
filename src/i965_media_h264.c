@@ -832,7 +832,7 @@ i965_media_h264_objects(VADriverContextP ctx,
 	dri_bo_unmap(i965_h264_context->avc_it_command_mb_info.bo);
 
 	BEGIN_BATCH(batch, 2);
-	OUT_BATCH(batch, MI_BATCH_BUFFER_START | (2 << 6));
+	OUT_BATCH(batch, MI_BATCH_BUFFER_START | (2 << 6) /* | (1 << 8) */);
 	OUT_RELOC(batch, i965_h264_context->avc_it_command_mb_info.bo,
 			  I915_GEM_DOMAIN_COMMAND, 0,
 			  0);
@@ -1003,6 +1003,12 @@ i965_media_h264_dec_context_init(VADriverContextP ctx, struct i965_media_context
 	media_context->urb.size_vfe_entry = 16;
 
 	media_context->urb.num_cs_entries = 1;
+
+	/**
+	 * TODO(irql):
+	 * 
+	 * This is two on the G4X patchset.
+	 */
 	media_context->urb.size_cs_entry = 1;
 
 	media_context->urb.vfe_start = 0;

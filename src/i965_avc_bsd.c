@@ -327,7 +327,12 @@ i965_avc_bsd_slice_state(VADriverContextP ctx,
                         slice_param->chroma_weight_l0[j][1] == 128)
                         i965_h264_context->weight128_chroma_l0 |= (1 << j);
                 } else {
-                    /* FIXME: workaround for weight 128 */
+                    /**
+					 * FIXME: workaround for weight 128
+					 * 
+					 * TODO(irql): There is an alternate version in the G4X patchset,
+					 * we might have to switch to it, for now leave as is.
+					 */
                     if (slice_param->luma_weight_l0[j] == 128 ||
                         slice_param->chroma_weight_l0[j][0] == 128 ||
                         slice_param->chroma_weight_l0[j][1] == 128)
@@ -357,6 +362,10 @@ i965_avc_bsd_slice_state(VADriverContextP ctx,
                         slice_param->chroma_weight_l1[j][1] == 128)
                         i965_h264_context->weight128_chroma_l1 |= (1 << j);
                 } else {
+					/**
+					 * TODO(irql): There is an alternate version in the G4X patchset,
+					 * we might have to switch to it, for now leave as is.
+					 */
                     if (slice_param->luma_weight_l0[j] == 128 ||
                         slice_param->chroma_weight_l0[j][0] == 128 ||
                         slice_param->chroma_weight_l0[j][1] == 128)
@@ -610,7 +619,7 @@ g4x_avc_bsd_object(VADriverContextP ctx,
         OUT_BCS_BATCH(batch, CMD_AVC_BSD_OBJECT | (8 - 2));
         OUT_BCS_BATCH(batch, 0); /* indirect data length for phantom slice is 0 */
         OUT_BCS_BATCH(batch, 0); /* indirect data start address for phantom slice is 0 */
-        OUT_BCS_BATCH(batch, 0);
+        OUT_BCS_BATCH(batch, slice_index);
         OUT_BCS_BATCH(batch, 0);
         OUT_BCS_BATCH(batch, 0);
         OUT_BCS_BATCH(batch, width_in_mbs * height_in_mbs / (1 + !!pic_param->pic_fields.bits.field_pic_flag));

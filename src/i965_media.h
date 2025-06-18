@@ -37,7 +37,12 @@
 
 #include "i965_structs.h"
 
+#if defined(I965_H264_ENABLE_CTG)
+#define MAX_INTERFACE_DESC      32
+#else
 #define MAX_INTERFACE_DESC      16
+#endif
+
 #define MAX_MEDIA_SURFACES      34
 
 struct decode_state;
