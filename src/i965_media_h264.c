@@ -152,6 +152,7 @@ struct intra_kernel_header intra_kernel_header_gen4 = {
 	(intra_Pred_4x4_Y_IP - ADD_ERROR_SB0_IP)
 };
 
+#if defined(I965_H264_ENABLE_CTG)
 /* software scoreboad kernel entry */
 static unsigned long avc_sw_scoreboard_kernel_offset[] = {
 #define GEN4_SCOREBOARD_IP 2484
@@ -159,6 +160,7 @@ static unsigned long avc_sw_scoreboard_kernel_offset[] = {
 	GEN4_SCOREBOARD_IP * INST_UNIT_GEN4,
 	GEN4_SCOREBOARD_MBAFF_IP * INST_UNIT_GEN4
 };
+#endif
 
 static const uint32_t h264_avc_combined_gen4[][4] = {
 #include "shaders/h264/mc/avc_mc.g4b"
