@@ -258,7 +258,7 @@ INTERLABEL(EXIT_LOOP):
 
 #ifdef SW_SCOREBOARD    
 	wait	n0:ud		//	Now wait for scoreboard to response
-    #include "Soreboard_update.asm"	// scorboard update function
+    #include "scoreboard_update.asm"	// scoreboard update function
 #else
 // Check for write commit first if SW scoreboard is disabled
 	mov	(1)	gREG_WRITE_COMMIT_Y<1>:ud	gREG_WRITE_COMMIT_Y<0;1,0>:ud		// Make sure Y write is committed
