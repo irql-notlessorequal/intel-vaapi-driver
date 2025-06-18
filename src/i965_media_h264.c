@@ -152,6 +152,14 @@ struct intra_kernel_header intra_kernel_header_gen4 = {
 	(intra_Pred_4x4_Y_IP - ADD_ERROR_SB0_IP)
 };
 
+/* software scoreboad kernel entry */
+static unsigned long avc_sw_scoreboard_kernel_offset[] = {
+#define GEN4_SCOREBOARD_IP 2484
+#define GEN4_SCOREBOARD_MBAFF_IP 2568
+	GEN4_SCOREBOARD_IP * INST_UNIT_GEN4,
+	GEN4_SCOREBOARD_MBAFF_IP * INST_UNIT_GEN4
+};
+
 static const uint32_t h264_avc_combined_gen4[][4] = {
 #include "shaders/h264/mc/avc_mc.g4b"
 };
@@ -448,7 +456,18 @@ i965_media_h264_interface_descriptor_remap_table(VADriverContextP ctx, struct i9
 		memset(desc, 0, sizeof(*desc));
 		desc->desc0.grf_reg_blocks = 7;
 		desc->desc0.kernel_start_pointer = (i965_h264_context->avc_kernels[H264_AVC_COMBINED].bo->offset + kernel_offset) >> 6; /* reloc */
-		desc->desc1.const_urb_entry_read_offset = 0;
+
+#if defined(I965_H264_ENABLE_CTG)
+		if (!i965_h264_context->use_avc_hw_scoreboard)
+		{
+			desc->desc1.const_urb_entry_read_offset = (i < FRAMEMB_MOTION) ? 0 : 2;
+		}
+		else
+#endif
+		{
+			desc->desc1.const_urb_entry_read_offset = 0;
+		}
+
 		desc->desc1.const_urb_entry_read_len = 2;
 		desc->desc3.binding_table_entry_count = 0;
 		desc->desc3.binding_table_pointer =
@@ -467,6 +486,38 @@ i965_media_h264_interface_descriptor_remap_table(VADriverContextP ctx, struct i9
 						  media_context->binding_table.bo);
 		desc++;
 	}
+
+#if defined(I965_H264_ENABLE_CTG)
+	if (!i965_h264_context->use_avc_hw_scoreboard)
+	{
+        /* Index [0-15] goes through the Interface Descriptor Remap Table
+         * so don't use it for software scoreboard kernel
+         */
+        for (; i < 16; i++)
+		{
+            desc++;
+        }
+
+        for (; i < 18; i++)
+		{
+            int kernel_offset = avc_sw_scoreboard_kernel_offset[i - 16];
+            memset(desc, 0, sizeof(*desc));
+            desc->desc0.grf_reg_blocks = 15;
+            desc->desc0.kernel_start_pointer = (i965_h264_context->avc_kernels[H264_AVC_COMBINED].bo->offset + kernel_offset) >> 6; /* reloc */
+            desc->desc1.const_urb_entry_read_offset = 0;
+            desc->desc1.const_urb_entry_read_len = 0;
+            desc->desc3.binding_table_entry_count = 0;
+            desc->desc3.binding_table_pointer = 0;
+
+            dri_bo_emit_reloc(bo,
+                              I915_GEM_DOMAIN_INSTRUCTION, 0,
+                              desc->desc0.grf_reg_blocks + kernel_offset,
+                              i * sizeof(*desc) + offsetof(struct i965_interface_descriptor, desc0),
+                              i965_h264_context->avc_kernels[H264_AVC_COMBINED].bo);
+            desc++;
+        }
+	}
+#endif
 
 	dri_bo_unmap(bo);
 }
@@ -490,6 +541,11 @@ i965_media_h264_vfe_state(VADriverContextP ctx, struct i965_media_context *media
 	vfe_state->vfe1.children_present = 0;
 	vfe_state->vfe2.interface_descriptor_base =
 		media_context->idrt.bo->offset >> 4; /* reloc */
+
+#if defined(I965_H264_ENABLE_CTG)
+	vfe_state->vfe1.debug_counter_control = 2;  /* for software scoreboard kernel */
+#endif
+
 	dri_bo_emit_reloc(bo,
 					  I915_GEM_DOMAIN_INSTRUCTION, 0,
 					  0,
@@ -648,6 +704,25 @@ i965_media_h264_upload_constants(VADriverContextP ctx,
 	assert(media_context->curbe.bo->virtual);
 	constant_buffer = media_context->curbe.bo->virtual;
 
+#if 0
+/**
+ * TODO(irql): I have no idea if the G4X variant is better of the one left here.
+ */
+	if (unlikely(i965_h264_context->is_g4x_context))
+	{
+		/* constant (64 bytes) for Intra kernel */
+		memcpy(constant_buffer, intra_kernel_header, sizeof(*intra_kernel_header));
+
+		struct inter_kernel_header inter_header;
+		inter_header.weight_offset = i965_h264_context->weight128_offset0;
+		inter_header.weight_offset_flag = !i965_h264_context->weight128_offset0_flag;
+		inter_header.pad0 = 0;
+
+		constant_buffer += 64;
+		memcpy(constant_buffer, &inter_header, sizeof(inter_header));
+	}
+#endif
+
 	/* HW solution for W=128 */
 	if (i965_h264_context->use_hw_w128) {
 		memcpy(constant_buffer, intra_kernel_header, sizeof(*intra_kernel_header));
@@ -693,6 +768,41 @@ i965_media_h264_states_setup(VADriverContextP ctx,
 	i965_media_h264_upload_constants(ctx, decode_state, media_context);
 }
 
+#if defined(I965_H264_ENABLE_CTG)
+static void
+i965_avc_sw_scoreboard_objects(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
+{
+	struct intel_batchbuffer *batch = i965_h264_context->batch;
+	int width_in_mb_minus_1 = i965_h264_context->picture.width_in_mbs - 1;
+	int height_in_mb_minus_1 = i965_h264_context->avc_it_command_mb_info.mbs / (width_in_mb_minus_1 + 1) / (1 + !!i965_h264_context->picture.mbaff_frame_flag) - 1;
+	int total_mb = i965_h264_context->avc_it_command_mb_info.mbs;
+	int kernel_index = i965_h264_context->picture.mbaff_frame_flag ? 17 : 16;
+
+	BEGIN_BATCH(batch, 16);
+	OUT_BATCH(batch, CMD_MEDIA_OBJECT_PRT | (16 - 2));
+	OUT_BATCH(batch, 0);
+	OUT_BATCH(batch,
+			  ((kernel_index << 24) | /* Interface Descriptor Offset. */
+			   (1 << 23)));			  /* PRT_Fence Needed */
+	OUT_BATCH(batch, 0);
+	OUT_BATCH(batch,
+			  ((height_in_mb_minus_1 << 16) |
+			   (width_in_mb_minus_1)));
+	OUT_BATCH(batch, total_mb);
+	OUT_BATCH(batch, 0);
+	OUT_BATCH(batch, 0);
+	OUT_BATCH(batch, 0);
+	OUT_BATCH(batch, 0);
+	OUT_BATCH(batch, 0);
+	OUT_BATCH(batch, 0);
+	OUT_BATCH(batch, 0);
+	OUT_BATCH(batch, 0);
+	OUT_BATCH(batch, 0);
+	OUT_BATCH(batch, 0);
+	ADVANCE_BATCH(batch);
+}
+#endif
+
 static void
 i965_media_h264_objects(VADriverContextP ctx,
 						struct decode_state *decode_state,
@@ -704,6 +814,13 @@ i965_media_h264_objects(VADriverContextP ctx,
 
 	assert(media_context->private_context);
 	i965_h264_context = (struct i965_h264_context *)media_context->private_context;
+
+#if defined(I965_H264_ENABLE_CTG)
+	if (!i965_h264_context->use_avc_hw_scoreboard)
+	{
+		i965_avc_sw_scoreboard_objects(ctx, i965_h264_context);
+	}
+#endif
 
 	dri_bo_map(i965_h264_context->avc_it_command_mb_info.bo, True);
 	assert(i965_h264_context->avc_it_command_mb_info.bo->virtual);
