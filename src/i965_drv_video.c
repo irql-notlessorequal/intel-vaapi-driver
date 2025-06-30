@@ -2367,7 +2367,6 @@ i965_QueryImageFormats(VADriverContextP ctx,
 	if (!ctx)
 		return VA_STATUS_ERROR_INVALID_CONTEXT;
 
-	struct i965_driver_data *i965 = i965_driver_data(ctx);
 	int n, idx = 0;
 
 	for (n = 0; i965_image_formats_map[n].va_format.fourcc != 0; n++)
