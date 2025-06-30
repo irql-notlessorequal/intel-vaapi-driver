@@ -169,7 +169,7 @@ void
 intel_update_vp9_frame_store_index(VADriverContextP ctx,
 								   struct decode_state *decode_state,
 								   VADecPictureParameterBufferVP9 *pic_param,
-								   GenFrameStore frame_store[MAX_GEN_REFERENCE_FRAMES]);
+								   GenFrameStore frame_store[MAX_GEN_HCP_REFERENCE_FRAMES]);
 
 bool
 intel_ensure_vp8_segmentation_buffer(VADriverContextP ctx, GenBuffer *buf,

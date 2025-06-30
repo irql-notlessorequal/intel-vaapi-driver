@@ -921,7 +921,7 @@ void
 intel_update_vp9_frame_store_index(VADriverContextP ctx,
 								   struct decode_state *decode_state,
 								   VADecPictureParameterBufferVP9 *pic_param,
-								   GenFrameStore frame_store[MAX_GEN_REFERENCE_FRAMES])
+								   GenFrameStore frame_store[MAX_GEN_HCP_REFERENCE_FRAMES])
 {
 	struct object_surface *obj_surface;
 	int i = 0, index = 0;
@@ -969,7 +969,7 @@ intel_update_vp9_frame_store_index(VADriverContextP ctx,
 	}
 
 	//Set the remaining framestores to either last/golden/altref
-	for (i = 3; i < MAX_GEN_REFERENCE_FRAMES; i++) {
+	for (i = 3; i < MAX_GEN_HCP_REFERENCE_FRAMES; i++) {
 		frame_store[i].surface_id = frame_store[i % 2].surface_id;
 		frame_store[i].obj_surface = frame_store[i % 2].obj_surface;
 	}
