@@ -852,7 +852,7 @@ gen8_pp_plx_avs_initialize(VADriverContextP ctx, struct i965_post_processing_con
 	struct gen7_pp_static_parameter *pp_static_parameter = pp_context->pp_static_parameter;
 	struct gen8_sampler_8x8_avs *sampler_8x8;
 	int i;
-	int width[3], height[3], pitch[3], offset[3];
+	int width[3] = { 0 }, height[3] = { 0 }, pitch[3], offset[3];
 	int src_width, src_height;
 	unsigned char *cc_ptr;
 	AVSState * const avs = &pp_avs_context->state;
@@ -866,6 +866,7 @@ gen8_pp_plx_avs_initialize(VADriverContextP ctx, struct i965_post_processing_con
 	gen8_pp_set_media_rw_message_surface(ctx, pp_context, src_surface, 0, 0,
 										 src_rect,
 										 width, height, pitch, offset);
+
 	src_height = height[0];
 	src_width  = width[0];
 
