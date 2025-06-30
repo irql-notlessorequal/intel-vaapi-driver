@@ -128,9 +128,9 @@ static struct hw_codec_info ilk_hw_codec_info = {
 };
 
 static void gen6_hw_codec_preinit(VADriverContextP ctx, struct hw_codec_info *codec_info);
-static void gen6_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
-	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs);
 
+extern void gen6_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs);
 extern struct hw_context *gen6_dec_hw_context_init(VADriverContextP, struct object_config *);
 extern struct hw_context *gen6_enc_hw_context_init(VADriverContextP, struct object_config *);
 
@@ -179,11 +179,12 @@ static struct hw_codec_info snb_hw_codec_info = {
 };
 
 static void gen7_hw_codec_preinit(VADriverContextP ctx, struct hw_codec_info *codec_info);
-static void gen7_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
-	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs);
 
+extern void gen7_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
+	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs);
 extern struct hw_context *gen7_dec_hw_context_init(VADriverContextP, struct object_config *);
 extern struct hw_context *gen7_enc_hw_context_init(VADriverContextP, struct object_config *);
+
 static struct hw_codec_info ivb_hw_codec_info = {
 	.dec_hw_context_init = gen7_dec_hw_context_init,
 	.enc_hw_context_init = gen7_enc_hw_context_init,
@@ -296,7 +297,7 @@ extern struct hw_context *gen8_dec_hw_context_init(VADriverContextP, struct obje
 extern struct hw_context *gen8_enc_hw_context_init(VADriverContextP, struct object_config *);
 extern void gen8_post_processing_context_init(VADriverContextP, void *, struct intel_batchbuffer *);
 
-static void gen8_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
+extern void gen8_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
 	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs);
 
 static struct hw_codec_info bdw_hw_codec_info = {
