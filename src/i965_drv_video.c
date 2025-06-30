@@ -1162,7 +1162,7 @@ static inline bool expose_frame_level_decoding(struct i965_driver_data *const i9
 	if (!i965->codec_info->supports_short_slice_dec)
 		return false;
 
-	return profile == VAProfileH264Baseline || profile == VAProfileH264ConstrainedBaseline
+	return profile == VAProfileH264ConstrainedBaseline
 		|| profile == VAProfileH264Main || profile == VAProfileH264High;
 }
 
