@@ -280,6 +280,13 @@ struct intel_region {
 
 #define IS_GLK(device_info)             (device_info->is_glklake)
 
+#if defined(ENABLE_GEN10_SUPPORT)
 #define IS_GEN10(device_info)           (device_info->gen == 10)
+#else
+/**
+ * This has the benefit of having the compiler omit the check in any conditions
+ */
+#define IS_GEN10(device_info)           (0)
+#endif
 
 #endif /* _INTEL_DRIVER_H_ */

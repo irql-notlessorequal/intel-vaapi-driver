@@ -57,6 +57,11 @@ AC_ARG_ENABLE([wayland],
                     [build with VA/Wayland API support @<:@default=yes@:>@])],
     [], [enable_wayland="yes"])
 
+AC_ARG_ENABLE([gen10-support],
+    [AC_HELP_STRING([--enable-gen10-support],
+                    [build with support for unreleased Cannon Lake hardware @<:@default=no@:>@])],
+    [], [enable_gen10_support="no"])
+
 AC_ARG_ENABLE([hybrid-codec],
     [AC_HELP_STRING([--enable-hybrid-codec],
                     [build with hybrid codec support @<:@default=no@:>@])],
@@ -131,6 +136,11 @@ if test "$enable_hybrid_codec" = "yes"; then
     AC_DEFINE([HAVE_HYBRID_CODEC], [1], [Defined to 1 if hybrid codec is needed])
 fi
 
+if test "$enable_gen10_support" = "yes"; then
+    AC_DEFINE([ENABLE_GEN10_SUPPORT], [1], [Defined to 1 if Cannon Lake ES support is needed])
+fi
+
+AM_CONDITIONAL(USE_GEN10_SUPPORT, test "$enable_gen10_support" = "yes")
 AM_CONDITIONAL(ENABLE_TESTS, test "$enable_tests" = "yes")
 
 VA_VERSION=`$PKG_CONFIG --modversion libva`
@@ -222,5 +232,7 @@ echo
 echo VA-API version ................... : $VA_VERSION_STR
 echo VA-API drivers path .............. : $LIBVA_DRIVERS_PATH
 echo Windowing systems ................ : $BACKENDS
+echo CNL support ...................... : $enable_gen10_support
+echo Hybrid driver support ............ : $enable_hybrid_codec
 echo Build tests ...................... : $enable_tests
 echo
