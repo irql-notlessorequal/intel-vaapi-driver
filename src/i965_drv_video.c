@@ -886,7 +886,7 @@ i965_validate_config(VADriverContextP ctx, VAProfile profile,
 			int32_t wrapper_num_entrypoints = 0;
 			VADriverContextP pdrvctx = i965->wrapper_pdrvctx;
 			CALL_VTABLE(pdrvctx, va_status,
-				vaQueryConfigEntrypoints(pdrvctx, profile, 
+				vaQueryConfigEntrypoints(pdrvctx, profile,
 					wrapper_entrypoints, &wrapper_num_entrypoints));
 			if (va_status == VA_STATUS_SUCCESS)
 			{
@@ -1799,25 +1799,25 @@ static VAStatus
 i965_surface_external_memory(VADriverContextP ctx,
 							struct object_surface *obj_surface,
 							int external_memory_type,
-							VASurfaceAttribExternalBuffers *memory_attibute,
+							VASurfaceAttribExternalBuffers *memory_attribute,
 							int index)
 {
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
 	unsigned int tiling, swizzle;
 
-	if (!memory_attibute ||
-		!memory_attibute->buffers ||
-		index >= memory_attibute->num_buffers)
+	if (!memory_attribute ||
+		!memory_attribute->buffers ||
+		index >= memory_attribute->num_buffers)
 		return VA_STATUS_ERROR_INVALID_PARAMETER;
 
-	obj_surface->size = memory_attibute->data_size;
+	obj_surface->size = memory_attribute->data_size;
 	if (external_memory_type == I965_SURFACE_MEM_GEM_FLINK)
 		obj_surface->bo = drm_intel_bo_gem_create_from_name(i965->intel.bufmgr,
 															"gem flinked vaapi surface",
-															memory_attibute->buffers[index]);
+															memory_attribute->buffers[index]);
 	else if (external_memory_type == I965_SURFACE_MEM_DRM_PRIME)
 		obj_surface->bo = drm_intel_bo_gem_create_from_prime(i965->intel.bufmgr,
-															 memory_attibute->buffers[index],
+															 memory_attribute->buffers[index],
 															 obj_surface->size);
 
 	if (!obj_surface->bo)
@@ -1825,34 +1825,34 @@ i965_surface_external_memory(VADriverContextP ctx,
 
 	dri_bo_get_tiling(obj_surface->bo, &tiling, &swizzle);
 
-	ASSERT_RET(obj_surface->orig_width == memory_attibute->width, VA_STATUS_ERROR_INVALID_PARAMETER);
-	ASSERT_RET(obj_surface->orig_height == memory_attibute->height, VA_STATUS_ERROR_INVALID_PARAMETER);
-	ASSERT_RET(memory_attibute->num_planes >= 1, VA_STATUS_ERROR_INVALID_PARAMETER);
+	ASSERT_RET(obj_surface->orig_width == memory_attribute->width, VA_STATUS_ERROR_INVALID_PARAMETER);
+	ASSERT_RET(obj_surface->orig_height == memory_attribute->height, VA_STATUS_ERROR_INVALID_PARAMETER);
+	ASSERT_RET(memory_attribute->num_planes >= 1, VA_STATUS_ERROR_INVALID_PARAMETER);
 
-	obj_surface->fourcc = memory_attibute->pixel_format;
-	obj_surface->width = memory_attibute->pitches[0];
+	obj_surface->fourcc = memory_attribute->pixel_format;
+	obj_surface->width = memory_attribute->pitches[0];
 	int bpp_1stplane = bpp_1stplane_by_fourcc(obj_surface->fourcc);
 	ASSERT_RET(IS_ALIGNED(obj_surface->width, 16), VA_STATUS_ERROR_INVALID_PARAMETER);
 	ASSERT_RET(obj_surface->width >= obj_surface->orig_width * bpp_1stplane, VA_STATUS_ERROR_INVALID_PARAMETER);
 
-	if (memory_attibute->num_planes == 1)
-		obj_surface->height = memory_attibute->data_size / obj_surface->width;
+	if (memory_attribute->num_planes == 1)
+		obj_surface->height = memory_attribute->data_size / obj_surface->width;
 	else
-		obj_surface->height = memory_attibute->offsets[1] / obj_surface->width;
+		obj_surface->height = memory_attribute->offsets[1] / obj_surface->width;
 
-	if (memory_attibute->num_planes > 1) {
+	if (memory_attribute->num_planes > 1) {
 		ASSERT_RET(obj_surface->height >= obj_surface->orig_height, VA_STATUS_ERROR_INVALID_PARAMETER);
 	}
 
 	if (tiling) {
 		ASSERT_RET(IS_ALIGNED(obj_surface->width, 128), VA_STATUS_ERROR_INVALID_PARAMETER);
 
-		if (memory_attibute->num_planes > 1)
+		if (memory_attribute->num_planes > 1)
 			ASSERT_RET(IS_ALIGNED(obj_surface->height, 32), VA_STATUS_ERROR_INVALID_PARAMETER);
 	} else {
 		ASSERT_RET(IS_ALIGNED(obj_surface->width, i965->codec_info->min_linear_wpitch), VA_STATUS_ERROR_INVALID_PARAMETER);
 
-		if (memory_attibute->num_planes > 1)
+		if (memory_attribute->num_planes > 1)
 			ASSERT_RET(IS_ALIGNED(obj_surface->height, i965->codec_info->min_linear_hpitch), VA_STATUS_ERROR_INVALID_PARAMETER);
 	}
 
@@ -1868,15 +1868,15 @@ i965_surface_external_memory(VADriverContextP ctx,
 	switch (obj_surface->fourcc) {
 	case VA_FOURCC_NV12:
 	case VA_FOURCC_P010:
-		ASSERT_RET(memory_attibute->num_planes == 2, VA_STATUS_ERROR_INVALID_PARAMETER);
-		ASSERT_RET(memory_attibute->pitches[0] == memory_attibute->pitches[1], VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->num_planes == 2, VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->pitches[0] == memory_attribute->pitches[1], VA_STATUS_ERROR_INVALID_PARAMETER);
 
 		obj_surface->subsampling = SUBSAMPLE_YUV420;
 		obj_surface->y_cb_offset = obj_surface->height;
 		obj_surface->y_cr_offset = obj_surface->height;
 		obj_surface->cb_cr_width = ALIGN(obj_surface->orig_width, 2) / 2;
 		obj_surface->cb_cr_height = ALIGN(obj_surface->orig_height, 2) / 2;
-		obj_surface->cb_cr_pitch = memory_attibute->pitches[1];
+		obj_surface->cb_cr_pitch = memory_attribute->pitches[1];
 		if (tiling)
 			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, 128), VA_STATUS_ERROR_INVALID_PARAMETER);
 		else
@@ -1886,15 +1886,15 @@ i965_surface_external_memory(VADriverContextP ctx,
 
 	case VA_FOURCC_YV12:
 	case VA_FOURCC_IMC1:
-		ASSERT_RET(memory_attibute->num_planes == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
-		ASSERT_RET(memory_attibute->pitches[1] == memory_attibute->pitches[2], VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->num_planes == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->pitches[1] == memory_attribute->pitches[2], VA_STATUS_ERROR_INVALID_PARAMETER);
 
 		obj_surface->subsampling = SUBSAMPLE_YUV420;
 		obj_surface->y_cr_offset = obj_surface->height;
-		obj_surface->y_cb_offset = memory_attibute->offsets[2] / obj_surface->width;
+		obj_surface->y_cb_offset = memory_attribute->offsets[2] / obj_surface->width;
 		obj_surface->cb_cr_width = ALIGN(obj_surface->orig_width, 2) / 2;
 		obj_surface->cb_cr_height = ALIGN(obj_surface->orig_height, 2) / 2;
-		obj_surface->cb_cr_pitch = memory_attibute->pitches[1];
+		obj_surface->cb_cr_pitch = memory_attribute->pitches[1];
 
 		if (tiling)
 			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, 128), VA_STATUS_ERROR_INVALID_PARAMETER);
@@ -1907,15 +1907,15 @@ i965_surface_external_memory(VADriverContextP ctx,
 	case VA_FOURCC_IYUV:
 	case VA_FOURCC_IMC3:
 	case VA_FOURCC_I010:
-		ASSERT_RET(memory_attibute->num_planes == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
-		ASSERT_RET(memory_attibute->pitches[1] == memory_attibute->pitches[2], VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->num_planes == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->pitches[1] == memory_attribute->pitches[2], VA_STATUS_ERROR_INVALID_PARAMETER);
 
 		obj_surface->subsampling = SUBSAMPLE_YUV420;
 		obj_surface->y_cb_offset = obj_surface->height;
-		obj_surface->y_cr_offset = memory_attibute->offsets[2] / obj_surface->width;
+		obj_surface->y_cr_offset = memory_attribute->offsets[2] / obj_surface->width;
 		obj_surface->cb_cr_width = ALIGN(obj_surface->orig_width, 2) / 2;
 		obj_surface->cb_cr_height = ALIGN(obj_surface->orig_height, 2) / 2;
-		obj_surface->cb_cr_pitch = memory_attibute->pitches[1];
+		obj_surface->cb_cr_pitch = memory_attribute->pitches[1];
 		if (tiling)
 			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, 128), VA_STATUS_ERROR_INVALID_PARAMETER);
 		else
@@ -1925,14 +1925,14 @@ i965_surface_external_memory(VADriverContextP ctx,
 
 	case VA_FOURCC_YUY2:
 	case VA_FOURCC_UYVY:
-		ASSERT_RET(memory_attibute->num_planes == 1, VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->num_planes == 1, VA_STATUS_ERROR_INVALID_PARAMETER);
 
 		obj_surface->subsampling = SUBSAMPLE_YUV422H;
 		obj_surface->y_cb_offset = 0;
 		obj_surface->y_cr_offset = 0;
 		obj_surface->cb_cr_width = obj_surface->orig_width / 2;
 		obj_surface->cb_cr_height = obj_surface->orig_height;
-		obj_surface->cb_cr_pitch = memory_attibute->pitches[0];
+		obj_surface->cb_cr_pitch = memory_attribute->pitches[0];
 
 		break;
 
@@ -1940,7 +1940,7 @@ i965_surface_external_memory(VADriverContextP ctx,
 	case VA_FOURCC_RGBX:
 	case VA_FOURCC_BGRA:
 	case VA_FOURCC_BGRX:
-		ASSERT_RET(memory_attibute->num_planes == 1, VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->num_planes == 1, VA_STATUS_ERROR_INVALID_PARAMETER);
 
 		obj_surface->subsampling = SUBSAMPLE_RGBX;
 		obj_surface->y_cb_offset = 0;
@@ -1952,7 +1952,7 @@ i965_surface_external_memory(VADriverContextP ctx,
 		break;
 
 	case VA_FOURCC_Y800: /* monochrome surface */
-		ASSERT_RET(memory_attibute->num_planes == 1, VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->num_planes == 1, VA_STATUS_ERROR_INVALID_PARAMETER);
 
 		obj_surface->subsampling = SUBSAMPLE_YUV400;
 		obj_surface->y_cb_offset = 0;
@@ -1964,15 +1964,15 @@ i965_surface_external_memory(VADriverContextP ctx,
 		break;
 
 	case VA_FOURCC_411P:
-		ASSERT_RET(memory_attibute->num_planes == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
-		ASSERT_RET(memory_attibute->pitches[1] == memory_attibute->pitches[2], VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->num_planes == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->pitches[1] == memory_attribute->pitches[2], VA_STATUS_ERROR_INVALID_PARAMETER);
 
 		obj_surface->subsampling = SUBSAMPLE_YUV411;
 		obj_surface->y_cb_offset = obj_surface->height;
-		obj_surface->y_cr_offset = memory_attibute->offsets[2] / obj_surface->width;
+		obj_surface->y_cr_offset = memory_attribute->offsets[2] / obj_surface->width;
 		obj_surface->cb_cr_width = obj_surface->orig_width / 4;
 		obj_surface->cb_cr_height = obj_surface->orig_height;
-		obj_surface->cb_cr_pitch = memory_attibute->pitches[1];
+		obj_surface->cb_cr_pitch = memory_attribute->pitches[1];
 		if (tiling)
 			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, 128), VA_STATUS_ERROR_INVALID_PARAMETER);
 		else
@@ -1980,15 +1980,15 @@ i965_surface_external_memory(VADriverContextP ctx,
 		break;
 
 	case VA_FOURCC_422H:
-		ASSERT_RET(memory_attibute->num_planes == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
-		ASSERT_RET(memory_attibute->pitches[1] == memory_attibute->pitches[2], VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->num_planes == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->pitches[1] == memory_attribute->pitches[2], VA_STATUS_ERROR_INVALID_PARAMETER);
 
 		obj_surface->subsampling = SUBSAMPLE_YUV422H;
 		obj_surface->y_cb_offset = obj_surface->height;
-		obj_surface->y_cr_offset = memory_attibute->offsets[2] / obj_surface->width;
+		obj_surface->y_cr_offset = memory_attribute->offsets[2] / obj_surface->width;
 		obj_surface->cb_cr_width = ALIGN(obj_surface->orig_width, 2) / 2;
 		obj_surface->cb_cr_height = obj_surface->orig_height;
-		obj_surface->cb_cr_pitch = memory_attibute->pitches[1];
+		obj_surface->cb_cr_pitch = memory_attribute->pitches[1];
 		if (tiling)
 			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, 128), VA_STATUS_ERROR_INVALID_PARAMETER);
 		else
@@ -1997,29 +1997,29 @@ i965_surface_external_memory(VADriverContextP ctx,
 		break;
 
 	case VA_FOURCC_YV16:
-		ASSERT_RET(memory_attibute->num_planes == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
-		ASSERT_RET(memory_attibute->pitches[1] == memory_attibute->pitches[2], VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->num_planes == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->pitches[1] == memory_attribute->pitches[2], VA_STATUS_ERROR_INVALID_PARAMETER);
 
 		obj_surface->subsampling = SUBSAMPLE_YUV422H;
-		obj_surface->y_cr_offset = memory_attibute->offsets[1] / obj_surface->width;
-		obj_surface->y_cb_offset = memory_attibute->offsets[2] / obj_surface->width;
+		obj_surface->y_cr_offset = memory_attribute->offsets[1] / obj_surface->width;
+		obj_surface->y_cb_offset = memory_attribute->offsets[2] / obj_surface->width;
 		obj_surface->cb_cr_width = ALIGN(obj_surface->orig_width, 2) / 2;
 		obj_surface->cb_cr_height = obj_surface->orig_height;
-		obj_surface->cb_cr_pitch = memory_attibute->pitches[1];
+		obj_surface->cb_cr_pitch = memory_attribute->pitches[1];
 		ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, i965->codec_info->min_linear_wpitch), VA_STATUS_ERROR_INVALID_PARAMETER);
 
 		break;
 
 	case VA_FOURCC_422V:
-		ASSERT_RET(memory_attibute->num_planes == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
-		ASSERT_RET(memory_attibute->pitches[1] == memory_attibute->pitches[2], VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->num_planes == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->pitches[1] == memory_attribute->pitches[2], VA_STATUS_ERROR_INVALID_PARAMETER);
 
 		obj_surface->subsampling = SUBSAMPLE_YUV422H;
 		obj_surface->y_cb_offset = obj_surface->height;
-		obj_surface->y_cr_offset = memory_attibute->offsets[2] / obj_surface->width;
+		obj_surface->y_cr_offset = memory_attribute->offsets[2] / obj_surface->width;
 		obj_surface->cb_cr_width = obj_surface->orig_width;
 		obj_surface->cb_cr_height = ALIGN(obj_surface->orig_height, 2) / 2;
-		obj_surface->cb_cr_pitch = memory_attibute->pitches[1];
+		obj_surface->cb_cr_pitch = memory_attribute->pitches[1];
 		if (tiling)
 			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, 128), VA_STATUS_ERROR_INVALID_PARAMETER);
 		else
@@ -2028,15 +2028,272 @@ i965_surface_external_memory(VADriverContextP ctx,
 		break;
 
 	case VA_FOURCC_444P:
-		ASSERT_RET(memory_attibute->num_planes == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
-		ASSERT_RET(memory_attibute->pitches[1] == memory_attibute->pitches[2], VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->num_planes == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->pitches[1] == memory_attribute->pitches[2], VA_STATUS_ERROR_INVALID_PARAMETER);
 
 		obj_surface->subsampling = SUBSAMPLE_YUV444;
 		obj_surface->y_cb_offset = obj_surface->height;
-		obj_surface->y_cr_offset = memory_attibute->offsets[2] / obj_surface->width;
+		obj_surface->y_cr_offset = memory_attribute->offsets[2] / obj_surface->width;
 		obj_surface->cb_cr_width = obj_surface->orig_width;
 		obj_surface->cb_cr_height = obj_surface->orig_height;
-		obj_surface->cb_cr_pitch = memory_attibute->pitches[1];
+		obj_surface->cb_cr_pitch = memory_attribute->pitches[1];
+		if (tiling)
+			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, 128), VA_STATUS_ERROR_INVALID_PARAMETER);
+		else
+			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, i965->codec_info->min_linear_wpitch), VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		break;
+
+	default:
+		return VA_STATUS_ERROR_INVALID_PARAMETER;
+	}
+
+	return VA_STATUS_SUCCESS;
+}
+
+static VAStatus
+i965_surface_external_memory2(VADriverContextP ctx,
+							struct object_surface *obj_surface,
+							int external_memory_type,
+							VADRMPRIMESurfaceDescriptor *memory_attribute,
+							int index)
+{
+	assert(external_memory_type != I965_SURFACE_MEM_DRM_PRIME_2);
+
+	struct i965_driver_data *i965 = i965_driver_data(ctx);
+	unsigned int tiling, swizzle;
+
+	if (!memory_attribute ||
+		!memory_attribute->objects ||
+		index >= memory_attribute->num_objects)
+		return VA_STATUS_ERROR_INVALID_PARAMETER;
+
+	if (memory_attribute->num_objects > 1)
+	{
+		i965_log_error(ctx, "i965_surface_external_memory2: Driver does not support more than one object.");
+		return VA_STATUS_ERROR_INVALID_PARAMETER;
+	}
+
+	obj_surface->size = memory_attribute->objects[0].size;
+	obj_surface->bo = drm_intel_bo_gem_create_from_prime(i965->intel.bufmgr,
+															 memory_attribute->objects[0].fd,
+															 obj_surface->size);
+
+	if (!obj_surface->bo)
+		return VA_STATUS_ERROR_INVALID_PARAMETER;
+
+	dri_bo_get_tiling(obj_surface->bo, &tiling, &swizzle);
+
+	ASSERT_RET(obj_surface->orig_width == memory_attribute->width, VA_STATUS_ERROR_INVALID_PARAMETER);
+	ASSERT_RET(obj_surface->orig_height == memory_attribute->height, VA_STATUS_ERROR_INVALID_PARAMETER);
+
+	obj_surface->fourcc = memory_attribute->fourcc;
+	obj_surface->width = memory_attribute->width;
+
+	if ((obj_surface->fourcc == VA_FOURCC_I420 ||
+		 obj_surface->fourcc == VA_FOURCC_IYUV ||
+		 obj_surface->fourcc == VA_FOURCC_I010 ||
+		 obj_surface->fourcc == VA_FOURCC_YV12 ||
+		 obj_surface->fourcc == VA_FOURCC_YV16) && tiling)
+		return VA_STATUS_ERROR_INVALID_PARAMETER;
+
+	int bpp_1stplane = bpp_1stplane_by_fourcc(obj_surface->fourcc);
+	ASSERT_RET(IS_ALIGNED(obj_surface->width, 16), VA_STATUS_ERROR_INVALID_PARAMETER);
+	ASSERT_RET(obj_surface->width >= obj_surface->orig_width * bpp_1stplane, VA_STATUS_ERROR_INVALID_PARAMETER);
+
+	if (memory_attribute->num_layers == 1)
+		obj_surface->height = memory_attribute->objects[0].size / obj_surface->width;
+	else
+		obj_surface->height = memory_attribute->layers[1].offset[0] / obj_surface->width;
+
+	if (memory_attribute->num_layers > 1) {
+		ASSERT_RET(obj_surface->height >= obj_surface->orig_height, VA_STATUS_ERROR_INVALID_PARAMETER);
+	}
+
+	if (tiling) {
+		ASSERT_RET(IS_ALIGNED(obj_surface->width, 128), VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		if (memory_attribute->num_layers > 1)
+			ASSERT_RET(IS_ALIGNED(obj_surface->height, 32), VA_STATUS_ERROR_INVALID_PARAMETER);
+	} else {
+		ASSERT_RET(IS_ALIGNED(obj_surface->width, i965->codec_info->min_linear_wpitch), VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		if (memory_attribute->num_layers > 1)
+			ASSERT_RET(IS_ALIGNED(obj_surface->height, i965->codec_info->min_linear_hpitch), VA_STATUS_ERROR_INVALID_PARAMETER);
+	}
+
+	switch (obj_surface->fourcc) {
+	case VA_FOURCC_NV12:
+	case VA_FOURCC_P010:
+		ASSERT_RET(memory_attribute->num_layers == 2, VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->layers[0].pitch[0] == memory_attribute->layers[1].pitch[0], VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		obj_surface->subsampling = SUBSAMPLE_YUV420;
+		obj_surface->y_cb_offset = obj_surface->height;
+		obj_surface->y_cr_offset = obj_surface->height;
+		obj_surface->cb_cr_width = ALIGN(obj_surface->orig_width, 2) / 2;
+		obj_surface->cb_cr_height = ALIGN(obj_surface->orig_height, 2) / 2;
+		obj_surface->cb_cr_pitch = memory_attribute->layers[1].pitch[0];
+		if (tiling)
+			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, 128), VA_STATUS_ERROR_INVALID_PARAMETER);
+		else
+			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, i965->codec_info->min_linear_wpitch), VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		break;
+
+	case VA_FOURCC_YV12:
+	case VA_FOURCC_IMC1:
+		ASSERT_RET(memory_attribute->num_layers == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->layers[1].pitch[0] == memory_attribute->layers[2].pitch[0], VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		obj_surface->subsampling = SUBSAMPLE_YUV420;
+		obj_surface->y_cr_offset = obj_surface->height;
+		obj_surface->y_cb_offset = memory_attribute->layers[2].offset[0] / obj_surface->width;
+		obj_surface->cb_cr_width = ALIGN(obj_surface->orig_width, 2) / 2;
+		obj_surface->cb_cr_height = ALIGN(obj_surface->orig_height, 2) / 2;
+		obj_surface->cb_cr_pitch = memory_attribute->layers[1].pitch[0];
+
+		if (tiling)
+			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, 128), VA_STATUS_ERROR_INVALID_PARAMETER);
+		else
+			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, i965->codec_info->min_linear_wpitch), VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		break;
+
+	case VA_FOURCC_I420:
+	case VA_FOURCC_IYUV:
+	case VA_FOURCC_IMC3:
+	case VA_FOURCC_I010:
+		ASSERT_RET(memory_attribute->num_layers == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->layers[1].pitch[0] == memory_attribute->layers[2].pitch[0], VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		obj_surface->subsampling = SUBSAMPLE_YUV420;
+		obj_surface->y_cb_offset = obj_surface->height;
+		obj_surface->y_cr_offset = memory_attribute->layers[2].offset[0] / obj_surface->width;
+		obj_surface->cb_cr_width = ALIGN(obj_surface->orig_width, 2) / 2;
+		obj_surface->cb_cr_height = ALIGN(obj_surface->orig_height, 2) / 2;
+		obj_surface->cb_cr_pitch = memory_attribute->layers[1].pitch[0];
+		if (tiling)
+			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, 128), VA_STATUS_ERROR_INVALID_PARAMETER);
+		else
+			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, i965->codec_info->min_linear_wpitch), VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		break;
+
+	case VA_FOURCC_YUY2:
+	case VA_FOURCC_UYVY:
+		ASSERT_RET(memory_attribute->num_layers == 1, VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		obj_surface->subsampling = SUBSAMPLE_YUV422H;
+		obj_surface->y_cb_offset = 0;
+		obj_surface->y_cr_offset = 0;
+		obj_surface->cb_cr_width = obj_surface->orig_width / 2;
+		obj_surface->cb_cr_height = obj_surface->orig_height;
+		obj_surface->cb_cr_pitch = memory_attribute->layers[0].pitch[0];
+
+		break;
+
+	case VA_FOURCC_RGBA:
+	case VA_FOURCC_RGBX:
+	case VA_FOURCC_BGRA:
+	case VA_FOURCC_BGRX:
+		ASSERT_RET(memory_attribute->num_layers == 1, VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		obj_surface->subsampling = SUBSAMPLE_RGBX;
+		obj_surface->y_cb_offset = 0;
+		obj_surface->y_cr_offset = 0;
+		obj_surface->cb_cr_width = 0;
+		obj_surface->cb_cr_height = 0;
+		obj_surface->cb_cr_pitch = 0;
+
+		break;
+
+	case VA_FOURCC_Y800: /* monochrome surface */
+		ASSERT_RET(memory_attribute->num_layers == 1, VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		obj_surface->subsampling = SUBSAMPLE_YUV400;
+		obj_surface->y_cb_offset = 0;
+		obj_surface->y_cr_offset = 0;
+		obj_surface->cb_cr_width = 0;
+		obj_surface->cb_cr_height = 0;
+		obj_surface->cb_cr_pitch = 0;
+
+		break;
+
+	case VA_FOURCC_411P:
+		ASSERT_RET(memory_attribute->num_layers == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->layers[1].pitch[0] == memory_attribute->layers[2].pitch[0], VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		obj_surface->subsampling = SUBSAMPLE_YUV411;
+		obj_surface->y_cb_offset = obj_surface->height;
+		obj_surface->y_cr_offset = memory_attribute->layers[2].offset[0] / obj_surface->width;
+		obj_surface->cb_cr_width = obj_surface->orig_width / 4;
+		obj_surface->cb_cr_height = obj_surface->orig_height;
+		obj_surface->cb_cr_pitch = memory_attribute->layers[1].pitch[0];
+		if (tiling)
+			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, 128), VA_STATUS_ERROR_INVALID_PARAMETER);
+		else
+			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, i965->codec_info->min_linear_wpitch), VA_STATUS_ERROR_INVALID_PARAMETER);
+		break;
+
+	case VA_FOURCC_422H:
+		ASSERT_RET(memory_attribute->num_layers == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->layers[1].pitch[0] == memory_attribute->layers[2].pitch[0], VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		obj_surface->subsampling = SUBSAMPLE_YUV422H;
+		obj_surface->y_cb_offset = obj_surface->height;
+		obj_surface->y_cr_offset = memory_attribute->layers[2].offset[0] / obj_surface->width;
+		obj_surface->cb_cr_width = ALIGN(obj_surface->orig_width, 2) / 2;
+		obj_surface->cb_cr_height = obj_surface->orig_height;
+		obj_surface->cb_cr_pitch = memory_attribute->layers[1].pitch[0];
+		if (tiling)
+			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, 128), VA_STATUS_ERROR_INVALID_PARAMETER);
+		else
+			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, i965->codec_info->min_linear_wpitch), VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		break;
+
+	case VA_FOURCC_YV16:
+		ASSERT_RET(memory_attribute->num_layers == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->layers[1].pitch[0] == memory_attribute->layers[2].pitch[0], VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		obj_surface->subsampling = SUBSAMPLE_YUV422H;
+		obj_surface->y_cr_offset = memory_attribute->layers[1].offset[0] / obj_surface->width;
+		obj_surface->y_cb_offset = memory_attribute->layers[2].offset[0] / obj_surface->width;
+		obj_surface->cb_cr_width = ALIGN(obj_surface->orig_width, 2) / 2;
+		obj_surface->cb_cr_height = obj_surface->orig_height;
+		obj_surface->cb_cr_pitch = memory_attribute->layers[1].pitch[0];
+		ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, i965->codec_info->min_linear_wpitch), VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		break;
+
+	case VA_FOURCC_422V:
+		ASSERT_RET(memory_attribute->num_layers == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->layers[1].pitch[0] == memory_attribute->layers[2].pitch[0], VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		obj_surface->subsampling = SUBSAMPLE_YUV422H;
+		obj_surface->y_cb_offset = obj_surface->height;
+		obj_surface->y_cr_offset = memory_attribute->layers[2].offset[0] / obj_surface->width;
+		obj_surface->cb_cr_width = obj_surface->orig_width;
+		obj_surface->cb_cr_height = ALIGN(obj_surface->orig_height, 2) / 2;
+		obj_surface->cb_cr_pitch = memory_attribute->layers[1].pitch[0];
+		if (tiling)
+			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, 128), VA_STATUS_ERROR_INVALID_PARAMETER);
+		else
+			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, i965->codec_info->min_linear_wpitch), VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		break;
+
+	case VA_FOURCC_444P:
+		ASSERT_RET(memory_attribute->num_layers == 3, VA_STATUS_ERROR_INVALID_PARAMETER);
+		ASSERT_RET(memory_attribute->layers[1].pitch[0] == memory_attribute->layers[2].pitch[0], VA_STATUS_ERROR_INVALID_PARAMETER);
+
+		obj_surface->subsampling = SUBSAMPLE_YUV444;
+		obj_surface->y_cb_offset = obj_surface->height;
+		obj_surface->y_cr_offset = memory_attribute->layers[2].offset[0] / obj_surface->width;
+		obj_surface->cb_cr_width = obj_surface->orig_width;
+		obj_surface->cb_cr_height = obj_surface->orig_height;
+		obj_surface->cb_cr_pitch = memory_attribute->layers[1].pitch[0];
 		if (tiling)
 			ASSERT_RET(IS_ALIGNED(obj_surface->cb_cr_pitch, 128), VA_STATUS_ERROR_INVALID_PARAMETER);
 		else
@@ -2067,7 +2324,7 @@ static inline int AlignHeightForFormat(struct i965_driver_data *i965, int su_hin
 			/**
 			 * The iHD driver claims that this is more performant.
 			 */
-			if (!(su_hint & VA_SURFACE_ATTRIB_USAGE_HINT_ENCODER) 
+			if (!(su_hint & VA_SURFACE_ATTRIB_USAGE_HINT_ENCODER)
 				&& !(su_hint & VA_SURFACE_ATTRIB_USAGE_HINT_VPP_WRITE))
 				return ALIGN(height, 64);
 
@@ -2100,6 +2357,7 @@ i965_CreateSurfaces2(
 	int memory_type = I965_SURFACE_MEM_NATIVE; /* native */
 	int surface_usage_hint = VA_SURFACE_ATTRIB_USAGE_HINT_GENERIC;
 	VASurfaceAttribExternalBuffers *memory_attribute = NULL;
+	VADRMPRIMESurfaceDescriptor *prime_descriptor = NULL;
 
 	for (i = 0; i < num_attribs && attrib_list; i++) {
 		if ((attrib_list[i].type == VASurfaceAttribPixelFormat) &&
@@ -2125,26 +2383,39 @@ i965_CreateSurfaces2(
 			}
 			else if (attrib_list[i].value.value.i == VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME)
 			{
-				memory_type = I965_SURFACE_MEM_DRM_PRIME; /* drm prime fd */
+				memory_type = I965_SURFACE_MEM_DRM_PRIME; /* VASurfaceAttribExternalBuffers (using DRM PRIME fd) */
+			}
+			else if (attrib_list[i].value.value.i == VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2)
+			{
+				memory_type = I965_SURFACE_MEM_DRM_PRIME_2; /* VADRMPRIMESurfaceDescriptor (using DRM PRIME fd) */
 			}
 			else if (attrib_list[i].value.value.i == VA_SURFACE_ATTRIB_MEM_TYPE_VA)
 			{
 				memory_type = I965_SURFACE_MEM_NATIVE; /* va native memory, to be allocated */
 			}
-			else if (attrib_list[i].value.value.i == VA_SURFACE_ATTRIB_MEM_TYPE_USER_PTR)
-			{
-				return VA_STATUS_ERROR_INVALID_PARAMETER;
-			}
 			else
 			{
-				i965_log_debug(ctx, "i965_CreateSurfaces2: Unknown VA_SURFACE_TYPE: %i\n", attrib_list[i].value.value.i);
+				if (attrib_list[i].value.value.i != VA_SURFACE_ATTRIB_MEM_TYPE_USER_PTR)
+				{
+					i965_log_debug(ctx, "i965_CreateSurfaces2: Unknown VA_SURFACE_TYPE: %i\n", attrib_list[i].value.value.i);
+				}
+
+				return VA_STATUS_ERROR_INVALID_PARAMETER;
 			}
 		}
 
 		if ((attrib_list[i].type == VASurfaceAttribExternalBufferDescriptor) &&
 			(attrib_list[i].flags == VA_SURFACE_ATTRIB_SETTABLE)) {
 			ASSERT_RET(attrib_list[i].value.type == VAGenericValueTypePointer, VA_STATUS_ERROR_INVALID_PARAMETER);
-			memory_attribute = (VASurfaceAttribExternalBuffers *)attrib_list[i].value.value.p;
+
+			if (memory_type == I965_SURFACE_MEM_DRM_PRIME_2)
+			{
+				prime_descriptor = (VADRMPRIMESurfaceDescriptor *)attrib_list[i].value.value.p;
+			}
+			else
+			{
+				memory_attribute = (VASurfaceAttribExternalBuffers *)attrib_list[i].value.value.p;
+			}
 		}
 	}
 
@@ -2172,7 +2443,7 @@ i965_CreateSurfaces2(
 	 * Chromium doesn't provide a FOURCC to this function,
 	 * this will cause it to explode later on as we need a BO
 	 * when exporting the surface via vaExportSurfaceHandle.
-	 * 
+	 *
 	 * Do what the iHD does and guess now.
 	 */
 	if (!expected_fourcc)
@@ -2273,6 +2544,14 @@ i965_CreateSurfaces2(
 												   obj_surface,
 												   memory_type,
 												   memory_attribute,
+												   i);
+			break;
+
+		case I965_SURFACE_MEM_DRM_PRIME_2:
+			vaStatus = i965_surface_external_memory2(ctx,
+												   obj_surface,
+												   memory_type,
+												   prime_descriptor,
 												   i);
 			break;
 
@@ -4426,7 +4705,7 @@ i965_SyncBuffer(VADriverContextP ctx,
 
 	/**
 	 * The kernel expects a negative value as an infinite timeout, enforce that.
-	 * 
+	 *
 	 * We also need to workaround a kernel limitation for DRM_IOCTL_I915_GEM_WAIT,
 	 * treat really large values as an infinite timeout.
 	 */
@@ -5268,7 +5547,7 @@ VAStatus i965_DeriveImage(VADriverContextP ctx,
 			image->format.red_mask = 0x0000ff00;
 			image->format.green_mask = 0x00ff0000;
 			image->format.blue_mask = 0xff000000;
-			break;		
+			break;
 
 		default:
 			goto error;
@@ -5974,7 +6253,7 @@ static Bool use_hw_put_image(struct i965_driver_data *const i965, struct object_
 	/* mpv will try to probe all formats, even if we don't have support for it. */
 	if (obj_image && obj_image->image.format.fourcc == VA_FOURCC_P010 && !HAS_VPP_P010(i965))
 		return false;
-	
+
 	return true;
 }
 
@@ -6472,7 +6751,7 @@ i965_QuerySurfaceAttributes(VADriverContextP ctx,
 
 	/**
 	 * We no longer have one massive function to query the formats.
-	 * 
+	 *
 	 * This has the benefit of being tider, at the cost of some additional
 	 * code overhead.
 	 */
@@ -6483,7 +6762,8 @@ i965_QuerySurfaceAttributes(VADriverContextP ctx,
 	attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
 	attribs[i].value.value.i = VA_SURFACE_ATTRIB_MEM_TYPE_VA |
 							   VA_SURFACE_ATTRIB_MEM_TYPE_KERNEL_DRM |
-							   VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME;
+							   VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME |
+							   VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2;
 	i++;
 
 	attribs[i].type = VASurfaceAttribExternalBufferDescriptor;
@@ -6560,21 +6840,27 @@ i965_acquire_buffer_handle(struct object_buffer *obj_buffer,
 	} else {
 		VABufferInfo * const buf_info = &obj_buffer->export_state;
 
-		switch (mem_type) {
-		case VA_SURFACE_ATTRIB_MEM_TYPE_KERNEL_DRM: {
+		switch (mem_type)
+		{
+
+		case VA_SURFACE_ATTRIB_MEM_TYPE_KERNEL_DRM:
+		{
 			uint32_t name;
 			if (drm_intel_bo_flink(buffer_store->bo, &name) != 0)
 				return VA_STATUS_ERROR_INVALID_BUFFER;
 			buf_info->handle = name;
 			break;
 		}
-		case VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME: {
+
+		case VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME:
+		{
 			int fd;
 			if (drm_intel_bo_gem_export_to_prime(buffer_store->bo, &fd) != 0)
 				return VA_STATUS_ERROR_INVALID_BUFFER;
 			buf_info->handle = (intptr_t)fd;
 			break;
 		}
+
 		}
 
 		buf_info->type = obj_buffer->type;
@@ -6598,11 +6884,15 @@ i965_release_buffer_handle(struct object_buffer *obj_buffer)
 	if (--obj_buffer->export_refcount == 0) {
 		VABufferInfo * const buf_info = &obj_buffer->export_state;
 
-		switch (buf_info->mem_type) {
-		case VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME: {
+		switch (buf_info->mem_type)
+		{
+
+		case VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME:
+		{
 			close((intptr_t)buf_info->handle);
 			break;
 		}
+
 		}
 		buf_info->mem_type = 0;
 	}
@@ -6616,47 +6906,65 @@ i965_AcquireBufferHandle(VADriverContextP ctx, VABufferID buf_id,
 {
 	struct i965_driver_data * const i965 = i965_driver_data(ctx);
 	struct object_buffer * const obj_buffer = BUFFER(buf_id);
-	uint32_t i, mem_type;
+	uint32_t mem_type;
 
 	/* List of supported memory types, in preferred order */
-	static const uint32_t mem_types[] = {
+	static const uint32_t mem_types[] =
+	{
 		VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME,
 		VA_SURFACE_ATTRIB_MEM_TYPE_KERNEL_DRM,
 		0
 	};
 
 	if (!obj_buffer)
+	{
 		return VA_STATUS_ERROR_INVALID_BUFFER;
-	/* XXX: only VA surface|image like buffers are supported for now */
+	}
+
+	/**
+	 * XXX: only VA surface|image like buffers are supported for now
+	 */
 	if (obj_buffer->type != VAImageBufferType)
+	{
 		return VA_STATUS_ERROR_UNSUPPORTED_BUFFERTYPE;
+	}
 
 	/*
 	 * As the allocated buffer by calling vaCreateBuffer is related with
 	 * the specific context, it is unnecessary to export it.
 	 * So it is not supported when the buffer is allocated from wrapped
-	 * backend dirver.
+	 * backend driver.
 	 */
-	if (obj_buffer->wrapper_buffer != VA_INVALID_ID) {
+	if (obj_buffer->wrapper_buffer != VA_INVALID_ID)
+	{
 		return VA_STATUS_ERROR_UNSUPPORTED_BUFFERTYPE;
 	}
 
 	if (!buf_info)
+	{
 		return VA_STATUS_ERROR_INVALID_PARAMETER;
+	}
 
 	if (!buf_info->mem_type)
+	{
 		mem_type = mem_types[0];
-	else {
+	}
+	else
+	{
 		mem_type = 0;
-		for (i = 0; mem_types[i] != 0; i++) {
-			if (buf_info->mem_type & mem_types[i]) {
+		for (uint32_t i = 0; mem_types[i] != 0; i++)
+		{
+			if (buf_info->mem_type & mem_types[i])
+			{
 				mem_type = buf_info->mem_type;
 				break;
 			}
 		}
+
 		if (!mem_type)
 			return VA_STATUS_ERROR_UNSUPPORTED_MEMORY_TYPE;
 	}
+
 	return i965_acquire_buffer_handle(obj_buffer, mem_type, buf_info);
 }
 
@@ -6700,14 +7008,10 @@ i965_ExportSurfaceHandle(VADriverContextP ctx, VASurfaceID surface_id,
 	if (!obj_surface->bo)
 	{
 		i965_log_debug(ctx, "vaExportSurfaceHandle: Surface lacks a backing BO to export\n");
-		return VA_STATUS_ERROR_INVALID_SURFACE;		
+		return VA_STATUS_ERROR_INVALID_SURFACE;
 	}
 
-	if (
-#if VA_CHECK_VERSION(1, 21, 0)
-		mem_type != VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_3 &&
-#endif
-		mem_type != VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2)
+	if (mem_type != VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2)
 	{
 		i965_log_info(ctx, "vaExportSurfaceHandle: memory type %08x "
 					  "is not supported.\n", mem_type);

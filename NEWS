@@ -3,6 +3,8 @@ Copyright (C) 2009-2023 Intel Corporation
 
 Version 2.4.5 - XX.XX.XXXX (IRQL fork)
 
+* Remove support for VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_3 in vaExportSurfaceHandle.
+* Add support for VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2 in vaCreateSurfaces.
 * Expose RGBX as a VPP format on ILK
 * Expose RGBA/BGRA as a VPP format on ILK
 
