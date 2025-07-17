@@ -327,7 +327,12 @@ i965_avc_bsd_slice_state(VADriverContextP ctx,
                         slice_param->chroma_weight_l0[j][1] == 128)
                         i965_h264_context->weight128_chroma_l0 |= (1 << j);
                 } else {
-                    /* FIXME: workaround for weight 128 */
+                    /**
+					 * FIXME: workaround for weight 128
+					 * 
+					 * TODO(irql): There is an alternate version in the G4X patchset,
+					 * we might have to switch to it, for now leave as is.
+					 */
                     if (slice_param->luma_weight_l0[j] == 128 ||
                         slice_param->chroma_weight_l0[j][0] == 128 ||
                         slice_param->chroma_weight_l0[j][1] == 128)
@@ -357,6 +362,10 @@ i965_avc_bsd_slice_state(VADriverContextP ctx,
                         slice_param->chroma_weight_l1[j][1] == 128)
                         i965_h264_context->weight128_chroma_l1 |= (1 << j);
                 } else {
+					/**
+					 * TODO(irql): There is an alternate version in the G4X patchset,
+					 * we might have to switch to it, for now leave as is.
+					 */
                     if (slice_param->luma_weight_l0[j] == 128 ||
                         slice_param->chroma_weight_l0[j][0] == 128 ||
                         slice_param->chroma_weight_l0[j][1] == 128)
@@ -610,7 +619,7 @@ g4x_avc_bsd_object(VADriverContextP ctx,
         OUT_BCS_BATCH(batch, CMD_AVC_BSD_OBJECT | (8 - 2));
         OUT_BCS_BATCH(batch, 0); /* indirect data length for phantom slice is 0 */
         OUT_BCS_BATCH(batch, 0); /* indirect data start address for phantom slice is 0 */
-        OUT_BCS_BATCH(batch, 0);
+        OUT_BCS_BATCH(batch, slice_index);
         OUT_BCS_BATCH(batch, 0);
         OUT_BCS_BATCH(batch, 0);
         OUT_BCS_BATCH(batch, width_in_mbs * height_in_mbs / (1 + !!pic_param->pic_fields.bits.field_pic_flag));
@@ -781,10 +790,132 @@ static void
 i965_avc_bsd_phantom_slice(VADriverContextP ctx,
                            struct decode_state *decode_state,
                            VAPictureParameterBufferH264 *pic_param,
+						   int prev_slice_type,
                            struct i965_h264_context *i965_h264_context)
 {
-    i965_avc_bsd_object(ctx, decode_state, pic_param, NULL, 0, i965_h264_context);
+    i965_avc_bsd_object(ctx, decode_state, pic_param, NULL, prev_slice_type, i965_h264_context);
 }
+
+#if defined(I965_H264_ENABLE_CTG)
+
+static int
+i965_list_find_weight(short *list, int size, short value)
+{
+	int i;
+
+	for (i = 0; i < size; i++)
+	{
+		if (list[i] == value)
+			return 1;
+	}
+
+	return 0;
+}
+
+static void
+i965_weight128_workaround(VADriverContextP ctx, struct decode_state *decode_state, void *h264_context)
+{
+	struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)h264_context;
+	VAPictureParameterBufferH264 *pic_param;
+	VASliceParameterBufferH264 *slice_param;
+	short weight128_offset0 = 0;
+	int i, j;
+
+	i965_h264_context->weight128_offset0_flag = 0;
+	i965_h264_context->weight128_offset0 = 0;
+
+	assert(decode_state->pic_param && decode_state->pic_param->buffer);
+	pic_param = (VAPictureParameterBufferH264 *)decode_state->pic_param->buffer;
+
+	for (j = 0; j < decode_state->num_slice_params; j++)
+	{
+		assert(decode_state->slice_params && decode_state->slice_params[j]->buffer);
+		slice_param = (VASliceParameterBufferH264 *)decode_state->slice_params[j]->buffer;
+
+		for (i = 0; i < decode_state->slice_params[j]->num_elements; i++)
+		{
+
+			if ((slice_param->slice_type == SLICE_TYPE_P ||
+				 slice_param->slice_type == SLICE_TYPE_SP) &&
+				(pic_param->pic_fields.bits.weighted_pred_flag == 1))
+			{
+				i965_h264_context->weight128_offset0_flag =
+					i965_list_find_weight(&slice_param->luma_weight_l0[0], 32, 128) ||
+					i965_list_find_weight(&slice_param->chroma_weight_l0[0][0], 64, 128);
+			}
+
+			if ((slice_param->slice_type == SLICE_TYPE_B) &&
+				(pic_param->pic_fields.bits.weighted_bipred_idc == 1))
+			{
+				i965_h264_context->weight128_offset0_flag =
+					i965_list_find_weight(&slice_param->luma_weight_l0[0], 32, 128) ||
+					i965_list_find_weight(&slice_param->chroma_weight_l0[0][0], 64, 128) ||
+					i965_list_find_weight(&slice_param->luma_weight_l1[0], 32, 128) ||
+					i965_list_find_weight(&slice_param->chroma_weight_l1[0][0], 64, 128);
+			}
+
+			if (i965_h264_context->weight128_offset0_flag)
+				break;
+
+			slice_param++;
+		}
+
+		if (i965_h264_context->weight128_offset0_flag)
+			break;
+	}
+
+	if (!i965_h264_context->weight128_offset0_flag)
+		return;
+
+	for (weight128_offset0 = 0; weight128_offset0 < 128; weight128_offset0++)
+	{
+		int bfound = 0;
+
+		for (j = 0; j < decode_state->num_slice_params; j++)
+		{
+			assert(decode_state->slice_params && decode_state->slice_params[j]->buffer);
+			slice_param = (VASliceParameterBufferH264 *)decode_state->slice_params[j]->buffer;
+
+			for (i = 0; i < decode_state->slice_params[j]->num_elements; i++)
+			{
+
+				if ((slice_param->slice_type == SLICE_TYPE_P ||
+					 slice_param->slice_type == SLICE_TYPE_SP) &&
+					(pic_param->pic_fields.bits.weighted_pred_flag == 1))
+				{
+					bfound =
+						i965_list_find_weight(&slice_param->luma_weight_l0[0], 32, weight128_offset0) ||
+						i965_list_find_weight(&slice_param->chroma_weight_l0[0][0], 64, weight128_offset0);
+				}
+
+				if ((slice_param->slice_type == SLICE_TYPE_B) &&
+					(pic_param->pic_fields.bits.weighted_bipred_idc == 1))
+				{
+					bfound =
+						i965_list_find_weight(&slice_param->luma_weight_l0[0], 32, weight128_offset0) ||
+						i965_list_find_weight(&slice_param->chroma_weight_l0[0][0], 64, weight128_offset0) ||
+						i965_list_find_weight(&slice_param->luma_weight_l1[0], 32, weight128_offset0) ||
+						i965_list_find_weight(&slice_param->chroma_weight_l1[0][0], 64, weight128_offset0);
+				}
+
+				if (bfound)
+					break;
+
+				slice_param++;
+			}
+
+			if (bfound)
+				break;
+		}
+
+		if (!bfound)
+		{
+			i965_h264_context->weight128_offset0 = weight128_offset0;
+			break;
+		}
+	}
+}
+#endif
 
 void
 i965_avc_bsd_pipeline(VADriverContextP ctx, struct decode_state *decode_state, void *h264_context)
@@ -793,12 +924,16 @@ i965_avc_bsd_pipeline(VADriverContextP ctx, struct decode_state *decode_state, v
     struct intel_batchbuffer *batch = i965_h264_context->batch;
     VAPictureParameterBufferH264 *pic_param;
     VASliceParameterBufferH264 *slice_param;
-    int i, j;
+    int i, j, prev_slice_type = SLICE_TYPE_I;
 
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
     pic_param = (VAPictureParameterBufferH264 *)decode_state->pic_param->buffer;
     intel_update_avc_frame_store_index(ctx, decode_state, pic_param,
                                        i965_h264_context->fsid_list, &i965_h264_context->fs_ctx);
+
+#if defined(I965_H264_ENABLE_CTG)
+	i965_weight128_workaround(ctx, decode_state, h264_context);
+#endif
 
     i965_h264_context->enable_avc_ildb = 0;
     i965_h264_context->picture.i_flag = 1;
@@ -820,6 +955,7 @@ i965_avc_bsd_pipeline(VADriverContextP ctx, struct decode_state *decode_state, v
                 break;
             }
 
+			prev_slice_type = slice_param->slice_type;
             slice_param++;
         }
     }
@@ -855,7 +991,7 @@ i965_avc_bsd_pipeline(VADriverContextP ctx, struct decode_state *decode_state, v
         }
     }
 
-    i965_avc_bsd_phantom_slice(ctx, decode_state, pic_param, i965_h264_context);
+    i965_avc_bsd_phantom_slice(ctx, decode_state, pic_param, prev_slice_type, i965_h264_context);
     intel_batchbuffer_emit_mi_flush(batch);
     intel_batchbuffer_end_atomic(batch);
     intel_batchbuffer_flush(batch);

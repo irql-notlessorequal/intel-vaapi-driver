@@ -46,7 +46,11 @@ struct i965_h264_context {
 	} picture;
 
 	int enable_avc_ildb;
-	int use_avc_hw_scoreboard;
+	/**
+	 * 0 = G4X (which requires a shader-based scoreboard)
+	 * 1 = Ironlake
+	 */
+	unsigned int use_avc_hw_scoreboard;
 
 	int use_hw_w128;
 	unsigned int weight128_luma_l0;

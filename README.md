@@ -15,7 +15,7 @@ This is a fork with many changes, including but not limited to:
 
 The `NEWS` file contains a more detailed changelog.
 
-[✻] Works on IVB and newer, broken on SNB and ILK (for now)
+[✻] Works on IVB and newer, semi-broken on SNB and ILK, unsupported on CTG
 
 # Release schedule
 
