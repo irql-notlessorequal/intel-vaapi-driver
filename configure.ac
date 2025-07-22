@@ -54,8 +54,8 @@ AC_ARG_ENABLE(x11,
 
 AC_ARG_ENABLE([wl-drm],
     [AC_HELP_STRING([--enable-wl-drm],
-                    [build with VA/Wayland API support @<:@default=yes@:>@])],
-    [], [enable_wl_drm="yes"])
+                    [build with legacy VA/Wayland API support @<:@default=no@:>@])],
+    [], [enable_wl_drm="no"])
 
 AC_ARG_ENABLE([hybrid-codec],
     [AC_HELP_STRING([--enable-hybrid-codec],

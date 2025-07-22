@@ -73,7 +73,7 @@ if get_option('with_x11') != 'no'
 endif
 
 WITH_WAYLAND_LEGACY = false
-if get_option('with_legacy_wayland') != 'no'
+if get_option('with_legacy_wayland')
   wayland_client_dep = dependency(
     'wayland-client',
     version : '>= 1.11.0',
