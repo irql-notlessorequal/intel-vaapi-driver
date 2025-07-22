@@ -72,12 +72,12 @@ if get_option('with_x11') != 'no'
   WITH_X11 = libva_x11_dep.found()
 endif
 
-WITH_WAYLAND_LEGACY = false
-if get_option('with_legacy_wayland') != 'no'
+WITH_WAYLAND_DRM = false
+if get_option('with_wayland_drm')
   wayland_client_dep = dependency(
     'wayland-client',
     version : '>= 1.11.0',
-    required : get_option('with_legacy_wayland') == 'yes')
+    required : get_option('with_wayland_drm') == 'yes')
 
   if wayland_client_dep.found()
     prefix = wayland_client_dep.get_pkgconfig_variable('prefix')
@@ -87,18 +87,18 @@ if get_option('with_legacy_wayland') != 'no'
   endif
 
   wl_scanner = find_program('wayland-scanner', wayland_scanner,
-			    required : get_option('with_legacy_wayland') == 'yes')
+			    required : get_option('with_wayland_drm') == 'yes')
 
   libva_wayland_dep = dependency(
     'libva-wayland',
     version : libva_version,
-    required : get_option('with_legacy_wayland') == 'yes')
+    required : get_option('with_wayland_drm') == 'yes')
 
   libva_modern_dep = dependency('libva',
     version : '>= 1.22.0',
     fallback : [ 'libva', 'libva_dep' ])
 
-  WITH_WAYLAND_LEGACY = (wayland_client_dep.found()
+  WITH_WAYLAND_DRM = (wayland_client_dep.found()
 		  and wl_scanner.found()
 		  and libva_wayland_dep.found()
       and not libva_modern_dep.found())

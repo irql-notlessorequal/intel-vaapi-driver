@@ -1,10 +1,10 @@
 option('driverdir', type : 'string', description : 'drivers path')
 option('with_x11', type : 'combo', choices : ['yes', 'no', 'auto'], value : 'auto')
-option('with_legacy_wayland',
-    description: 'Build with Wayland support via the legacy wl_drm protocol.'
-    type : 'combo',
-    choices : ['yes', 'no', 'auto'],
-    value : 'auto'
+option('with_wayland_drm', 
+    description: 'Build with Wayland support via the legacy wl_drm protocol',
+    deprecated: true,
+    type : 'boolean',
+    value : false
 )
 option('enable_hybrid_codec', type : 'boolean', value : false)
 option('enable_tests', type : 'boolean', value : false)
