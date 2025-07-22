@@ -52,10 +52,10 @@ AC_ARG_ENABLE(x11,
                     [build with VA/X11 API support @<:@default=yes@:>@])],
     [], [enable_x11="yes"])
 
-AC_ARG_ENABLE([wayland],
-    [AC_HELP_STRING([--enable-wayland],
-                    [build with VA/Wayland API support @<:@default=yes@:>@])],
-    [], [enable_wayland="yes"])
+AC_ARG_ENABLE([wayland-drm],
+    [AC_HELP_STRING([--enable-wayland-drm],
+                    [build with VA/Wayland API support via legacy wl_drm @<:@default=no@:>@])],
+    [], [enable_wayland_drm="no"])
 
 AC_ARG_ENABLE([hybrid-codec],
     [AC_HELP_STRING([--enable-hybrid-codec],
@@ -164,27 +164,27 @@ fi
 AC_MSG_RESULT([$LIBVA_DRIVERS_PATH])
 AC_SUBST(LIBVA_DRIVERS_PATH)
 
-# Check for Wayland
-USE_WAYLAND="no"
-if test "$enable_wayland" = "yes"; then
+# Check for Wayland via wl_drm
+USE_WAYLAND_DRM="no"
+if test "$enable_wayland_drm" = "yes"; then
     PKG_CHECK_MODULES([LIBVA_WAYLAND_DEPS], [libva-wayland >= va_api_version],
         [
           PKG_CHECK_MODULES([WAYLAND_CLIENT],
              [wayland-client >= wayland_api_version],
              [
-                USE_WAYLAND="yes"
+                USE_WAYLAND_DRM="yes"
                 WAYLAND_PREFIX=`$PKG_CONFIG --variable=prefix wayland-client`
                 AC_PATH_PROG([WAYLAND_SCANNER], [wayland-scanner],
-                    [USE_ WAYLAND="no"],
+                    [USE_WAYLAND_DRM="no"],
                     [${WAYLAND_PREFIX}/bin$PATH_SEPARATOR$PATH])
              ], [:])
         ], [:])
-    if test "$USE_WAYLAND" = "yes"; then
-      AC_DEFINE([HAVE_VA_WAYLAND], [1],
-        [Defined to 1 if VA/Wayland API is enabled])
+    if test "$USE_WAYLAND_DRM" = "yes"; then
+      AC_DEFINE([HAVE_VA_WAYLAND_DRM], [1],
+        [Defined to 1 if the legacy VA/Wayland API via wl_drm is enabled])
     fi
 fi
-AM_CONDITIONAL(USE_WAYLAND, test "$USE_WAYLAND" = "yes")
+AM_CONDITIONAL(USE_WAYLAND_DRM, test "$USE_WAYLAND_DRM" = "yes")
 
 AC_OUTPUT([
     Makefile
@@ -214,7 +214,7 @@ AC_OUTPUT([
 dnl Print summary
 BACKENDS="drm"
 AS_IF([test "$USE_X11" = "yes"], [BACKENDS="$BACKENDS x11"])
-AS_IF([test "$USE_WAYLAND" = "yes"], [BACKENDS="$BACKENDS wayland"])
+AS_IF([test "$USE_WAYLAND_DRM" = "yes"], [BACKENDS="$BACKENDS wayland-drm"])
 
 echo
 echo $PACKAGE configuration summary:

@@ -76,7 +76,7 @@ source_c			+= i965_output_x11.c
 source_h			+= i965_output_x11.h
 endif
 
-if USE_WAYLAND
+if USE_WAYLAND_DRM
 source_c			+= i965_output_wayland.c
 source_h			+= i965_output_wayland.h
 source_h			+= $(protocol_source_h)
@@ -114,8 +114,8 @@ $(PKG_VERSION_FILE): $(NEW_VERSION_FILE)
 BUILT_SOURCES	+= intel_version.h
 EXTRA_DIST	+= Android.mk intel_version.h.in $(PKG_VERSION_FILE)
 
-# Wayland protocol
-if USE_WAYLAND
+# Wayland via the wl_drm protocol
+if USE_WAYLAND_DRM
 protocol_source_h = wayland-drm-client-protocol.h
 i965_output_wayland.c: $(protocol_source_h)
 %-client-protocol.h : %.xml
