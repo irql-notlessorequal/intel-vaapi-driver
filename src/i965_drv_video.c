@@ -36,7 +36,7 @@
 # include "i965_output_x11.h"
 #endif
 
-#ifdef HAVE_VA_WAYLAND
+#ifdef HAVE_VA_WAYLAND_DRM
 # include "i965_output_wayland.h"
 #endif
 
@@ -7276,7 +7276,7 @@ struct {
 		0,
 	},
 
-#ifdef HAVE_VA_WAYLAND
+#ifdef HAVE_VA_WAYLAND_DRM
 	{
 		i965_output_wayland_init,
 		i965_output_wayland_terminate,
