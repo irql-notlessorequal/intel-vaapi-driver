@@ -19,9 +19,8 @@ ninja
 
 # prepare to build deb
 cd ..
+mkdir -p distribution/debian/i965-va-driver/usr/lib/x86_64-linux-gnu/dri
 cp build/src/i965_drv_video.so distribution/debian/i965-va-driver/usr/lib/x86_64-linux-gnu/dri
-# cp src/.libs/i965_drv_video.so distribution/debian/i965-va-driver/usr/lib/x86_64-linux-gnu/dri
-# sudo chown -R root:root distribution/debian/i965-va-driver
 
 # build deb
 cd distribution/debian
