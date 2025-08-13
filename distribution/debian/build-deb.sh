@@ -13,6 +13,7 @@ if [ ! $currentdir == 'intel-vaapi-driver' ]; then
 fi
 
 # build
+sudo apt install libva-dev libx11-dev libdrm-dev meson
 meson build
 cd build
 ninja
