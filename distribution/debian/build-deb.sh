@@ -1,6 +1,27 @@
 #!/bin/bash
 set -eou pipefail
 
+REQUIRED_PACKAGES=(libva-dev libdrm-dev libx11-dev libwayland-dev meson)
+MISSING=0
+
+# check for missing dependencies
+function package_exists() {
+  dpkg -l "$1" &> /dev/null
+  return $?
+}
+
+for pkg in "${REQUIRED_PACKAGES[@]}"; do
+  if ! package_exists "$pkg"; then
+      echo "ERROR: $pkg is not installed on your machine."
+      MISSING=1
+  fi
+done
+
+if [ $MISSING -ne 0 ]; then
+  exit 1
+fi
+
+# enter the build directory
 cd $(dirname "$0")
 cd ../../
 
@@ -13,7 +34,6 @@ if [ ! $currentdir == 'intel-vaapi-driver' ]; then
 fi
 
 # build
-sudo apt install libva-dev libx11-dev libdrm-dev meson
 meson build
 cd build
 ninja
