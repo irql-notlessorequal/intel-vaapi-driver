@@ -177,7 +177,23 @@ intel_driver_init(VADriverContextP ctx)
 		intel->mocs_state = GEN9_PTE_CACHE;
 
 	intel_driver_get_revid(intel, &intel->revision);
+
+	if (g_intel_debug_option_flags & VA_INTEL_DUMP_KERNEL_CAPS)
+		intel_driver_dump_kernel_caps(*intel);
+
 	return true;
+}
+
+void intel_driver_dump_kernel_caps(struct intel_driver_data intel)
+{
+	fprintf(stderr, "Dumping kernel caps...\r\n\r\n");
+
+	fprintf(stderr, "HAS_EXECBUFFER2: %s\r\n", (intel.has_exec2 ? "true" : "false"));
+	fprintf(stderr, "HAS_BSD_RING   : %s\r\n", (intel.has_bsd ? "true" : "false"));
+	fprintf(stderr, "HAS_BLT_ENGINE : %s\r\n", (intel.has_blt ? "true" : "false"));
+	fprintf(stderr, "HAS_VEBOX_RING : %s\r\n", (intel.has_vebox ? "true" : "false"));
+	fprintf(stderr, "HAS_BSD2_RING  : %s\r\n", (intel.has_bsd2 ? "true" : "false"));
+	fprintf(stderr, "HAS_LOADED_HUC : %s\r\n", (intel.has_huc ? "true" : "false"));
 }
 
 void

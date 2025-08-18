@@ -111,6 +111,7 @@ extern uint32_t g_intel_debug_option_flags;
 #define VA_INTEL_DEBUG_OPTION_BENCH     (1 << 1)
 #define VA_INTEL_DEBUG_OPTION_DUMP_AUB  (1 << 2)
 #define VA_INTEL_DEBUG_VERBOSE          (1 << 3)
+#define VA_INTEL_DUMP_KERNEL_CAPS		(1 << 4)
 
 #define ASSERT_RET(value, fail_ret) do {    \
 		if (!(value)) {                     \
@@ -237,6 +238,7 @@ struct intel_driver_data {
 };
 
 bool intel_driver_init(VADriverContextP ctx);
+void intel_driver_dump_kernel_caps(struct intel_driver_data intel);
 void intel_driver_terminate(VADriverContextP ctx);
 
 static INLINE struct intel_driver_data *
