@@ -780,6 +780,7 @@ static struct hw_codec_info cfl_hw_codec_info = {
 	},
 };
 
+#if defined(ENABLE_GEN10_SUPPORT)
 static struct hw_codec_info cnl_hw_codec_info = {
 	.dec_hw_context_init = gen9_dec_hw_context_init,
 	.enc_hw_context_init = gen9_enc_hw_context_init,
@@ -852,6 +853,7 @@ static struct hw_codec_info cnl_hw_codec_info = {
 		{VAProcFilterSkinToneEnhancement, I965_RING_VEBOX},
 	},
 };
+#endif
 
 struct hw_codec_info *
 i965_get_codec_info(int devid)
@@ -1031,12 +1033,14 @@ static const struct intel_device_info cfl_device_info = {
 	.is_cfllake = 1,
 };
 
+#if defined(ENABLE_GEN10_SUPPORT)
 static const struct intel_device_info cnl_device_info = {
 	.gen = 10,
 
 	.urb_size = 4096,
 	.max_wm_threads = 64,       /* per PSD */
 };
+#endif
 
 const struct intel_device_info *
 i965_get_device_info(int devid)

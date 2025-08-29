@@ -6,6 +6,7 @@ config_cfg.set('INTEL_DRIVER_MINOR_VERSION', intel_vaapi_driver_minor_version)
 config_cfg.set('INTEL_DRIVER_MICRO_VERSION', intel_vaapi_driver_micro_version)
 config_cfg.set('INTEL_DRIVER_PRE_VERSION', intel_vaapi_driver_pre_version)
 config_cfg.set10('HAVE_HYBRID_CODEC', get_option('enable_hybrid_codec'))
+config_cfg.set10('ENABLE_GEN10_SUPPORT', get_option('enable_gen10_support'))
 if WITH_X11
   config_cfg.set('HAVE_VA_X11', 1)
 endif
@@ -103,16 +104,21 @@ sources = [
   'i965_avc_encoder.c',
   'gen9_hevc_enc_kernels_binary.c',
   'gen9_hevc_encoder.c',
-  'gen9_hevc_enc_utils.c',
-  'gen10_encoder_vp8.c',
-  'gen10_hcp_common.c',
-  'gen10_hevc_enc_kernels_binary.c',
-  'gen10_hevc_enc_common.c',
-  'gen10_hevc_encoder.c',
-  'gen10_huc_common.c',
-  'gen10_vdenc_common.c',
-  'gen10_vdenc_vp9.c',
+  'gen9_hevc_enc_utils.c'
 ]
+
+if get_option('enable_gen10_support')
+  sources += [
+    'gen10_encoder_vp8.c',
+    'gen10_hcp_common.c',
+    'gen10_hevc_enc_kernels_binary.c',
+    'gen10_hevc_enc_common.c',
+    'gen10_hevc_encoder.c',
+    'gen10_huc_common.c',
+    'gen10_vdenc_common.c',
+    'gen10_vdenc_vp9.c',
+ ]
+endif
 
 headers = [
   'dso_utils.h',
@@ -178,16 +184,21 @@ headers = [
   'gen9_hevc_enc_kernels.h',
   'gen9_hevc_enc_kernels_binary.h',
   'gen9_hevc_enc_utils.h',
-  'gen9_hevc_encoder.h',
-  'gen10_hcp_common.h',
-  'gen10_hevc_enc_kernels_binary.h',
-  'gen10_hevc_enc_common.h',
-  'gen10_hevc_encoder.h',
-  'gen10_hevc_enc_const_def.h',
-  'gen10_huc_common.h',
-  'gen10_vdenc_common.h',
-  'gen10_vdenc_vp9.h',
+  'gen9_hevc_encoder.h'
 ]
+
+if get_option('enable_gen10_support')
+  headers += [
+    'gen10_hcp_common.h',
+    'gen10_hevc_enc_kernels_binary.h',
+    'gen10_hevc_enc_common.h',
+    'gen10_hevc_encoder.h',
+    'gen10_hevc_enc_const_def.h',
+    'gen10_huc_common.h',
+    'gen10_vdenc_common.h',
+    'gen10_vdenc_vp9.h',
+  ]
+endif
 
 if WITH_X11
   sources += 'i965_output_x11.c'
