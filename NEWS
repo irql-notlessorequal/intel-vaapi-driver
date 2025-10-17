@@ -10,6 +10,13 @@ Version 2.4.5 - XX.XX.XXXX (IRQL fork)
     these formats, meaning that a workaround is needed for Chromium.
 
 * Don't advertise VAProfileHEVCMain10 format support on HSW and IVB.
+* Disable this driver's Wayland backend by default.
+
+    This lets the VA-API library use zwp_linux_dmabuf_v1 instead
+    which is more preferable due to compositors migrating to it.
+
+    If any user requires legacy wl_drm support, a build time option
+    remains.
 
 Version 2.4.4 - 06.Apr.2025 (IRQL fork)
 
