@@ -106,15 +106,19 @@ struct intel_batchbuffer;
 #define True 1
 #define False 0
 
+enum intel_debug_flags
+{
+	INTEL_DEBUG_FLAGS_NONE = 0,
+	INTEL_DEBUG_FLAGS_ASSERTS = 1,
+	INTEL_DEBUG_FLAGS_BENCH = 2,
+	INTEL_DEBUG_FLAGS_DUMP_AUB = 4,
+	INTEL_DEBUG_FLAGS_VERBOSE = 8
+};
 extern uint32_t g_intel_debug_option_flags;
-#define VA_INTEL_DEBUG_OPTION_ASSERT    (1 << 0)
-#define VA_INTEL_DEBUG_OPTION_BENCH     (1 << 1)
-#define VA_INTEL_DEBUG_OPTION_DUMP_AUB  (1 << 2)
-#define VA_INTEL_DEBUG_VERBOSE          (1 << 3)
 
 #define ASSERT_RET(value, fail_ret) do {    \
 		if (!(value)) {                     \
-			if (g_intel_debug_option_flags & VA_INTEL_DEBUG_OPTION_ASSERT)       \
+			if (g_intel_debug_option_flags & INTEL_DEBUG_FLAGS_ASSERTS)      \
 				assert(value);              \
 			return fail_ret;                \
 		}                                   \
@@ -122,7 +126,7 @@ extern uint32_t g_intel_debug_option_flags;
 
 #define ASSERT_RET_MUTEX(value, mutex, fail_ret) do {    \
 		if (!(value)) {                     \
-			if (g_intel_debug_option_flags & VA_INTEL_DEBUG_OPTION_ASSERT)       \
+			if (g_intel_debug_option_flags & INTEL_DEBUG_FLAGS_ASSERTS)      \
 				assert(value);              \
 			_i965UnlockMutex(mutex);        \
 			return fail_ret;                \

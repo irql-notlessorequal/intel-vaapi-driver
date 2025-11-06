@@ -7149,7 +7149,7 @@ void i965_log_info(VADriverContextP ctx, const char *format, ...)
 
 void i965_log_debug(VADriverContextP ctx, const char *format, ...)
 {
-	if (!(g_intel_debug_option_flags & VA_INTEL_DEBUG_VERBOSE))
+	if (!(g_intel_debug_option_flags & INTEL_DEBUG_FLAGS_VERBOSE))
 		return;
 
 	va_list vl;
