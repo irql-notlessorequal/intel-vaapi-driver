@@ -56,6 +56,21 @@ uint32_t g_intel_debug_option_flags = 0;
 #define LOCAL_I915_PARAM_EU_TOTAL 34
 #endif
 
+struct debug_flag
+{
+	enum intel_debug_flags value;
+	const char* name;
+	const char* description;
+};
+
+static const struct debug_flag flags[] = {
+	{INTEL_DEBUG_FLAGS_NONE, "NONE", NULL},
+	{INTEL_DEBUG_FLAGS_ASSERTS, "ASSERTS", "Enable driver asserts for debugging purposes"},
+	{INTEL_DEBUG_FLAGS_BENCH, "BENCH", "Disable calling swap_buffer in the X11 backend"},
+	{INTEL_DEBUG_FLAGS_DUMP_AUB, "DUMP_AUB", "Dumps all buffer submissions into an AUB trace (deprecated)"},
+	{INTEL_DEBUG_FLAGS_VERBOSE, "VERBOSE", "Enable verbose logging"}
+};
+
 static Bool
 intel_driver_get_param(struct intel_driver_data *intel, int param, int *value)
 {
@@ -99,21 +114,47 @@ bool should_enable_int(const char* str)
 	return atoi(env_str);
 }
 
+static inline void
+intel_driver_handle_debug(void)
+{
+	g_intel_debug_option_flags = 0;
+
+	char *env_str = NULL;
+	if ((env_str = getenv("VA_INTEL_DEBUG")))
+	{
+		if (strcmp("help", env_str) == 0)
+		{
+			fprintf(stderr, "Available debug options for i965:\n");
+
+			for (int i = 0; i < sizeof(flags) / sizeof(struct debug_flag); i++)
+			{
+				const struct debug_flag flag = flags[i];
+
+				if (flag.value == INTEL_DEBUG_FLAGS_NONE)
+					continue;
+
+				fprintf(stderr, "\t%s (%d) = %s\n", flag.name, flag.value, flag.description);
+			}
+
+			return;
+		}
+
+		g_intel_debug_option_flags = atoi(env_str);
+	}
+
+	if (g_intel_debug_option_flags & INTEL_DEBUG_FLAGS_VERBOSE)
+		fprintf(stderr, "i965: Verbose logging enabled.\n");
+}
+
 bool
 intel_driver_init(VADriverContextP ctx)
 {
 	struct intel_driver_data *intel = intel_driver_data(ctx);
 	struct drm_state * const drm_state = (struct drm_state *)ctx->drm_state;
 	int has_exec2 = 0, has_bsd = 0, has_blt = 0, has_vebox = 0;
-	char *env_str = NULL;
 	int ret_value = 0;
 
-	g_intel_debug_option_flags = 0;
-	if ((env_str = getenv("VA_INTEL_DEBUG")))
-		g_intel_debug_option_flags = atoi(env_str);
-
-	if (g_intel_debug_option_flags & VA_INTEL_DEBUG_VERBOSE)
-		fprintf(stderr, "i965: Verbose logging enabled.\n");
+	intel_driver_handle_debug();
 
 	ASSERT_RET(drm_state, false);
 	ASSERT_RET((VA_CHECK_DRM_AUTH_TYPE(ctx, VA_DRM_AUTH_DRI1) ||

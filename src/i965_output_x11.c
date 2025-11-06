@@ -199,7 +199,7 @@ i965_put_surface_x11(
 		}
 	}
 
-	if (!(g_intel_debug_option_flags & VA_INTEL_DEBUG_OPTION_BENCH))
+	if (!(g_intel_debug_option_flags & INTEL_DEBUG_FLAGS_BENCH))
 		dri_vtable->swap_buffer(ctx, dri_drawable);
 
 	_i965UnlockMutex(&i965->render_mutex);
