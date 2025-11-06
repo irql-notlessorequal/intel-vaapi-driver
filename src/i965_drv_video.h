@@ -563,6 +563,7 @@ struct i965_driver_data {
 
 	/* VA/Wayland specific data */
 	struct va_wl_output *wl_output;
+	struct intel_wayland_linux_dmabuf_context* dmabuf_output;
 
 	VADriverContextP wrapper_pdrvctx;
 
