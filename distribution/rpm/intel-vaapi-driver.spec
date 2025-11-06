@@ -44,8 +44,7 @@ VA-API (Video Acceleration API) user mode driver for Intel GEN Graphics family (
 %build
 %meson \
   -D enable_hybrid_codec=true \
-  -D with_x11=yes \
-  -D with_wayland=yes
+  -D with_x11=yes
 
 %meson_build
 
