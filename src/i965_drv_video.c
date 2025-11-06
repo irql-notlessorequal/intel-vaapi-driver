@@ -36,8 +36,12 @@
 # include "i965_output_x11.h"
 #endif
 
-#ifdef HAVE_VA_WAYLAND
-# include "i965_output_wayland.h"
+#ifdef HAVE_VA_WAYLAND_DMABUF
+#include "i965_output_wayland_dmabuf.h"
+#endif
+
+#ifdef HAVE_VA_WAYLAND_DRM
+#include "i965_output_wayland.h"
 #endif
 
 #include "intel_version.h"
@@ -7275,7 +7279,13 @@ struct {
 		i965_render_terminate,
 		0,
 	},
-
+#ifdef HAVE_VA_WAYLAND_DMABUF
+	{
+		i965_wayland_linux_dmabuf_create,
+		i965_wayland_linux_dmabuf_terminate,
+		VA_DISPLAY_WAYLAND,		
+	},
+#endif
 #ifdef HAVE_VA_WAYLAND
 	{
 		i965_output_wayland_init,
