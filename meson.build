@@ -25,7 +25,7 @@ mathlib_dep = cc.find_library('m', required : false)
 git = find_program('git', required : false)
 
 thread_dep = dependency('threads')
-libdrm_dep = dependency('libdrm', version : '>= 2.4.52')
+libdrm_dep = dependency('libdrm', version : '>= 2.4.75')
 libdrm_intel_dep = dependency('libdrm_intel')
 
 libva_version = '>= 1.1.0'
@@ -72,12 +72,12 @@ if get_option('with_x11') != 'no'
   WITH_X11 = libva_x11_dep.found()
 endif
 
-WITH_WAYLAND = false
-if get_option('with_wayland') != 'no'
+WITH_WAYLAND_DRM = false
+if get_option('with_wayland_drm') != 'no'
   wayland_client_dep = dependency(
     'wayland-client',
     version : '>= 1.11.0',
-    required : get_option('with_wayland') == 'yes')
+    required : get_option('with_wayland_drm') == 'yes')
 
   if wayland_client_dep.found()
     prefix = wayland_client_dep.get_pkgconfig_variable('prefix')
@@ -87,16 +87,43 @@ if get_option('with_wayland') != 'no'
   endif
 
   wl_scanner = find_program('wayland-scanner', wayland_scanner,
-			    required : get_option('with_wayland') == 'yes')
+			    required : get_option('with_wayland_drm') == 'yes')
 
   libva_wayland_dep = dependency(
     'libva-wayland',
     version : libva_version,
-    required : get_option('with_wayland') == 'yes')
+    required : get_option('with_wayland_drm') == 'yes')
 
-  WITH_WAYLAND = (wayland_client_dep.found()
+  WITH_WAYLAND_DRM = (wayland_client_dep.found()
 		  and wl_scanner.found()
 		  and libva_wayland_dep.found())
+endif
+
+WITH_WAYLAND_DMABUF = false
+if get_option('with_wayland_dmabuf') != 'no'
+  wl_dmabuf_client_dep = dependency(
+    'wayland-client',
+    version : '>= 1.19.91',
+    required : get_option('with_wayland_dmabuf') == 'yes')
+
+  if wl_dmabuf_client_dep.found()
+    prefix = wl_dmabuf_client_dep.get_pkgconfig_variable('prefix')
+    wayland_scanner = join_paths(prefix, 'bin', 'wayland-scanner')
+  else
+    wayland_scanner = ''
+  endif
+
+  wl_scanner = find_program('wayland-scanner', wayland_scanner,
+			    required : get_option('with_wayland_dmabuf') == 'yes')
+
+  libva_wl_dmabuf_dep = dependency(
+    'libva-wayland',
+    version : '>= 1.22.0',
+    required : get_option('with_wayland_dmabuf') == 'yes')
+
+  WITH_WAYLAND_DMABUF = (wl_dmabuf_client_dep.found()
+		  and wl_scanner.found()
+		  and libva_wl_dmabuf_dep.found())
 endif
 
 subdir('src')

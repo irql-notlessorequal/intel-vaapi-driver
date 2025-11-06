@@ -9,8 +9,11 @@ config_cfg.set10('HAVE_HYBRID_CODEC', get_option('enable_hybrid_codec'))
 if WITH_X11
   config_cfg.set('HAVE_VA_X11', 1)
 endif
-if WITH_WAYLAND
-  config_cfg.set('HAVE_VA_WAYLAND', 1)
+if WITH_WAYLAND_DMABUF
+  config_cfg.set('HAVE_VA_WAYLAND_DMABUF', 1)
+endif
+if WITH_WAYLAND_DRM
+  config_cfg.set('HAVE_VA_WAYLAND_DRM', 1)
 endif
 if cc.has_function('log2f')
   config_cfg.set('HAVE_LOG2F', 1)
@@ -194,8 +197,20 @@ if WITH_X11
   headers += 'i965_output_x11.h'
 endif
 
-if WITH_WAYLAND
-  protocol_header = custom_target(
+if WITH_WAYLAND_DMABUF
+  protocol_header_dmabuf = custom_target(
+      'linux-dmabuf-v1-client-protocol_h',
+      output : 'linux-dmabuf-v1-client.h',
+      input : 'linux-dmabuf-v1.xml',
+      command : [ wl_scanner, 'client-header', '@INPUT@', '@OUTPUT@' ])
+
+  sources += 'i965_output_wayland_dmabuf.c'
+  headers += [ 'i965_output_wayland_dmabuf.h',
+               protocol_header_dmabuf ]
+endif
+
+if WITH_WAYLAND_DRM
+  protocol_header_drm = custom_target(
       'wayland-drm-client-protocol_h',
       output : 'wayland-drm-client-protocol.h',
       input : 'wayland-drm.xml',
@@ -203,7 +218,7 @@ if WITH_WAYLAND
 
   sources += 'i965_output_wayland.c'
   headers += [ 'i965_output_wayland.h',
-               protocol_header ]
+               protocol_header_drm ]
 endif
 
 cflags = [
@@ -228,7 +243,7 @@ if WITH_X11
   shared_deps += [ libva_x11_dep ]
 endif
 
-if WITH_WAYLAND
+if WITH_WAYLAND_DMABUF or WITH_WAYLAND_DRM
   shared_deps += [ wayland_client_dep, libva_wayland_dep ]
 endif
 

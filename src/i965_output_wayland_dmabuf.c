@@ -40,6 +40,8 @@
 #include "i965_drv_video.h"
 #include "dso_utils.h"
 
+typedef void (*VADisplayContextDestroyFunc)(VADriverContextP ctx);
+
 typedef uint32_t (*wl_display_get_global_func)(struct wl_display *display,
 											   const char *interface, uint32_t version);
 typedef struct wl_event_queue *(*wl_display_create_queue_func)(struct wl_display *display);

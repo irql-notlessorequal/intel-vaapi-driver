@@ -7286,7 +7286,7 @@ struct {
 		VA_DISPLAY_WAYLAND,		
 	},
 #endif
-#ifdef HAVE_VA_WAYLAND
+#ifdef HAVE_VA_WAYLAND_DRM
 	{
 		i965_output_wayland_init,
 		i965_output_wayland_terminate,
