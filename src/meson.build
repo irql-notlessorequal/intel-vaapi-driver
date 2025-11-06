@@ -198,13 +198,20 @@ if WITH_X11
 endif
 
 if WITH_WAYLAND_DMABUF
+  protocol_code_dmabuf = custom_target(
+      'linux-dmabuf-v1-client-protocol_c',
+      output : 'linux-dmabuf-v1-client.c',
+      input : 'linux-dmabuf-v1.xml',
+      command : [ wl_scanner, 'private-code', '@INPUT@', '@OUTPUT@' ])
+
   protocol_header_dmabuf = custom_target(
       'linux-dmabuf-v1-client-protocol_h',
       output : 'linux-dmabuf-v1-client.h',
       input : 'linux-dmabuf-v1.xml',
       command : [ wl_scanner, 'client-header', '@INPUT@', '@OUTPUT@' ])
 
-  sources += 'i965_output_wayland_dmabuf.c'
+  sources += [ 'i965_output_wayland_dmabuf.c',
+               protocol_code_dmabuf ]
   headers += [ 'i965_output_wayland_dmabuf.h',
                protocol_header_dmabuf ]
 endif
