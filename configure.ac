@@ -12,12 +12,18 @@ m4_append([intel_vaapi_driver_version], intel_vaapi_driver_pre_version, [.pre])
 # libva minimum version requirement
 m4_define([va_api_version], [1.4.0])
 
+# We need a much newer version of VA-API for linux-dmabuf-v1
+m4_define([va_api_dmabuf_version], [1.22.0])
+
 # libdrm minimum version requirement
-m4_define([libdrm_version], [2.4.52])
+m4_define([libdrm_version], [2.4.75])
 
 # Wayland minimum version requirement
 # 1.11.0 for wl_proxy_create_wrapper
 m4_define([wayland_api_version], [1.11.0])
+
+# Require a slightly newer version of Wayland for DMABUF.
+m4_define([wayland_dmabuf_api_version], [1.19.91])
 
 AC_PREREQ([2.57])
 AC_INIT([intel_vaapi_driver],
@@ -52,10 +58,15 @@ AC_ARG_ENABLE(x11,
                     [build with VA/X11 API support @<:@default=yes@:>@])],
     [], [enable_x11="yes"])
 
-AC_ARG_ENABLE([wayland],
-    [AC_HELP_STRING([--enable-wayland],
-                    [build with VA/Wayland API support @<:@default=yes@:>@])],
-    [], [enable_wayland="yes"])
+AC_ARG_ENABLE([wayland-dmabuf],
+    [AC_HELP_STRING([--enable-wayland-dmabuf],
+                    [build with VA/Wayland API support via linux-dmabuf-v1 @<:@default=yes@:>@])],
+    [], [enable_wayland_dmabuf="yes"])
+
+AC_ARG_ENABLE([wayland-drm],
+    [AC_HELP_STRING([--enable-wayland-drm],
+                    [build with VA/Wayland API support via legacy wl_drm @<:@default=yes@:>@])],
+    [], [enable_wayland_drm="yes"])
 
 AC_ARG_ENABLE([hybrid-codec],
     [AC_HELP_STRING([--enable-hybrid-codec],
@@ -164,27 +175,53 @@ fi
 AC_MSG_RESULT([$LIBVA_DRIVERS_PATH])
 AC_SUBST(LIBVA_DRIVERS_PATH)
 
-# Check for Wayland
-USE_WAYLAND="no"
-if test "$enable_wayland" = "yes"; then
+# Check for Wayland via wl_drm
+USE_WAYLAND_DRM="no"
+if test "$enable_wayland_drm" = "yes"; then
     PKG_CHECK_MODULES([LIBVA_WAYLAND_DEPS], [libva-wayland >= va_api_version],
         [
           PKG_CHECK_MODULES([WAYLAND_CLIENT],
              [wayland-client >= wayland_api_version],
              [
-                USE_WAYLAND="yes"
+                USE_WAYLAND_DRM="yes"
                 WAYLAND_PREFIX=`$PKG_CONFIG --variable=prefix wayland-client`
                 AC_PATH_PROG([WAYLAND_SCANNER], [wayland-scanner],
-                    [USE_ WAYLAND="no"],
+                    [USE_WAYLAND_DRM="no"],
                     [${WAYLAND_PREFIX}/bin$PATH_SEPARATOR$PATH])
              ], [:])
         ], [:])
-    if test "$USE_WAYLAND" = "yes"; then
-      AC_DEFINE([HAVE_VA_WAYLAND], [1],
-        [Defined to 1 if VA/Wayland API is enabled])
+    if test "$USE_WAYLAND_DRM" = "yes"; then
+      AC_DEFINE([HAVE_VA_WAYLAND_DRM], [1],
+        [Defined to 1 if VA/Wayland API via wl_drm is enabled])
     fi
 fi
-AM_CONDITIONAL(USE_WAYLAND, test "$USE_WAYLAND" = "yes")
+AM_CONDITIONAL(USE_WAYLAND_DRM, test "$USE_WAYLAND_DRM" = "yes")
+
+# Check for Wayland via linux-dmabuf
+USE_WAYLAND_DMABUF="no"
+if test "$enable_wayland_dmabuf" = "yes"; then
+    PKG_CHECK_MODULES([LIBVA_WAYLAND_DEPS], [libva-wayland >= va_api_dmabuf_version],
+        [
+          PKG_CHECK_MODULES([WAYLAND_CLIENT],
+             [wayland-client >= wayland_dmabuf_api_version],
+             [
+                USE_WAYLAND_DMABUF="yes"
+                WAYLAND_PREFIX=`$PKG_CONFIG --variable=prefix wayland-client`
+                AC_PATH_PROG([WAYLAND_SCANNER], [wayland-scanner],
+                    [USE_WAYLAND_DMABUF="no"],
+                    [${WAYLAND_PREFIX}/bin$PATH_SEPARATOR$PATH])
+             ], [:])
+        ], [:])
+    if test "$USE_WAYLAND_DMABUF" = "yes"; then
+      AC_DEFINE([HAVE_VA_WAYLAND_DMABUF], [1],
+        [Defined to 1 if VA/Wayland API via DMABUF is enabled])
+    fi
+fi
+AM_CONDITIONAL(USE_WAYLAND_DMABUF, test "$USE_WAYLAND_DMABUF" = "yes")
+
+# Ugly Makefile workaround
+AM_CONDITIONAL([IS_WAYLAND_ENABLED],
+               [test "x$USE_WAYLAND_DRM" = xyes || test "x$USE_WAYLAND_DMABUF" = xyes])
 
 AC_OUTPUT([
     Makefile
@@ -214,7 +251,8 @@ AC_OUTPUT([
 dnl Print summary
 BACKENDS="drm"
 AS_IF([test "$USE_X11" = "yes"], [BACKENDS="$BACKENDS x11"])
-AS_IF([test "$USE_WAYLAND" = "yes"], [BACKENDS="$BACKENDS wayland"])
+AS_IF([test "$USE_WAYLAND_DRM" = "yes"], [BACKENDS="$BACKENDS wayland-drm"])
+AS_IF([test "$USE_WAYLAND_DMABUF" = "yes"], [BACKENDS="$BACKENDS wayland-dmabuf"])
 
 echo
 echo $PACKAGE configuration summary:

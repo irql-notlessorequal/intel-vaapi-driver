@@ -76,11 +76,21 @@ source_c			+= i965_output_x11.c
 source_h			+= i965_output_x11.h
 endif
 
-if USE_WAYLAND
+if USE_WAYLAND_DMABUF
+source_c			+= i965_output_wayland_dmabuf.c
+source_h			+= i965_output_wayland_dmabuf.h
+source_c			+= $(protocol_source_c_dmabuf)
+source_h			+= $(protocol_source_h_dmabuf)
+endif
+
+if USE_WAYLAND_DRM
 source_c			+= i965_output_wayland.c
 source_h			+= i965_output_wayland.h
 source_h			+= $(protocol_source_h)
-driver_cflags			+= $(WAYLAND_CLIENT_CFLAGS)
+endif
+
+if IS_WAYLAND_ENABLED
+driver_cflags		+= $(WAYLAND_CLIENT_CFLAGS)
 endif
 
 # git version
@@ -115,7 +125,19 @@ BUILT_SOURCES	+= intel_version.h
 EXTRA_DIST	+= Android.mk intel_version.h.in $(PKG_VERSION_FILE)
 
 # Wayland protocol
-if USE_WAYLAND
+if USE_WAYLAND_DMABUF
+protocol_source_h_dmabuf = linux-dmabuf-v1-client.h
+protocol_source_c_dmabuf = linux-dmabuf-v1-client.c
+i965_output_wayland_dmabuf.c: $(protocol_source_h_dmabuf) $(protocol_source_c_dmabuf)
+%-client.h : %.xml
+	$(AM_V_GEN)$(WAYLAND_SCANNER) client-header < $< > $@
+%-client.c : %.xml
+	$(AM_V_GEN)$(WAYLAND_SCANNER) private-code < $< > $@
+
+BUILT_SOURCES += $(protocol_source_h_dmabuf) $(protocol_source_c_dmabuf)
+endif
+
+if USE_WAYLAND_DRM
 protocol_source_h = wayland-drm-client-protocol.h
 i965_output_wayland.c: $(protocol_source_h)
 %-client-protocol.h : %.xml
@@ -125,6 +147,7 @@ BUILT_SOURCES += $(protocol_source_h)
 endif
 
 EXTRA_DIST += \
+	linux-dmabuf-v1.xml     \
 	wayland-drm.xml         \
 	$(NULL)
 
