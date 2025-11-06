@@ -33,6 +33,7 @@ depcomp
 TAGS
 /src/intel_version.h
 /src/wayland-drm-client-protocol.h
+/src/linux-dmabuf-v1-client.h
 .VERSION*
 # IRQL fork
 .vscode/c_cpp_properties.json
