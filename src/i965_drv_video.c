@@ -7399,61 +7399,63 @@ i965_initialize_wrapper(VADriverContextP ctx, const char *driver_name)
 
 		handle = dlopen(driver_path, RTLD_NOW | RTLD_GLOBAL | RTLD_NODELETE);
 		if (!handle) {
-			i965_log_error(ctx, "failed to open %s\n", driver_path);
+			i965_log_error_nocb("failed to open %s\n", driver_path);
 			driver_dir = strtok_r(NULL, ":", &saveptr);
 			continue;
 		}
-		{
-			VADriverInit init_func = NULL;
-			char init_func_s[256];
-			int i;
 
-			static const struct {
-				int major;
-				int minor;
-			} compatible_versions[] = {
-				{VA_MAJOR_VERSION, VA_MINOR_VERSION},
-				{1, 18},
-				{0, 37},
-				{0, 36},
-				{0, 35},
-				{0, 34},
-				{0, 33},
-				{0, 32},
-				{
-					-1,
-				}};
-			for (i = 0; compatible_versions[i].major >= 0; i++) {
-				snprintf(init_func_s, sizeof(init_func_s),
-						 "__vaDriverInit_%d_%d",
-						 compatible_versions[i].major,
-						 compatible_versions[i].minor);
-				init_func = (VADriverInit)dlsym(handle, init_func_s);
-				if (init_func) {
-					break;
-				}
+		VADriverInit init_func = NULL;
+		char init_func_s[256];
+		int i;
+
+		static const struct {
+			int major;
+			int minor;
+		} compatible_versions[] = {
+			{VA_MAJOR_VERSION, VA_MINOR_VERSION},
+			{1, 18},
+			{0, 37},
+			{0, 36},
+			{0, 35},
+			{0, 34},
+			{0, 33},
+			{0, 32},
+			{
+				-1,
 			}
-			if (compatible_versions[i].major < 0) {
-				dlclose(handle);
-				i965_log_error(ctx, "%s has no function %s\n",
-						driver_path, init_func_s);
-				driver_dir = strtok_r(NULL, ":", &saveptr);
-				continue;
+		};
+
+		for (i = 0; compatible_versions[i].major >= 0; i++) {
+			snprintf(init_func_s, sizeof(init_func_s),
+					 "__vaDriverInit_%d_%d",
+					 compatible_versions[i].major,
+					 compatible_versions[i].minor);
+			init_func = (VADriverInit)dlsym(handle, init_func_s);
+			if (init_func) {
+				break;
 			}
-
-			if (init_func)
-				va_status = (*init_func)(wrapper_pdrvctx);
-
-			if (va_status != VA_STATUS_SUCCESS) {
-				dlclose(handle);
-				i965_log_error(ctx, "%s init failed, got status %i.\n", driver_path, va_status);
-				driver_dir = strtok_r(NULL, ":", &saveptr);
-				continue;
-			}
-
-			wrapper_pdrvctx->handle = handle;
-			driver_loaded = true;
 		}
+
+		if (compatible_versions[i].major < 0) {
+			dlclose(handle);
+			i965_log_error_nocb("%s has no function %s\n",
+					driver_path, init_func_s);
+			driver_dir = strtok_r(NULL, ":", &saveptr);
+			continue;
+		}
+
+		if (init_func)
+			va_status = (*init_func)(wrapper_pdrvctx);
+
+		if (va_status != VA_STATUS_SUCCESS) {
+			dlclose(handle);
+			i965_log_error_nocb("%s init failed, got status %i.\n", driver_path, va_status);
+			driver_dir = strtok_r(NULL, ":", &saveptr);
+			continue;
+		}
+
+		wrapper_pdrvctx->handle = handle;
+		driver_loaded = true;
 	}
 
 	free(search_path);
