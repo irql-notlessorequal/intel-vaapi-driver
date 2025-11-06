@@ -7,4 +7,6 @@ option('with_wayland_drm',
     value : false
 )
 option('enable_hybrid_codec', type : 'boolean', value : false)
+option('enable_h264_ctg', type : 'boolean', value : false,
+		description: 'Enables shader-based H.264 decoding for GMA 4500 (M)HD hardware.')
 option('enable_tests', type : 'boolean', value : false)

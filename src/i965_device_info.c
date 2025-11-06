@@ -88,6 +88,9 @@ static struct hw_codec_info g4x_hw_codec_info = {
 	.min_linear_hpitch = 4,
 
 	.has_mpeg2_decoding = 1,
+#if defined(I965_H264_ENABLE_CTG)
+	.has_h264_decoding = 1,
+#endif
 
 	.num_filters = 0,
 };
