@@ -3,12 +3,12 @@ Copyright (C) 2009-2023 Intel Corporation
 
 Version 2.4.5 - XX.XX.XXXX (IRQL fork)
 
-* Expose RGBX as a VPP format on ILK
-* Expose RGBA/BGRA as a VPP format on ILK
+* Expose ARGB as a VPP format on ILK
 
     Ironlake is affected by the same issue as Sandybridge with
     these formats, meaning that a workaround is needed for Chromium.
 
+* Improvements to ARGB handling in the VPP backend
 * Don't advertise VAProfileHEVCMain10 format support on HSW and IVB.
 * Disable this driver's Wayland backend by default.
 
@@ -17,6 +17,8 @@ Version 2.4.5 - XX.XX.XXXX (IRQL fork)
 
     If any user requires legacy wl_drm support, a build time option
     remains.
+
+* Minor cleanup.
 
 Version 2.4.4 - 06.Apr.2025 (IRQL fork)
 
