@@ -1655,7 +1655,7 @@ gen75_mfc_avc_pipeline_programing(VADriverContextP ctx,
 	dri_bo *slice_batch_bo;
 
 	if (intel_mfc_interlace_check(ctx, encode_state, encoder_context)) {
-		fprintf(stderr, "Current VA driver don't support interlace mode!\n");
+		i965_log_error(ctx, "Current VA driver don't support interlace mode!\n");
 		assert(0);
 		return;
 	}
@@ -1712,7 +1712,7 @@ gen75_mfc_avc_encode_picture(VADriverContextP ctx,
 				break;
 			} else if (sts == BRC_OVERFLOW_WITH_MIN_QP || sts == BRC_UNDERFLOW_WITH_MAX_QP) {
 				if (!mfc_context->hrd.violation_noted) {
-					fprintf(stderr, "Unrepairable %s!\n", (sts == BRC_OVERFLOW_WITH_MIN_QP) ? "overflow" : "underflow");
+					i965_log_error_nocb("Unrepairable %s!\n", (sts == BRC_OVERFLOW_WITH_MIN_QP) ? "overflow" : "underflow");
 					mfc_context->hrd.violation_noted = 1;
 				}
 				return VA_STATUS_SUCCESS;

@@ -2535,7 +2535,7 @@ gen9_hcpe_hevc_encode_picture(VADriverContextP ctx,
 				break;
 			} else if (sts == BRC_OVERFLOW_WITH_MIN_QP || sts == BRC_UNDERFLOW_WITH_MAX_QP) {
 				if (!hcpe_context->hrd.violation_noted) {
-					fprintf(stderr, "Unrepairable %s!\n", (sts == BRC_OVERFLOW_WITH_MIN_QP) ? "overflow" : "underflow");
+					i965_log_error_nocb("Unrepairable %s!\n", (sts == BRC_OVERFLOW_WITH_MIN_QP) ? "overflow" : "underflow");
 					hcpe_context->hrd.violation_noted = 1;
 				}
 				return VA_STATUS_SUCCESS;

@@ -5875,7 +5875,7 @@ i965_sw_putimage(VADriverContextP ctx,
 		/* Don't allow format mismatch */
 		if (obj_surface->fourcc != obj_image->image.format.fourcc)
 		{
-			fprintf(stderr, "i965_sw_putimage: Format mismatch, rejecting call. (surface: %#010x, image: %#010x)\r\n",
+			i965_log_error(ctx, "i965_sw_putimage: Format mismatch, rejecting call. (surface: %#010x, image: %#010x)\r\n",
 					obj_surface->fourcc, obj_image->image.format.fourcc);
 			return VA_STATUS_ERROR_INVALID_IMAGE_FORMAT;
 		}
@@ -7124,6 +7124,15 @@ void i965_log_error(VADriverContextP ctx, const char *format, ...)
 	va_end(vl);
 }
 
+void i965_log_error_nocb(const char *format, ...)
+{
+	va_list vl;
+
+	va_start(vl, format);
+	vfprintf(stderr, format, vl);
+	va_end(vl);
+}
+
 void i965_log_info(VADriverContextP ctx, const char *format, ...)
 {
 	va_list vl;
@@ -7369,7 +7378,7 @@ i965_initialize_wrapper(VADriverContextP ctx, const char *driver_name)
 	vtable = calloc(1, sizeof(*vtable));
 
 	if (!wrapper_pdrvctx || !vtable) {
-		fprintf(stderr, "Failed to allocate memory for wrapper \n");
+		i965_log_error(ctx, "Failed to allocate memory for wrapper \n");
 		free(wrapper_pdrvctx);
 		free(vtable);
 		return VA_STATUS_ERROR_ALLOCATION_FAILED;
@@ -7390,7 +7399,7 @@ i965_initialize_wrapper(VADriverContextP ctx, const char *driver_name)
 
 		handle = dlopen(driver_path, RTLD_NOW | RTLD_GLOBAL | RTLD_NODELETE);
 		if (!handle) {
-			fprintf(stderr, "failed to open %s\n", driver_path);
+			i965_log_error(ctx, "failed to open %s\n", driver_path);
 			driver_dir = strtok_r(NULL, ":", &saveptr);
 			continue;
 		}
@@ -7426,7 +7435,7 @@ i965_initialize_wrapper(VADriverContextP ctx, const char *driver_name)
 			}
 			if (compatible_versions[i].major < 0) {
 				dlclose(handle);
-				fprintf(stderr, "%s has no function %s\n",
+				i965_log_error(ctx, "%s has no function %s\n",
 						driver_path, init_func_s);
 				driver_dir = strtok_r(NULL, ":", &saveptr);
 				continue;
@@ -7437,7 +7446,7 @@ i965_initialize_wrapper(VADriverContextP ctx, const char *driver_name)
 
 			if (va_status != VA_STATUS_SUCCESS) {
 				dlclose(handle);
-				fprintf(stderr, "%s init failed, got status %i.\n", driver_path, va_status);
+				i965_log_error(ctx, "%s init failed, got status %i.\n", driver_path, va_status);
 				driver_dir = strtok_r(NULL, ":", &saveptr);
 				continue;
 			}
