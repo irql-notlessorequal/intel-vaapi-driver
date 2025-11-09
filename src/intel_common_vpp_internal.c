@@ -201,7 +201,8 @@ intel_common_scaling_post_processing(VADriverContextP ctx,
 	if (dst_fourcc == VA_FOURCC_RGBX ||
 		dst_fourcc == VA_FOURCC_RGBA ||
 		dst_fourcc == VA_FOURCC_BGRX ||
-		dst_fourcc == VA_FOURCC_BGRA)
+		dst_fourcc == VA_FOURCC_BGRA ||
+		dst_fourcc == VA_FOURCC_ARGB)
 		scale_flag |= DST_RGB32;
 
 	/* If P010 is converted without resolution change,
