@@ -41,6 +41,10 @@ intel_memman_init(struct intel_driver_data *intel)
 
 	intel_bufmgr_gem_enable_reuse(intel->bufmgr);
 
+	/**
+	 * TODO: Replace this with a local version if possible since the libdrm
+	 * APIs do nothing since 2015.
+	 */
 	if (g_intel_debug_option_flags & INTEL_DEBUG_FLAGS_DUMP_AUB) {
 		drm_intel_bufmgr_gem_set_aub_filename(intel->bufmgr,
 											  "va.aub");
