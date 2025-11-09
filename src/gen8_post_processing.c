@@ -1907,7 +1907,8 @@ gen8_pp_context_get_surface_conf(VADriverContextP ctx,
 		if (fourcc == VA_FOURCC_RGBX ||
 			fourcc == VA_FOURCC_RGBA ||
 			fourcc == VA_FOURCC_BGRX ||
-			fourcc == VA_FOURCC_BGRA) {
+			fourcc == VA_FOURCC_BGRA ||
+			fourcc == VA_FOURCC_ARGB) {
 			/* nothing to do here */
 		} else if (fourcc == VA_FOURCC_P010 || fourcc == VA_FOURCC_NV12) {
 			width[1] = ALIGN(width[0], 2) / 2;
@@ -1938,7 +1939,8 @@ gen8_pp_context_get_surface_conf(VADriverContextP ctx,
 		if (fourcc == VA_FOURCC_RGBX ||
 			fourcc == VA_FOURCC_RGBA ||
 			fourcc == VA_FOURCC_BGRX ||
-			fourcc == VA_FOURCC_BGRA) {
+			fourcc == VA_FOURCC_BGRA ||
+			fourcc == VA_FOURCC_ARGB) {
 			/* nothing to do here */
 		} else if (fourcc == VA_FOURCC_P010 || fourcc == VA_FOURCC_NV12) {
 			width[1] = ALIGN(width[0], 2) / 2;

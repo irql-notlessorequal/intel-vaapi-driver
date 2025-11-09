@@ -285,17 +285,7 @@ i965_image_formats_map[I965_MAX_IMAGE_FORMATS + 1] = {
 	{
 		/* [31:0] A:R:G:B 8:8:8:8 little endian */
 		I965_SURFACETYPE_RGBA,
-		{ VA_FOURCC_BGRA, VA_LSB_FIRST, 32, 32, 0x00ff0000, 0x0000ff00, 0x000000ff,  0xff000000 }
-	},
-	{
-		/* [31:0] X:B:G:R 8:8:8:8 little endian */
-		I965_SURFACETYPE_RGBA,
-		{ VA_FOURCC_RGBX, VA_LSB_FIRST, 32, 24, 0x000000ff, 0x0000ff00, 0x00ff0000 }
-	},
-	{
-		/* [31:0] X:R:G:B 8:8:8:8 little endian */
-		I965_SURFACETYPE_RGBA,
-		{ VA_FOURCC_BGRX, VA_LSB_FIRST, 32, 24, 0x00ff0000, 0x0000ff00, 0x000000ff }
+		{ VA_FOURCC_BGRA, VA_LSB_FIRST, 32, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000 }
 	},
 	{
 		/* [31:0] A:B:G:R 8:8:8:8 little endian */
@@ -303,10 +293,15 @@ i965_image_formats_map[I965_MAX_IMAGE_FORMATS + 1] = {
 		{ VA_FOURCC_RGBA, VA_LSB_FIRST, 32, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000 }
 	},
 	{
-		/* [31:0] B:G:R:A 8:8:8:8 little endian */
+		/* [31:0] X:R:G:B 8:8:8:8 little endian */
 		I965_SURFACETYPE_RGBA,
-		{ VA_FOURCC_ARGB, VA_LSB_FIRST, 32, 32, 0x0000ff00, 0x00ff0000, 0xff000000, 0x000000ff }
+		{ VA_FOURCC_BGRX, VA_LSB_FIRST, 32, 24, 0x00ff0000, 0x0000ff00, 0x000000ff, 0 }
 	},
+	{
+		/* [31:0] X:B:G:R 8:8:8:8 little endian */
+		I965_SURFACETYPE_RGBA,
+		{ VA_FOURCC_RGBX, VA_LSB_FIRST, 32, 24, 0x000000ff, 0x0000ff00, 0x00ff0000, 0 }
+	}
 };
 
 /* List of supported subpicture formats */
@@ -5257,18 +5252,14 @@ VAStatus i965_DeriveImage(VADriverContextP ctx,
 			image->format.green_mask = 0x0000ff00;
 			image->format.blue_mask = 0x00ff0000;
 			break;
+
 		case VA_FOURCC_BGRA:
 		case VA_FOURCC_BGRX:
+		case VA_FOURCC_ARGB:
 			image->format.red_mask = 0x00ff0000;
 			image->format.green_mask = 0x0000ff00;
 			image->format.blue_mask = 0x000000ff;
-			break;
-
-		case VA_FOURCC_ARGB:
-			image->format.red_mask = 0x0000ff00;
-			image->format.green_mask = 0x00ff0000;
-			image->format.blue_mask = 0xff000000;
-			break;		
+			break;	
 
 		default:
 			goto error;
@@ -5276,21 +5267,17 @@ VAStatus i965_DeriveImage(VADriverContextP ctx,
 
 		switch (image->format.fourcc)
 		{
-
 		case VA_FOURCC_RGBA:
 		case VA_FOURCC_BGRA:
+		case VA_FOURCC_ARGB:
 			image->format.alpha_mask = 0xff000000;
 			image->format.depth = 32;
 			break;
+
 		case VA_FOURCC_RGBX:
 		case VA_FOURCC_BGRX:
 			image->format.alpha_mask = 0x00000000;
 			image->format.depth = 24;
-			break;
-
-		case VA_FOURCC_ARGB:
-			image->format.alpha_mask = 0x000000ff;
-			image->format.depth = 32;
 			break;
 
 		default:
@@ -6332,6 +6319,7 @@ i965_GetSurfaceAttributes(
 						case VA_FOURCC_BGRX:
 						case VA_FOURCC_RGBX:
 						case VA_FOURCC_RGBA:
+						case VA_FOURCC_ARGB:
 							break;
 						default:
 							attrib_list[i].value.value.i = 0;
@@ -6354,6 +6342,7 @@ i965_GetSurfaceAttributes(
 						case VA_FOURCC_BGRX:
 						case VA_FOURCC_RGBX:
 						case VA_FOURCC_RGBA:
+						case VA_FOURCC_ARGB:
 							break;
 						default:
 							attrib_list[i].value.value.i = 0;

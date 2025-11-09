@@ -1978,7 +1978,8 @@ pp_set_media_rw_message_surface(VADriverContextP ctx, struct i965_post_processin
 	int full_packed_format = (fourcc == VA_FOURCC_RGBA ||
 							  fourcc == VA_FOURCC_RGBX ||
 							  fourcc == VA_FOURCC_BGRA ||
-							  fourcc == VA_FOURCC_BGRX);
+							  fourcc == VA_FOURCC_BGRX ||
+							  fourcc == VA_FOURCC_ARGB);
 	int scale_factor_of_1st_plane_width_in_byte = 1;
 
 	if (surface->type == I965_SURFACE_TYPE_SURFACE) {
@@ -3279,7 +3280,8 @@ gen7_pp_plx_avs_initialize(VADriverContextP ctx, struct i965_post_processing_con
 		if ((src_fourcc == VA_FOURCC_RGBA) ||
 			(src_fourcc == VA_FOURCC_RGBX) ||
 			(src_fourcc == VA_FOURCC_BGRA) ||
-			(src_fourcc == VA_FOURCC_BGRX)) {
+			(src_fourcc == VA_FOURCC_BGRX) ||
+			(src_fourcc == VA_FOURCC_ARGB)) {
 			pp_static_parameter->grf2.avs_wa_enable = 0;
 		}
 	}
@@ -5242,6 +5244,7 @@ i965_image_pl2_processing(VADriverContextP ctx,
 	case VA_FOURCC_BGRA:
 	case VA_FOURCC_RGBX:
 	case VA_FOURCC_RGBA:
+	case VA_FOURCC_ARGB:
 		vaStatus = i965_post_processing_internal(ctx, i965->pp_context,
 												 src_surface,
 												 src_rect,
@@ -5567,6 +5570,7 @@ i965_image_processing(VADriverContextP ctx,
 		case VA_FOURCC_BGRX:
 		case VA_FOURCC_RGBA:
 		case VA_FOURCC_RGBX:
+		case VA_FOURCC_ARGB:
 			status = i965_image_pl1_rgbx_processing(ctx,
 													src_surface,
 													src_rect,
@@ -5788,6 +5792,7 @@ pp_get_kernel_index(uint32_t src_fourcc, uint32_t dst_fourcc, uint32_t pp_ops,
 	case VA_FOURCC_RGBA:
 	case VA_FOURCC_BGRX:
 	case VA_FOURCC_BGRA:
+	case VA_FOURCC_ARGB:
 		switch (dst_fourcc) {
 		case VA_FOURCC_NV12:
 			pp_index = PP_RGBX_LOAD_SAVE_NV12;
@@ -5833,6 +5838,7 @@ pp_get_kernel_index(uint32_t src_fourcc, uint32_t dst_fourcc, uint32_t pp_ops,
 		case VA_FOURCC_RGBA:
 		case VA_FOURCC_BGRX:
 		case VA_FOURCC_BGRA:
+		case VA_FOURCC_ARGB:
 			pp_index = PP_NV12_LOAD_SAVE_RGBX;
 			break;
 		}
