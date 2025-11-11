@@ -1,5 +1,5 @@
 %if !%{defined version}
-%define version 2.4.4
+%define version 2.4.5
 %endif
 
 # Based on https://github.com/negativo17/intel-vaapi-driver/blob/master/intel-vaapi-driver.spec

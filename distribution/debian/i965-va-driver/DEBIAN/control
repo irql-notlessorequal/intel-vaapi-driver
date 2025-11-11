@@ -1,6 +1,6 @@
 Package: i965-va-driver
 Maintainer: https://github.com/irql-notlessorequal
-Version: 2.4.4
+Version: 2.4.5
 Architecture: amd64
 Depends: libva-driver-abi-1.20, libc6 (>= 2.38), libdrm-intel1 (>= 2.4.52), libdrm2 (>= 2.4.52)
 Suggests: i965-va-driver-shaders
