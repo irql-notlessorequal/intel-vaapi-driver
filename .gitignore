@@ -35,5 +35,6 @@ TAGS
 /src/wayland-drm-client-protocol.h
 .VERSION*
 # IRQL fork
+.idea/
 .vscode/c_cpp_properties.json
 .vscode/settings.json
