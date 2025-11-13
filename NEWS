@@ -3,6 +3,10 @@ Copyright (C) 2009-2023 Intel Corporation
 
 Version 2.4.6 - XX.XX.XXXX (IRQL fork)
 
+* Remove support for VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_3 in vaExportSurfaceHandle.
+
+    It was using an ugly memory hack to work and there isn't much support or use case for this variant.
+
 Version 2.4.5 - 11.11.2025 (IRQL fork)
 
 * Expose ARGB as a VPP format on ILK
