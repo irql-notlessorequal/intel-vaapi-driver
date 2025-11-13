@@ -6692,11 +6692,7 @@ i965_ExportSurfaceHandle(VADriverContextP ctx, VASurfaceID surface_id,
 		return VA_STATUS_ERROR_INVALID_SURFACE;		
 	}
 
-	if (
-#if VA_CHECK_VERSION(1, 21, 0)
-		mem_type != VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_3 &&
-#endif
-		mem_type != VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2)
+	if (mem_type != VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2)
 	{
 		i965_log_info(ctx, "vaExportSurfaceHandle: memory type %08x "
 					  "is not supported.\n", mem_type);
