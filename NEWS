@@ -3,6 +3,7 @@ Copyright (C) 2009-2023 Intel Corporation
 
 Version 2.4.6 - XX.XX.XXXX (IRQL fork)
 
+* Add support for VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2 in vaCreateSurfaces.
 * Fully fix video decoding on Ironlake and Sandy Bridge in Chromium
 
     This comes with some CPU overhead as we need to override the alpha channel
