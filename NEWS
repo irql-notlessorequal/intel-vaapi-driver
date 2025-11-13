@@ -1,7 +1,9 @@
 intel-vaapi-driver NEWS -- summary of changes.  2020-06-01
 Copyright (C) 2009-2023 Intel Corporation
 
-Version 2.4.5 - XX.XX.XXXX (IRQL fork)
+Version 2.4.6 - XX.XX.XXXX (IRQL fork)
+
+Version 2.4.5 - 11.11.2025 (IRQL fork)
 
 * Expose ARGB as a VPP format on ILK
 
