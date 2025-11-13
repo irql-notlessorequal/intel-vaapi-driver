@@ -6734,7 +6734,8 @@ i965_QuerySurfaceAttributes(VADriverContextP ctx,
 	attribs[i].flags = VA_SURFACE_ATTRIB_GETTABLE | VA_SURFACE_ATTRIB_SETTABLE;
 	attribs[i].value.value.i = VA_SURFACE_ATTRIB_MEM_TYPE_VA |
 							   VA_SURFACE_ATTRIB_MEM_TYPE_KERNEL_DRM |
-							   VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME;
+							   VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME |
+							   VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2;
 	i++;
 
 	attribs[i].type = VASurfaceAttribExternalBufferDescriptor;
