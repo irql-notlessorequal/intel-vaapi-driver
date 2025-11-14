@@ -1935,6 +1935,7 @@ i965_surface_external_memory(VADriverContextP ctx,
 	case VA_FOURCC_RGBX:
 	case VA_FOURCC_BGRA:
 	case VA_FOURCC_BGRX:
+	case VA_FOURCC_ARGB:
 		ASSERT_RET(memory_attibute->num_planes == 1, VA_STATUS_ERROR_INVALID_PARAMETER);
 
 		obj_surface->subsampling = SUBSAMPLE_RGBX;

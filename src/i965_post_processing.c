@@ -4756,6 +4756,8 @@ i965_post_processing_internal(
 {
 	VAStatus va_status;
 
+	i965_log_debug(ctx, "i965_post_processing_internal({ pp_index=%d })\n", pp_index);
+
 	if (pp_context && pp_context->intel_post_processing) {
 		va_status = (pp_context->intel_post_processing)(ctx, pp_context,
 														src_surface, src_rect,
@@ -5784,6 +5786,10 @@ pp_get_kernel_index(uint32_t src_fourcc, uint32_t dst_fourcc, uint32_t pp_ops,
 {
 	int pp_index = -1;
 
+	i965_log_debug(NULL,
+		"pp_get_kernel_index: { src_fourcc=%#010x dst_fourcc=%#010x filter_flags=%#010x }\n",
+		src_fourcc, dst_fourcc, filter_flags);
+
 	if (!dst_fourcc)
 		dst_fourcc = src_fourcc;
 
@@ -5990,6 +5996,7 @@ i965_proc_picture_fast(VADriverContextP ctx,
 		if ((pp_ops & PP_OP_CHANGE_FORMAT) && (pp_ops & PP_OP_CHANGE_SIZE))
 			return VA_STATUS_ERROR_UNIMPLEMENTED; // temporary surface is needed
 	}
+
 	if (pipeline_param->pipeline_flags & VA_PROC_PIPELINE_FAST) {
 		filter_flags &= ~VA_FILTER_SCALING_MASK;
 		filter_flags |= VA_FILTER_SCALING_FAST;
@@ -6041,6 +6048,11 @@ i965_proc_picture(VADriverContextP ctx,
 	obj_surface = SURFACE(proc_state->current_render_target);
 	if (!obj_surface)
 		return VA_STATUS_ERROR_INVALID_SURFACE;
+
+	i965_log_debug(ctx,
+		"i965_proc_picture: { surface_fmt=%#010x surface_fourcc=%#010x has_bo=%d }\n",
+		obj_surface->expected_format, obj_surface->fourcc,
+		(obj_surface->bo != NULL));
 
 	if (!obj_surface->bo) {
 		unsigned int expected_format = obj_surface->expected_format;
