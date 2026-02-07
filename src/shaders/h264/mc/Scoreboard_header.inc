@@ -40,7 +40,7 @@
 #if !defined(__SCOREBOARD_HEADER__)	// Make sure this file is only included once
 #define __SCOREBOARD_HEADER__
 
-// Module name: scoreboard_header.inc
+// Module name: Scoreboard_header.inc
 //
 // Common header file for both scoreboard and scoreboard_MBAFF kernels
 //
