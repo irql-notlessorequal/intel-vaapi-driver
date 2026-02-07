@@ -112,13 +112,15 @@ enum intel_debug_flags
 	INTEL_DEBUG_FLAGS_ASSERTS = 1,
 	INTEL_DEBUG_FLAGS_BENCH = 2,
 	INTEL_DEBUG_FLAGS_DUMP_AUB = 4,
-	INTEL_DEBUG_FLAGS_VERBOSE = 8
+	INTEL_DEBUG_FLAGS_VERBOSE = 8,
+	INTEL_DEBUG_FLAGS_KERNEL_CAPS = 16
 };
+
 extern uint32_t g_intel_debug_option_flags;
 
 #define ASSERT_RET(value, fail_ret) do {    \
 		if (!(value)) {                     \
-			if (g_intel_debug_option_flags & INTEL_DEBUG_FLAGS_ASSERTS)      \
+			if (unlikely(g_intel_debug_option_flags & INTEL_DEBUG_FLAGS_ASSERTS)) \
 				assert(value);              \
 			return fail_ret;                \
 		}                                   \
@@ -126,7 +128,7 @@ extern uint32_t g_intel_debug_option_flags;
 
 #define ASSERT_RET_MUTEX(value, mutex, fail_ret) do {    \
 		if (!(value)) {                     \
-			if (g_intel_debug_option_flags & INTEL_DEBUG_FLAGS_ASSERTS)      \
+			if (unlikely(g_intel_debug_option_flags & INTEL_DEBUG_FLAGS_ASSERTS)) \
 				assert(value);              \
 			_i965UnlockMutex(mutex);        \
 			return fail_ret;                \

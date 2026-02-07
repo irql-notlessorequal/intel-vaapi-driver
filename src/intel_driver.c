@@ -68,7 +68,8 @@ static const struct debug_flag flags[] = {
 	{INTEL_DEBUG_FLAGS_ASSERTS, "ASSERTS", "Enable driver asserts for debugging purposes"},
 	{INTEL_DEBUG_FLAGS_BENCH, "BENCH", "Disable calling swap_buffer in the X11 backend"},
 	{INTEL_DEBUG_FLAGS_DUMP_AUB, "DUMP_AUB", "Dumps all buffer submissions into an AUB trace (deprecated)"},
-	{INTEL_DEBUG_FLAGS_VERBOSE, "VERBOSE", "Enable verbose logging"}
+	{INTEL_DEBUG_FLAGS_VERBOSE, "VERBOSE", "Enable verbose logging"},
+	{INTEL_DEBUG_FLAGS_KERNEL_CAPS, "KERNEL_CAPS", "Prints the kernel caps that the driver probes for"}
 };
 
 static Bool
@@ -146,6 +147,19 @@ intel_driver_handle_debug(void)
 		fprintf(stderr, "i965: Verbose logging enabled.\n");
 }
 
+static inline void
+intel_driver_dump_kernel_caps(struct intel_driver_data intel)
+{
+	fprintf(stderr, "Dumping kernel caps...\r\n\r\n");
+
+	fprintf(stderr, "HAS_EXECBUFFER2: %s\r\n", (intel.has_exec2 ? "true" : "false"));
+	fprintf(stderr, "HAS_BSD_RING   : %s\r\n", (intel.has_bsd ? "true" : "false"));
+	fprintf(stderr, "HAS_BLT_ENGINE : %s\r\n", (intel.has_blt ? "true" : "false"));
+	fprintf(stderr, "HAS_VEBOX_RING : %s\r\n", (intel.has_vebox ? "true" : "false"));
+	fprintf(stderr, "HAS_BSD2_RING  : %s\r\n", (intel.has_bsd2 ? "true" : "false"));
+	fprintf(stderr, "HAS_LOADED_HUC : %s\r\n", (intel.has_huc ? "true" : "false"));
+}
+
 bool
 intel_driver_init(VADriverContextP ctx)
 {
@@ -218,6 +232,10 @@ intel_driver_init(VADriverContextP ctx)
 		intel->mocs_state = GEN9_PTE_CACHE;
 
 	intel_driver_get_revid(intel, &intel->revision);
+
+	if (g_intel_debug_option_flags & INTEL_DEBUG_FLAGS_KERNEL_CAPS)
+		intel_driver_dump_kernel_caps(*intel);
+
 	return true;
 }
 
