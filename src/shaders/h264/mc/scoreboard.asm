@@ -73,7 +73,7 @@ mov (1) acc0:ud 0xf0aa55a5:ud
 #endif
 
 #include "header.inc"
-#include "scoreboard_header.inc"
+#include "Scoreboard_header.inc"
 
 //
 //  Now, begin source code....
