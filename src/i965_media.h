@@ -30,6 +30,8 @@
 #ifndef _I965_MEDIA_H_
 #define _I965_MEDIA_H_
 
+#include "sysdeps.h"
+
 #include <xf86drm.h>
 #include <drm.h>
 #include <i915_drm.h>

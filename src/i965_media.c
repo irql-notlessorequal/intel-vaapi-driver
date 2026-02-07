@@ -26,12 +26,6 @@
  *    Zou Nan hai <nanhai.zou@intel.com>
  *
  */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
 #include "intel_batchbuffer.h"
 #include "intel_driver.h"
 #include "i965_defines.h"

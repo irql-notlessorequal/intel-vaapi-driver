@@ -23,8 +23,7 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "sysdeps.h"
 #include "i965_drv_video.h"
 
 #include <string.h>
