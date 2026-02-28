@@ -22,7 +22,7 @@ config_file = configure_file(
 
 if git.found()
   git_version = run_command(
-    git, '--git-dir', join_paths(meson.source_root(), '.git'),
+    git, '--git-dir', join_paths(meson.project_source_root(), '.git'),
     'describe', '--tags')
   intel_driver_git_version = git_version.stdout().strip()
 else
@@ -189,6 +189,8 @@ headers = [
   'gen10_vdenc_vp9.h',
 ]
 
+subdir('genxml')
+
 if WITH_X11
   sources += 'i965_output_x11.c'
   headers += 'i965_output_x11.h'
@@ -222,6 +224,7 @@ shared_deps = [
   libdrm_dep,
   libdrm_intel_dep,
   libva_dep,
+  idep_genxml
 ]
 
 if WITH_X11

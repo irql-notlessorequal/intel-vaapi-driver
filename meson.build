@@ -1,7 +1,7 @@
 project(
   'intel-vaapi-driver', 'c',
-  version : '2.4.6.1',
-  meson_version : '>= 0.43.0',
+  version : '2.5.0.1',
+  meson_version : '>= 0.60.0',
   default_options : [ 'warning_level=1',
                       'buildtype=debugoptimized' ])
 
@@ -23,6 +23,7 @@ dl_dep = cc.find_library('dl')
 mathlib_dep = cc.find_library('m', required : false)
 
 git = find_program('git', required : false)
+prog_python = find_program('python3', 'python', version : '>= 3.9')
 
 thread_dep = dependency('threads')
 libdrm_dep = dependency('libdrm', version : '>= 2.4.52')
@@ -41,7 +42,7 @@ va_api_minor_version = '33'
 driverdir = get_option('driverdir')
 if libva_dep.type_name() == 'pkgconfig'
   if driverdir == ''
-    driverdir = libva_dep.get_pkgconfig_variable('driverdir')
+    driverdir = libva_dep.get_variable(pkgconfig : 'driverdir')
   endif
   va_api_version_array = libva_dep.version().split('.')
   va_api_major_version = va_api_version_array[0]
@@ -80,7 +81,7 @@ if get_option('with_wayland_drm') != 'no'
     required : get_option('with_wayland_drm') == 'yes')
 
   if wayland_client_dep.found()
-    prefix = wayland_client_dep.get_pkgconfig_variable('prefix')
+    prefix = wayland_client_dep.get_variable(pkgconfig: 'prefix')
     wayland_scanner = join_paths(prefix, 'bin', 'wayland-scanner')
   else
     wayland_scanner = ''
