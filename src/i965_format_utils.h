@@ -195,6 +195,27 @@ static void i965_GuessExpectedFourCC(int format, int *fourcc)
 #ifndef DRM_FORMAT_GR1616
 #define DRM_FORMAT_GR1616    fourcc_code('G', 'R', '3', '2')
 #endif
+#ifndef DRM_FORMAT_XYUV8888
+#define DRM_FORMAT_XYUV8888  fourcc_code('X', 'Y', 'U', 'V')
+#endif
+#ifndef DRM_FORMAT_Y210
+#define DRM_FORMAT_Y210      fourcc_code('Y', '2', '1', '0')
+#endif
+#ifndef DRM_FORMAT_Y216
+#define DRM_FORMAT_Y216      fourcc_code('Y', '2', '1', '6')
+#endif
+#ifndef DRM_FORMAT_Y410
+#define DRM_FORMAT_Y410      fourcc_code('Y', '4', '1', '0')
+#endif
+#ifndef DRM_FORMAT_Y416
+#define DRM_FORMAT_Y416      fourcc_code('Y', '4', '1', '6')
+#endif
+#ifndef DRM_FORMAT_P010
+#define DRM_FORMAT_P010      fourcc_code('P', '0', '1', '0')
+#endif
+#ifndef DRM_FORMAT_P016
+#define DRM_FORMAT_P016      fourcc_code('P', '0', '1', '6')
+#endif
 
 static uint32_t drm_format_of_separate_plane(uint32_t fourcc, int plane)
 {
