@@ -37,6 +37,12 @@
 /**
  * FALLTHROUGH macro
  */
+#if defined(__has_attribute)
+#  define HAS_GCC_FALLTHROUGH   __has_attribute(fallthrough)
+#else
+#  define HAS_GCC_FALLTHROUGH   0
+#endif
+
 #if defined(__has_cpp_attribute) && defined(__clang__)
 /* We do not do the same trick as __has_attribute because parsing
  * clang::fallthrough in the preprocessor fails in GCC. */
@@ -52,7 +58,7 @@
 #elif HAS_CLANG_FALLTHROUGH
 /* Clang++ specific */
 #define FALLTHROUGH [[clang::fallthrough]]
-#elif __has_attribute(fallthrough)
+#elif HAS_GCC_FALLTHROUGH
 /* Non-standard but supported by at least gcc and clang */
 #define FALLTHROUGH __attribute__((fallthrough))
 #else
