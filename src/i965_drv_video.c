@@ -2843,8 +2843,10 @@ i965_CreateContext(VADriverContextP ctx,
 	obj_context->hw_context = NULL;
 	obj_context->wrapper_context = VA_INVALID_ID;
 
-	if (!obj_context->render_targets)
+	if (!obj_context->render_targets) {
+		i965_destroy_context(&i965->context_heap, (struct object_base *)obj_context);
 		return VA_STATUS_ERROR_ALLOCATION_FAILED;
+	}
 
 	for (i = 0; i < num_render_targets; i++) {
 		if (NULL == SURFACE(render_targets[i])) {
@@ -2942,8 +2944,11 @@ i965_CreateContext(VADriverContextP ctx,
 	}
 
 	attrib = i965_lookup_config_attribute(obj_config, VAConfigAttribRTFormat);
-	if (!attrib)
+	if (!attrib) {
+		i965_destroy_context(&i965->context_heap, (struct object_base *)obj_context);
 		return VA_STATUS_ERROR_INVALID_CONFIG;
+	}
+
 	obj_context->codec_state.base.chroma_formats = attrib->value;
 
 	if (obj_config->wrapper_config != VA_INVALID_ID) {
