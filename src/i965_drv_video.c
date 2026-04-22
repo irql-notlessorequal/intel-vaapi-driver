@@ -1327,9 +1327,8 @@ i965_GetConfigAttributes(VADriverContextP ctx,
 				 profile == VAProfileH264Main ||
 				 profile == VAProfileH264High) &&
 				entrypoint == VAEntrypointEncSlice) {
-				if (IS_GEN9(i965->intel.device_info))
-					attrib_list[i].value = VA_ATTRIB_NOT_SUPPORTED;
-				else if (IS_GEN10(i965->intel.device_info))
+				if (IS_GEN9(i965->intel.device_info) ||
+					IS_GEN10(i965->intel.device_info))
 					attrib_list[i].value = VA_ATTRIB_NOT_SUPPORTED;
 				else {
 					VAConfigAttribValEncRateControlExt *val_config = (VAConfigAttribValEncRateControlExt *) & (attrib_list[i].value);
