@@ -2897,23 +2897,44 @@ i965_CreateContext(VADriverContextP ctx,
 			memset(&obj_context->codec_state.encode, 0, sizeof(obj_context->codec_state.encode));
 			obj_context->codec_state.encode.current_render_target = VA_INVALID_ID;
 			obj_context->codec_state.encode.max_packed_header_params_ext = NUM_SLICES;
+
 			obj_context->codec_state.encode.packed_header_params_ext =
 				calloc(obj_context->codec_state.encode.max_packed_header_params_ext,
 					   sizeof(struct buffer_store *));
+
+			if (!obj_context->codec_state.encode.packed_header_params_ext) {
+				i965_destroy_context(&i965->context_heap, (struct object_base *)obj_context);
+				return VA_STATUS_ERROR_ALLOCATION_FAILED;
+			}
 
 			obj_context->codec_state.encode.max_packed_header_data_ext = NUM_SLICES;
 			obj_context->codec_state.encode.packed_header_data_ext =
 				calloc(obj_context->codec_state.encode.max_packed_header_data_ext,
 					   sizeof(struct buffer_store *));
 
-			obj_context->codec_state.encode.max_slice_num = NUM_SLICES;
-			obj_context->codec_state.encode.slice_rawdata_index =
-				calloc(obj_context->codec_state.encode.max_slice_num, sizeof(int));
-			obj_context->codec_state.encode.slice_rawdata_count =
-				calloc(obj_context->codec_state.encode.max_slice_num, sizeof(int));
+			if (!obj_context->codec_state.encode.packed_header_data_ext) {
+				i965_destroy_context(&i965->context_heap, (struct object_base *)obj_context);
+				return VA_STATUS_ERROR_ALLOCATION_FAILED;
+			}			
 
-			obj_context->codec_state.encode.slice_header_index =
-				calloc(obj_context->codec_state.encode.max_slice_num, sizeof(int));
+			obj_context->codec_state.encode.max_slice_num = NUM_SLICES;
+
+			int *tmp_idx = calloc(obj_context->codec_state.encode.max_slice_num, sizeof(int));
+			int *tmp_cnt = calloc(obj_context->codec_state.encode.max_slice_num, sizeof(int));
+			int *tmp_hdr = calloc(obj_context->codec_state.encode.max_slice_num, sizeof(int));
+
+			if (!tmp_idx || !tmp_cnt || !tmp_hdr) {
+				free(tmp_idx);
+				free(tmp_cnt);
+				free(tmp_hdr);
+
+				i965_destroy_context(&i965->context_heap, (struct object_base *)obj_context);
+				return VA_STATUS_ERROR_ALLOCATION_FAILED;
+			}
+			
+			obj_context->codec_state.encode.slice_rawdata_index = tmp_idx;
+			obj_context->codec_state.encode.slice_rawdata_count = tmp_cnt;
+			obj_context->codec_state.encode.slice_header_index = tmp_hdr;
 
 			obj_context->codec_state.encode.vps_sps_seq_index = 0;
 
