@@ -136,57 +136,69 @@ static int get_sampling_from_fourcc(unsigned int fourcc);
 #define DEF_RGB(FOURCC, SUB, FLAG)                      DEF_FOUCC_INFO(FOURCC, RGB, SUB, FLAG)
 #define DEF_INDEX(FOURCC, SUB, FLAG)                    DEF_FOUCC_INFO(FOURCC, INDEX, SUB, FLAG)
 
+/* Sorted from smallest value to largest. */
 static const i965_fourcc_info i965_fourcc_infos[] = {
-	DEF_YUV(NV12, YUV420, I_SI),
-	DEF_YUV(I420, YUV420, I_SI),
-	DEF_YUV(IYUV, YUV420, I_S),
-	DEF_YUV(IMC3, YUV420, I_S),
-	DEF_YUV(YV12, YUV420, I_SI),
-	DEF_YUV(IMC1, YUV420, I_S),
-
-	DEF_YUV(P010, YUV420, I_SI),
-	DEF_YUV(I010, YUV420, I_S),
-
-	DEF_YUV(422H, YUV422H, I_SI),
-	DEF_YUV(422V, YUV422V, I_S),
-	DEF_YUV(YV16, YUV422H, I_S),
-	DEF_YUV(YUY2, YUV422H, I_SI),
-	DEF_YUV(UYVY, YUV422H, I_SI),
-
-	DEF_YUV(444P, YUV444, I_S),
-
-	DEF_YUV(411P, YUV411, I_S),
-
 	DEF_YUV(Y800, YUV400, I_S),
 
-	DEF_RGB(RGBA, RGBX, I_SI),
-	DEF_RGB(RGBX, RGBX, I_SI),
-	DEF_RGB(BGRA, RGBX, I_SI),
-	DEF_RGB(BGRX, RGBX, I_SI),
+	DEF_YUV(I010, YUV420, I_S),
+	DEF_YUV(P010, YUV420, I_SI),
 
-	DEF_RGB(ARGB, RGBX, I_SI),
-	DEF_RGB(ABGR, RGBX, I_I),
+	DEF_YUV(I420, YUV420, I_SI),
+	DEF_YUV(IMC1, YUV420, I_S),
+	DEF_YUV(NV12, YUV420, I_SI),
+	DEF_YUV(YV12, YUV420, I_SI),
+
+	DEF_YUV(YUY2, YUV422H, I_SI),
+	DEF_YUV(IMC3, YUV420, I_S),
+
+	DEF_INDEX(AI44, RGBX, I_I),
+	DEF_INDEX(IA44, RGBX, I_I),
+
+	DEF_YUV(YV16, YUV422H, I_S),
 
 	DEF_INDEX(IA88, RGBX, I_I),
 	DEF_INDEX(AI88, RGBX, I_I),
 
-	DEF_INDEX(IA44, RGBX, I_I),
-	DEF_INDEX(AI44, RGBX, I_I)
+	DEF_RGB(RGBA, RGBX, I_SI),
+	DEF_RGB(BGRA, RGBX, I_SI),
+	DEF_RGB(ARGB, RGBX, I_SI),
+
+	DEF_YUV(422H, YUV422H, I_SI),
+	DEF_YUV(411P, YUV411, I_S),
+	DEF_YUV(444P, YUV444, I_S),
+
+	DEF_RGB(ABGR, RGBX, I_I),
+
+	DEF_YUV(422V, YUV422V, I_S),
+	DEF_YUV(IYUV, YUV420, I_S),
+
+	DEF_RGB(RGBX, RGBX, I_SI),
+	DEF_RGB(BGRX, RGBX, I_SI),
+
+	DEF_YUV(UYVY, YUV422H, I_SI),
 };
+
+static int
+compare_fourcc_info(const void *key, const void *elem)
+{
+	unsigned int fourcc = *(const unsigned int *)key;
+	const i965_fourcc_info *info = (const i965_fourcc_info *)elem;
+	return (fourcc > info->fourcc) - (fourcc < info->fourcc);
+}
 
 const i965_fourcc_info *
 get_fourcc_info(unsigned int fourcc)
 {
-	unsigned int i;
-
-	for (i = 0; i < ARRAY_ELEMS(i965_fourcc_infos); i++) {
-		const i965_fourcc_info * const info = &i965_fourcc_infos[i];
-
-		if (info->fourcc == fourcc)
-			return info;
-	}
-
-	return NULL;
+#ifdef DEBUG
+	/* Validate table is sorted */
+	for (unsigned int i = 1; i < ARRAY_ELEMS(i965_fourcc_infos); i++)
+		assert(i965_fourcc_infos[i].fourcc > i965_fourcc_infos[i - 1].fourcc);
+#endif
+	return bsearch(&fourcc,
+				   i965_fourcc_infos,
+				   ARRAY_ELEMS(i965_fourcc_infos),
+				   sizeof(i965_fourcc_infos[0]),
+				   compare_fourcc_info);
 }
 
 static int
