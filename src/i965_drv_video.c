@@ -2832,7 +2832,6 @@ i965_CreateContext(VADriverContextP ctx,
 		return vaStatus;
 	}
 
-	*context = contextID;
 	obj_context->flags = flag;
 	obj_context->context_id = contextID;
 	obj_context->obj_config = obj_config;
@@ -2977,6 +2976,7 @@ i965_CreateContext(VADriverContextP ctx,
 		i965_destroy_context(&i965->context_heap, (struct object_base *)obj_context);
 	}
 
+	*context = contextID;
 	i965->current_context_id = contextID;
 
 	return vaStatus;
