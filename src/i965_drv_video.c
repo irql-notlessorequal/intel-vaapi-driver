@@ -1158,7 +1158,8 @@ i965_get_enc_packed_attributes(VADriverContextP ctx, VAProfile profile, VAEntryp
 	return enc_packed_attribs;
 }
 
-static inline bool expose_frame_level_decoding(struct i965_driver_data *const i965, VAProfile profile, VAEntrypoint entrypoint)
+static inline bool
+expose_frame_level_decoding(struct i965_driver_data *const i965, VAProfile profile, VAEntrypoint entrypoint)
 {
 	if (!i965->intel.dec_base)
 		return false;
@@ -1171,6 +1172,36 @@ static inline bool expose_frame_level_decoding(struct i965_driver_data *const i9
 
 	return profile == VAProfileH264ConstrainedBaseline
 		|| profile == VAProfileH264Main || profile == VAProfileH264High;
+}
+
+static inline int
+get_max_width_for_codec(struct i965_driver_data *const i965, VAProfile profile, VAEntrypoint entrypoint)
+{
+	switch (profile)
+	{
+		case VAProfileMPEG2Main:
+		case VAProfileMPEG2Simple:
+			return i965->codec_info->max_width_mpeg2;
+		case VAProfileJPEGBaseline:
+			return i965->codec_info->max_width_jpeg;
+		default:
+			return i965->codec_info->max_width;
+	}
+}
+
+static inline int
+get_max_height_for_codec(struct i965_driver_data *const i965, VAProfile profile, VAEntrypoint entrypoint)
+{
+	switch (profile)
+	{
+		case VAProfileMPEG2Main:
+		case VAProfileMPEG2Simple:
+			return i965->codec_info->max_height_mpeg2;
+		case VAProfileJPEGBaseline:
+			return i965->codec_info->max_height_jpeg;
+		default:
+			return i965->codec_info->max_height;
+	}
 }
 
 VAStatus
@@ -1421,12 +1452,14 @@ i965_GetConfigAttributes(VADriverContextP ctx,
 		case VAConfigAttribMaxPictureWidth:
 			if (profile == VAProfileNone)
 				break;
+
 			attrib_list[i].value = get_max_width_for_codec(i965, profile, entrypoint);
 			break;
 
 		case VAConfigAttribMaxPictureHeight:
 			if (profile == VAProfileNone)
 				break;
+
 			attrib_list[i].value = get_max_height_for_codec(i965, profile, entrypoint);
 			break;
 
@@ -1438,35 +1471,6 @@ i965_GetConfigAttributes(VADriverContextP ctx,
 	}
 
 	return VA_STATUS_SUCCESS;
-}
-
-/* "Max resolution supported for MPEG2 is 1920x1088.  However, frame rate can go much higher than 30 FPS." (https://community.intel.com/t5/Media-Intel-Video-Processing/Queries-on-Hardware-accelerated-MPEG2-encoding-support/m-p/1088271/highlight/true) */
-int get_max_width_for_codec(struct i965_driver_data *const i965, VAProfile profile, VAEntrypoint entrypoint)
-{
-	switch (profile)
-	{
-	case VAProfileMPEG2Main:
-	case VAProfileMPEG2Simple:
-		return i965->codec_info->max_width_mpeg2;
-	case VAProfileJPEGBaseline:
-		return i965->codec_info->max_width_jpeg;
-	default:
-		return i965->codec_info->max_width;
-	}
-}
-
-int get_max_height_for_codec(struct i965_driver_data *const i965, VAProfile profile, VAEntrypoint entrypoint)
-{
-	switch (profile)
-	{
-	case VAProfileMPEG2Main:
-	case VAProfileMPEG2Simple:
-		return i965->codec_info->max_height_mpeg2;
-	case VAProfileJPEGBaseline:
-		return i965->codec_info->max_height_jpeg;
-	default:
-		return i965->codec_info->max_height;
-	}
 }
 
 static void
@@ -2753,20 +2757,23 @@ i965_destroy_context(struct object_heap *heap, struct object_base *obj)
 }
 
 static inline void
+hw_formats(VADriverContextP ctx,
+		   struct object_config *obj_config,
+		   struct i965_driver_data *i965,
+		   int* i, VASurfaceAttrib *attribs)
+{
+	assert(i965->codec_info->get_hw_formats);
+	i965->codec_info->get_hw_formats(ctx, obj_config, i965, i, attribs);
+}
+
+static inline void
 max_resolution(struct i965_driver_data *i965,
 			   struct object_config *obj_config,
 			   int *w, /* out */
 			   int *h) /* out */
 {
-	if (i965->codec_info->max_resolution)
-	{
-		i965->codec_info->max_resolution(i965, obj_config, w, h);
-	}
-	else
-	{
-		*w = get_max_width_for_codec(i965, obj_config->profile, obj_config->entrypoint);
-		*h = get_max_height_for_codec(i965, obj_config->profile, obj_config->entrypoint);
-	}
+	assert(i965->codec_info->max_resolution);
+	i965->codec_info->max_resolution(i965, obj_config, w, h);
 }
 
 #if defined(HAVE_HYBRID_CODEC)
@@ -6476,7 +6483,7 @@ i965_QuerySurfaceAttributes(VADriverContextP ctx,
 	 * This has the benefit of being tider, at the cost of some additional
 	 * code overhead.
 	 */
-	i965->codec_info->get_hw_formats(ctx, obj_config, i965, &i, attribs);
+	hw_formats(ctx, obj_config, i965, &i, attribs);
 
 	attribs[i].type = VASurfaceAttribMemoryType;
 	attribs[i].value.type = VAGenericValueTypeInteger;
