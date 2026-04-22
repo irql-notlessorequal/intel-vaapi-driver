@@ -194,8 +194,6 @@ struct intel_device_info {
  * formats with alpha in them, causing them to explode horribly.
  * 
  * To be fair this is my fault since I'm the one that exposed BGRA to Chromium.
- * 
- * Currently provides no functionality.
  */
 #define HW_WORKAROUND_INVALID_RGBX_SHADER_USE					(1 << 2)
 	uint32_t driver_workarounds;
@@ -209,7 +207,7 @@ struct intel_device_info {
 	unsigned int is_broxton     : 1; /* gen9 */
 	unsigned int is_kabylake    : 1; /* gen9p5 */
 	unsigned int is_glklake     : 1; /* gen9p5 lp*/
-	unsigned int is_cfllake     : 1;
+	unsigned int is_cfllake     : 1; /* gen10 (unreleased) */
 };
 
 struct intel_driver_data {
