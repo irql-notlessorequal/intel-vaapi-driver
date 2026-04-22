@@ -5918,7 +5918,7 @@ i965_hw_putimage(VADriverContextP ctx,
 
 	if (!obj_surface->bo) {
 		unsigned int tiling, swizzle;
-		int surface_sampling = get_sampling_from_fourcc(obj_image->image.format.fourcc);;
+		int surface_sampling = get_sampling_from_fourcc(obj_image->image.format.fourcc);
 		dri_bo_get_tiling(obj_image->bo, &tiling, &swizzle);
 
 		i965_check_alloc_surface_bo(ctx,
