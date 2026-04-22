@@ -31,6 +31,8 @@
 #include <string.h>
 #include <assert.h>
 
+#include <tmmintrin.h>
+
 #include "intel_batchbuffer.h"
 #include "intel_driver.h"
 #include "i965_defines.h"
@@ -1142,6 +1144,29 @@ static struct pp_module pp_modules_gen75[] = {
 	},
 
 };
+
+__attribute__((target("ssse3")))
+static void
+fill_alpha_rows(uint8_t *base, int orig_width, int orig_height, int byte_pitch)
+{
+	fprintf(stderr, 
+		"fill_alpha_rows(width = %d, height = %d, stride = %d)\r\n", orig_width, orig_height, byte_pitch);
+
+    const __m128i alpha = _mm_set1_epi32(0xFF000000);
+
+    for (int y = 0; y < orig_height; y++) {
+        uint32_t *row = (uint32_t *)(base + y * byte_pitch);
+        int x = 0;
+
+        for (; x + 4 <= orig_width; x += 4) {
+            __m128i v = _mm_load_si128((__m128i *)&row[x]);
+            _mm_store_si128((__m128i *)&row[x], _mm_or_si128(v, alpha));
+        }
+
+        for (; x < orig_width; x++)
+            row[x] |= 0xFF000000u;
+    }
+}
 
 static void
 pp_dndi_frame_store_reset(DNDIFrameStore *fs)
@@ -4756,6 +4781,8 @@ i965_post_processing_internal(
 {
 	VAStatus va_status;
 
+	i965_log_debug(ctx, "i965_post_processing_internal({ pp_index=%d })\n", pp_index);
+
 	if (pp_context && pp_context->intel_post_processing) {
 		va_status = (pp_context->intel_post_processing)(ctx, pp_context,
 														src_surface, src_rect,
@@ -5075,6 +5102,8 @@ i965_image_pl1_rgbx_processing(VADriverContextP ctx,
 	int fourcc = pp_get_surface_fourcc(ctx, dst_surface);
 	VAStatus vaStatus;
 
+	i965_log_debug(ctx, "i965_image_pl1_rgbx_processing(fourcc = %#010x)\r\n", fourcc);
+
 	vaStatus = intel_common_scaling_post_processing(ctx,
 													pp_context,
 													src_surface,
@@ -5121,6 +5150,8 @@ i965_image_pl3_processing(VADriverContextP ctx,
 	struct i965_post_processing_context *pp_context = i965->pp_context;
 	int fourcc = pp_get_surface_fourcc(ctx, dst_surface);
 	VAStatus vaStatus = VA_STATUS_ERROR_UNIMPLEMENTED;
+
+	i965_log_debug(ctx, "i965_image_pl3_processing(fourcc = %#010x)\r\n", fourcc);
 
 	vaStatus = intel_common_scaling_post_processing(ctx,
 													pp_context,
@@ -5194,6 +5225,8 @@ i965_image_pl2_processing(VADriverContextP ctx,
 	struct i965_post_processing_context *pp_context = i965->pp_context;
 	int fourcc = pp_get_surface_fourcc(ctx, dst_surface);
 	VAStatus vaStatus = VA_STATUS_ERROR_UNIMPLEMENTED;
+
+	i965_log_debug(ctx, "i965_image_pl2_processing(fourcc = %#010x)\r\n", fourcc);
 
 	vaStatus = intel_common_scaling_post_processing(ctx,
 													pp_context,
@@ -5274,6 +5307,8 @@ i965_image_pl1_processing(VADriverContextP ctx,
 	struct i965_post_processing_context *pp_context = i965->pp_context;
 	int fourcc = pp_get_surface_fourcc(ctx, dst_surface);
 	VAStatus vaStatus;
+
+	i965_log_debug(ctx, "i965_image_pl1_processing(fourcc = %#010x)\r\n", fourcc);
 
 	vaStatus = intel_common_scaling_post_processing(ctx,
 													pp_context,
@@ -5784,6 +5819,10 @@ pp_get_kernel_index(uint32_t src_fourcc, uint32_t dst_fourcc, uint32_t pp_ops,
 {
 	int pp_index = -1;
 
+	i965_log_debug(NULL,
+		"pp_get_kernel_index: { src_fourcc=%#010x dst_fourcc=%#010x filter_flags=%#010x }\n",
+		src_fourcc, dst_fourcc, filter_flags);
+
 	if (!dst_fourcc)
 		dst_fourcc = src_fourcc;
 
@@ -6008,7 +6047,22 @@ i965_proc_picture_fast(VADriverContextP ctx,
 	proc_context->pp_context.filter_flags = filter_flags;
 	status = i965_post_processing_internal(ctx, &proc_context->pp_context,
 										   &src_surface, &src_rect, &dst_surface, &dst_rect, pp_index, NULL);
+
 	intel_batchbuffer_flush(proc_context->pp_context.batch);
+
+	if (status == VA_STATUS_SUCCESS &&
+		dst_obj_surface->fourcc == VA_FOURCC_BGRA &&
+		(i965->intel.device_info->driver_workarounds &
+		 HW_WORKAROUND_INVALID_RGBX_SHADER_USE))
+	{
+		dri_bo_map(dst_obj_surface->bo, 1);
+		fill_alpha_rows(dst_obj_surface->bo->virtual,
+						dst_obj_surface->width / 4,
+						dst_obj_surface->height,
+						dst_obj_surface->width);
+		dri_bo_unmap(dst_obj_surface->bo);
+	}
+
 	return status;
 }
 
@@ -6042,7 +6096,14 @@ i965_proc_picture(VADriverContextP ctx,
 	if (!obj_surface)
 		return VA_STATUS_ERROR_INVALID_SURFACE;
 
+	i965_log_debug(ctx,
+		"i965_proc_picture: { surface_fmt=%#010x surface_fourcc=%#010x has_bo=%d }\n",
+		obj_surface->expected_format, obj_surface->fourcc,
+		(obj_surface->bo != NULL));
+
 	if (!obj_surface->bo) {
+		i965_log_debug(ctx, "i965_proc_picture: Missing BO, generating surface!\r\n");
+
 		unsigned int expected_format = obj_surface->expected_format;
 		int fourcc = 0;
 		int subsample = 0;
