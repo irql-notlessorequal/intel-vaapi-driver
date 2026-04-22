@@ -5958,8 +5958,6 @@ static Bool use_hw_put_image(struct i965_driver_data *const i965, struct object_
 	if (!HAS_VPP(i965))
 		return false;
 
-#define HAS_VPP_P010(ctx) ((ctx)->codec_info->has_vpp_p010 && \
-						   (ctx)->intel.has_bsd)
 	/* mpv will try to probe all formats, even if we don't have support for it. */
 	if (obj_image && obj_image->image.format.fourcc == VA_FOURCC_P010 && !HAS_VPP_P010(i965))
 		return false;
