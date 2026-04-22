@@ -31,6 +31,8 @@
 #include <string.h>
 #include <assert.h>
 
+#include <emmintrin.h>
+
 #include "intel_batchbuffer.h"
 #include "intel_driver.h"
 #include "i965_defines.h"
@@ -1142,6 +1144,29 @@ static struct pp_module pp_modules_gen75[] = {
 	},
 
 };
+
+__attribute__((target("sse2"))) static void
+fill_alpha_rows(uint8_t *base, int pixel_width, int height, int byte_pitch)
+{
+	const __m128i alpha = _mm_set1_epi32(0xFF000000);
+
+	for (int y = 0; y < height; y++)
+	{
+		uint32_t *row = (uint32_t *)(base + y * byte_pitch);
+		int x = 0;
+
+		for (; x + 4 <= pixel_width; x += 4)
+		{
+			__m128i v = _mm_load_si128((__m128i *)&row[x]);
+			_mm_stream_si128((__m128i *)&row[x], _mm_or_si128(v, alpha));
+		}
+
+		for (; x < pixel_width; x++)
+			row[x] |= 0xFF000000u;
+	}
+
+	_mm_sfence();
+}
 
 static void
 pp_dndi_frame_store_reset(DNDIFrameStore *fs)
@@ -6008,7 +6033,22 @@ i965_proc_picture_fast(VADriverContextP ctx,
 	proc_context->pp_context.filter_flags = filter_flags;
 	status = i965_post_processing_internal(ctx, &proc_context->pp_context,
 										   &src_surface, &src_rect, &dst_surface, &dst_rect, pp_index, NULL);
+
 	intel_batchbuffer_flush(proc_context->pp_context.batch);
+
+	if (status == VA_STATUS_SUCCESS &&
+		dst_obj_surface->fourcc == VA_FOURCC_BGRA &&
+		(i965->intel.device_info->driver_workarounds &
+		 HW_WORKAROUND_INVALID_RGBX_SHADER_USE))
+	{
+		dri_bo_map(dst_obj_surface->bo, 1);
+		fill_alpha_rows(dst_obj_surface->bo->virtual,
+						dst_obj_surface->width / 4, /* BGRA is four bytes per pixel. */
+						dst_obj_surface->height,
+						dst_obj_surface->width);
+		dri_bo_unmap(dst_obj_surface->bo);
+	}
+
 	return status;
 }
 
