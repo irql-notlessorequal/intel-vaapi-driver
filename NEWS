@@ -3,6 +3,13 @@ Copyright (C) 2009-2023 Intel Corporation
 
 Version 2.4.6 - XX.XX.XXXX (IRQL fork)
 
+* Fully fix video decoding on Ironlake and Sandy Bridge in Chromium
+
+    This comes with some CPU overhead as we need to override the alpha channel
+    in the post-processing buffer for every single frame.
+
+    There are options to avoid this performance penalty.
+
 * Remove support for VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_3 in vaExportSurfaceHandle.
 
     It was using an ugly memory hack to work and there isn't much support or use case for this variant.
