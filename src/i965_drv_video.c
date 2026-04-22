@@ -3966,12 +3966,24 @@ i965_encoder_render_picture(VADriverContextP ctx,
 				}
 				if (encode->slice_index == encode->max_slice_num) {
 					int slice_num = encode->max_slice_num;
-					encode->slice_rawdata_index = realloc(encode->slice_rawdata_index,
-														  (slice_num + NUM_SLICES) * sizeof(int));
-					encode->slice_rawdata_count = realloc(encode->slice_rawdata_count,
-														  (slice_num + NUM_SLICES) * sizeof(int));
-					encode->slice_header_index = realloc(encode->slice_header_index,
-														 (slice_num + NUM_SLICES) * sizeof(int));
+					int *tmp_idx = realloc(encode->slice_rawdata_index,
+										   (slice_num + NUM_SLICES) * sizeof(int));
+					int *tmp_cnt = realloc(encode->slice_rawdata_count,
+										   (slice_num + NUM_SLICES) * sizeof(int));
+					int *tmp_hdr = realloc(encode->slice_header_index,
+										   (slice_num + NUM_SLICES) * sizeof(int));
+
+					if (!tmp_idx || !tmp_cnt || !tmp_hdr) {
+						free(tmp_idx);
+						free(tmp_cnt);
+						free(tmp_hdr);
+						return VA_STATUS_ERROR_ALLOCATION_FAILED;
+					}
+
+					encode->slice_rawdata_index = tmp_idx;
+					encode->slice_rawdata_count = tmp_cnt;
+					encode->slice_header_index = tmp_hdr;
+
 					memset(encode->slice_rawdata_index + slice_num, 0,
 						   sizeof(int) * NUM_SLICES);
 					memset(encode->slice_rawdata_count + slice_num, 0,
@@ -3980,12 +3992,6 @@ i965_encoder_render_picture(VADriverContextP ctx,
 						   sizeof(int) * NUM_SLICES);
 
 					encode->max_slice_num += NUM_SLICES;
-					if ((encode->slice_rawdata_index == NULL) ||
-						(encode->slice_header_index == NULL)  ||
-						(encode->slice_rawdata_count == NULL)) {
-						vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
-						return vaStatus;
-					}
 				}
 			}
 			break;
@@ -4052,13 +4058,24 @@ i965_encoder_render_picture(VADriverContextP ctx,
 						 */
 						if (encode->slice_index == encode->max_slice_num) {
 							int slice_num = encode->max_slice_num;
+							int *tmp_idx = realloc(encode->slice_rawdata_index,
+												   (slice_num + NUM_SLICES) * sizeof(int));
+							int *tmp_cnt = realloc(encode->slice_rawdata_count,
+												   (slice_num + NUM_SLICES) * sizeof(int));
+							int *tmp_hdr = realloc(encode->slice_header_index,
+												   (slice_num + NUM_SLICES) * sizeof(int));
 
-							encode->slice_rawdata_index = realloc(encode->slice_rawdata_index,
-																  (slice_num + NUM_SLICES) * sizeof(int));
-							encode->slice_rawdata_count = realloc(encode->slice_rawdata_count,
-																  (slice_num + NUM_SLICES) * sizeof(int));
-							encode->slice_header_index = realloc(encode->slice_header_index,
-																 (slice_num + NUM_SLICES) * sizeof(int));
+							if (!tmp_idx || !tmp_cnt || !tmp_hdr) {
+								free(tmp_idx);
+								free(tmp_cnt);
+								free(tmp_hdr);
+								return VA_STATUS_ERROR_ALLOCATION_FAILED;
+							}
+
+							encode->slice_rawdata_index = tmp_idx;
+							encode->slice_rawdata_count = tmp_cnt;
+							encode->slice_header_index = tmp_hdr;
+
 							memset(encode->slice_rawdata_index + slice_num, 0,
 								   sizeof(int) * NUM_SLICES);
 							memset(encode->slice_rawdata_count + slice_num, 0,
