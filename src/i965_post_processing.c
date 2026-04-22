@@ -31,8 +31,6 @@
 #include <string.h>
 #include <assert.h>
 
-#include <tmmintrin.h>
-
 #include "intel_batchbuffer.h"
 #include "intel_driver.h"
 #include "i965_defines.h"
@@ -1145,27 +1143,50 @@ static struct pp_module pp_modules_gen75[] = {
 
 };
 
-__attribute__((target("ssse3")))
 static void
-fill_alpha_rows(uint8_t *base, int orig_width, int orig_height, int byte_pitch)
+i965_bgra_fix_alpha(VADriverContextP ctx,
+                    struct i965_post_processing_context *pp_context,
+                    struct object_surface *obj_surface)
 {
-	fprintf(stderr, 
-		"fill_alpha_rows(width = %d, height = %d, stride = %d)\r\n", orig_width, orig_height, byte_pitch);
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = pp_context->batch;
+    unsigned int blt_cmd, br13;
+    int pitch;
 
-    const __m128i alpha = _mm_set1_epi32(0xFF000000);
+    blt_cmd = XY_COLOR_BLT_CMD |
+              XY_COLOR_BLT_WRITE_ALPHA; /* alpha channel only, leave RGB intact */
 
-    for (int y = 0; y < orig_height; y++) {
-        uint32_t *row = (uint32_t *)(base + y * byte_pitch);
-        int x = 0;
+    br13 = (0xF0 << 16) |              /* ROP: PATCOPY */
+           BR13_8888;                  /* 32bpp */
 
-        for (; x + 4 <= orig_width; x += 4) {
-            __m128i v = _mm_load_si128((__m128i *)&row[x]);
-            _mm_store_si128((__m128i *)&row[x], _mm_or_si128(v, alpha));
-        }
+    pitch = obj_surface->width;
 
-        for (; x < orig_width; x++)
-            row[x] |= 0xFF000000u;
+    if (obj_surface->bo &&
+		drm_intel_bo_get_tiling(obj_surface->bo, NULL, NULL) != I915_TILING_NONE) {
+        blt_cmd |= XY_COLOR_BLT_DST_TILED;
+        pitch /= 4;
     }
+
+    br13 |= pitch;
+
+    if (IS_GEN6(i965->intel.device_info)) {
+        intel_batchbuffer_start_atomic_blt(batch, 24);
+        BEGIN_BLT_BATCH(batch, 6);
+    } else {
+        intel_batchbuffer_start_atomic(batch, 24);
+        BEGIN_BATCH(batch, 6);
+    }
+
+    OUT_BATCH(batch, blt_cmd);
+    OUT_BATCH(batch, br13);
+    OUT_BATCH(batch, 0 << 16 | 0);
+    OUT_BATCH(batch, obj_surface->height << 16 | obj_surface->width);
+    OUT_RELOC(batch, obj_surface->bo,
+              I915_GEM_DOMAIN_RENDER, I915_GEM_DOMAIN_RENDER, 0);
+    OUT_BATCH(batch, 0xFF000000);
+    ADVANCE_BATCH(batch);
+
+    intel_batchbuffer_end_atomic(batch);
 }
 
 static void
@@ -6055,12 +6076,8 @@ i965_proc_picture_fast(VADriverContextP ctx,
 		(i965->intel.device_info->driver_workarounds &
 		 HW_WORKAROUND_INVALID_RGBX_SHADER_USE))
 	{
-		dri_bo_map(dst_obj_surface->bo, 1);
-		fill_alpha_rows(dst_obj_surface->bo->virtual,
-						dst_obj_surface->width / 4,
-						dst_obj_surface->height,
-						dst_obj_surface->width);
-		dri_bo_unmap(dst_obj_surface->bo);
+		i965_bgra_fix_alpha(ctx, &proc_context->pp_context, dst_obj_surface);
+		intel_batchbuffer_flush(proc_context->pp_context.batch);
 	}
 
 	return status;
