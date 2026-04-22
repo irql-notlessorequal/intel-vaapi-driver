@@ -2,7 +2,7 @@
 
 This is a fork with many changes, including but not limited to:
 
-- Functioning Chromium support [✻]
+- Functioning Chromium support
 - Fix JPEG decoding of oddly encoded files on gen7/8 (https://github.com/intel/intel-vaapi-driver/pull/514)
 - fix exporting buffers with 3 planes and `VA_EXPORT_SURFACE_SEPARATE_LAYERS` (https://github.com/intel/intel-vaapi-driver/pull/530)
 - `i965_pci_ids`: Add CFL PCI ID found on Xeon W-1290P (https://github.com/intel/intel-vaapi-driver/pull/548)
@@ -14,8 +14,6 @@ This is a fork with many changes, including but not limited to:
 - Expose ARGB format support. (https://github.com/intel/intel-vaapi-driver/issues/500)
 
 The `NEWS` file contains a more detailed changelog.
-
-[✻] Works on IVB and newer, broken on SNB and ILK (for now)
 
 # Release schedule
 
