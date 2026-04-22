@@ -7356,7 +7356,13 @@ i965_initialize_wrapper(VADriverContextP ctx, const char *driver_name)
 	driver_dir = strtok_r(search_path, ":", &saveptr);
 	while (driver_dir && !driver_loaded) {
 		memset(driver_path, 0, sizeof(driver_path));
-		sprintf(driver_path, "%s/%s%s", driver_dir, driver_name, DRIVER_EXTENSION);
+
+		int n = snprintf(driver_path, sizeof(driver_path), "%s/%s%s",
+						 driver_dir, driver_name, DRIVER_EXTENSION);
+		if (n < 0 || n >= (int)sizeof(driver_path)) {
+			driver_dir = strtok_r(NULL, ":", &saveptr);
+			continue;
+		}
 
 		handle = dlopen(driver_path, RTLD_NOW | RTLD_GLOBAL | RTLD_NODELETE);
 		if (!handle) {
