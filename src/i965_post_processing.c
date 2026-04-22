@@ -1151,31 +1151,15 @@ i965_bgra_fix_alpha(VADriverContextP ctx,
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct intel_batchbuffer *batch = pp_context->batch;
     unsigned int blt_cmd, br13;
-    int pitch;
+    int pitch = obj_surface->width;
 
-    blt_cmd = XY_COLOR_BLT_CMD |
-              XY_COLOR_BLT_WRITE_ALPHA; /* alpha channel only, leave RGB intact */
+    blt_cmd = XY_COLOR_BLT_CMD | XY_COLOR_BLT_WRITE_ALPHA;
+    br13 = (0xF0 << 16) | BR13_8888 | pitch;
 
-    br13 = (0xF0 << 16) |              /* ROP: PATCOPY */
-           BR13_8888;                  /* 32bpp */
-
-    pitch = obj_surface->width;
-
-    if (obj_surface->bo &&
-		drm_intel_bo_get_tiling(obj_surface->bo, NULL, NULL) != I915_TILING_NONE) {
-        blt_cmd |= XY_COLOR_BLT_DST_TILED;
-        pitch /= 4;
-    }
-
-    br13 |= pitch;
-
-    if (IS_GEN6(i965->intel.device_info)) {
-        intel_batchbuffer_start_atomic_blt(batch, 24);
-        BEGIN_BLT_BATCH(batch, 6);
-    } else {
-        intel_batchbuffer_start_atomic(batch, 24);
-        BEGIN_BATCH(batch, 6);
-    }
+    /* Stay on the render ring for both Gen5 and Gen6 to avoid
+     * inter-ring sync issues - same ring as the PP shader above */
+    intel_batchbuffer_start_atomic(batch, 24);
+    BEGIN_BATCH(batch, 6);
 
     OUT_BATCH(batch, blt_cmd);
     OUT_BATCH(batch, br13);
@@ -1184,8 +1168,8 @@ i965_bgra_fix_alpha(VADriverContextP ctx,
     OUT_RELOC(batch, obj_surface->bo,
               I915_GEM_DOMAIN_RENDER, I915_GEM_DOMAIN_RENDER, 0);
     OUT_BATCH(batch, 0xFF000000);
-    ADVANCE_BATCH(batch);
 
+    ADVANCE_BATCH(batch);
     intel_batchbuffer_end_atomic(batch);
 }
 
