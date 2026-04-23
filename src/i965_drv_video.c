@@ -2083,7 +2083,7 @@ i965_CreateSurfaces2(
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
 	int i, j;
 	VAStatus vaStatus = VA_STATUS_SUCCESS;
-	int expected_fourcc = 0;
+	uint32_t expected_fourcc = 0;
 	int memory_type = I965_SURFACE_MEM_NATIVE; /* native */
 	int surface_usage_hint = VA_SURFACE_ATTRIB_USAGE_HINT_GENERIC;
 	VASurfaceAttribExternalBuffers *memory_attribute = NULL;

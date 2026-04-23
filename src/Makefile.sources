@@ -29,6 +29,7 @@ source_c = \
 	i965_avc_ildb.c \
 	i965_decoder_utils.c \
 	i965_device_info.c \
+	i965_format_utils.c \
 	i965_drv_video.c \
 	i965_encoder.c \
 	i965_encoder_utils.c \
