@@ -27,8 +27,9 @@
 
 #include "i965_mutext.h"
 
-#define OBJECT_HEAP_OFFSET_MASK     0x7F000000
-#define OBJECT_HEAP_ID_MASK         0x00FFFFFF
+#define OBJECT_HEAP_OFFSET_MASK         0x7F000000
+#define OBJECT_HEAP_ID_MASK             0x00FFFFFF
+#define OBJECT_HEAP_DEFAULT_INCREMENT   16
 
 typedef struct object_base *object_base_p;
 typedef struct object_heap *object_heap_p;
@@ -44,12 +45,36 @@ struct object_heap {
 	int next_free;
 	int heap_size;
 	int heap_increment;
+	int heap_shift;
 	_I965Mutex mutex;
 	void **bucket;
 	int num_buckets;
 };
 
 typedef int object_heap_iterator;
+
+static inline void
+object_heap_slot_to_indices(const struct object_heap *heap, int slot,
+							int *bucket_index, int *obj_index)
+{
+	if (heap->heap_shift >= 0)
+	{
+		*bucket_index = slot >> heap->heap_shift;
+		*obj_index = slot & (heap->heap_increment - 1);
+	}
+	else
+	{
+		*bucket_index = slot / heap->heap_increment;
+		*obj_index = slot % heap->heap_increment;
+	}
+}
+
+static inline object_base_p
+object_heap_bucket_obj(const struct object_heap *heap,
+					   int bucket_index, int obj_index)
+{
+	return (object_base_p)((char *)heap->bucket[bucket_index] + obj_index * heap->object_size);
+}
 
 /*
  * Return 0 on success, -1 on error
