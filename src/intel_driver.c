@@ -221,7 +221,6 @@ intel_driver_init(VADriverContextP ctx)
 	}
 
 	intel->mocs_state = 0;
-	intel->hybrid_vp8 = should_enable_int("I965_VP8_ENCODE");
 	intel->rc_hw_mode = should_enable_int("I965_RC_COUNTER");
 	intel->dec_base = should_enable_int("I965_BASE_DECODING");
 
