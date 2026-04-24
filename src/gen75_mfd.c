@@ -724,19 +724,11 @@ gen75_mfd_avc_directmode_state(VADriverContextP ctx,
 							   VASliceParameterBufferH264 *slice_param,
 							   struct gen7_mfd_context *gen7_mfd_context)
 {
-	struct i965_driver_data *i965 = i965_driver_data(ctx);
 	struct intel_batchbuffer *batch = gen7_mfd_context->base.batch;
 	struct object_surface *obj_surface;
 	GenAvcSurface *gen7_avc_surface;
 	VAPictureH264 *va_pic;
 	int i;
-
-	if (IS_STEPPING_BPLUS(i965)) {
-		gen75_mfd_avc_directmode_state_bplus(ctx, decode_state, pic_param, slice_param,
-											 gen7_mfd_context);
-
-		return;
-	}
 
 	BEGIN_BCS_BATCH(batch, 69);
 	OUT_BCS_BATCH(batch, MFX_AVC_DIRECTMODE_STATE | (69 - 2));
@@ -1161,6 +1153,7 @@ gen75_mfd_avc_decode_picture(VADriverContextP ctx,
 							 struct decode_state *decode_state,
 							 struct gen7_mfd_context *gen7_mfd_context)
 {
+	struct i965_driver_data *i965 = i965_driver_data(ctx);
 	struct intel_batchbuffer *batch = gen7_mfd_context->base.batch;
 	VAPictureParameterBufferH264 *pic_param;
 	VASliceParameterBufferH264 *slice_param, *next_slice_param, *next_slice_group_param;
@@ -1208,7 +1201,11 @@ gen75_mfd_avc_decode_picture(VADriverContextP ctx,
 			else
 				next_slice_param = next_slice_group_param;
 
-			gen75_mfd_avc_directmode_state(ctx, decode_state, pic_param, slice_param, gen7_mfd_context);
+			if (IS_STEPPING_BPLUS(i965))
+				gen75_mfd_avc_directmode_state_bplus(ctx, decode_state, pic_param, slice_param, gen7_mfd_context);
+			else
+				gen75_mfd_avc_directmode_state(ctx, decode_state, pic_param, slice_param, gen7_mfd_context);
+
 			gen75_mfd_avc_ref_idx_state(ctx, pic_param, slice_param, gen7_mfd_context);
 			gen75_mfd_avc_weightoffset_state(ctx, pic_param, slice_param, gen7_mfd_context);
 			gen75_mfd_avc_slice_state(ctx, pic_param, slice_param, next_slice_param, gen7_mfd_context);
