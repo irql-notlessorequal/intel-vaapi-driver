@@ -41,7 +41,7 @@ va_api_minor_version = '33'
 driverdir = get_option('driverdir')
 if libva_dep.type_name() == 'pkgconfig'
   if driverdir == ''
-    driverdir = libva_dep.get_pkgconfig_variable('driverdir')
+    driverdir = libva_dep.get_variable(pkgconfig : 'driverdir')
   endif
   va_api_version_array = libva_dep.version().split('.')
   va_api_major_version = va_api_version_array[0]
@@ -80,7 +80,7 @@ if get_option('with_wayland_drm') != 'no'
     required : get_option('with_wayland_drm') == 'yes')
 
   if wayland_client_dep.found()
-    prefix = wayland_client_dep.get_pkgconfig_variable('prefix')
+    prefix = wayland_client_dep.get_variable(pkgconfig : 'prefix')
     wayland_scanner = join_paths(prefix, 'bin', 'wayland-scanner')
   else
     wayland_scanner = ''
