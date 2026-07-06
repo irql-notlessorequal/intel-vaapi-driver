@@ -2069,7 +2069,9 @@ i965_CreateSurfaces2(
 	VAStatus vaStatus = VA_STATUS_SUCCESS;
 	int expected_fourcc = 0;
 	int memory_type = I965_SURFACE_MEM_NATIVE; /* native */
+#if 0
 	int surface_usage_hint = VA_SURFACE_ATTRIB_USAGE_HINT_GENERIC;
+#endif
 	VASurfaceAttribExternalBuffers *memory_attribute = NULL;
 
 	for (i = 0; i < num_attribs && attrib_list; i++) {
@@ -2079,11 +2081,13 @@ i965_CreateSurfaces2(
 			expected_fourcc = attrib_list[i].value.value.i;
 		}
 
+#if 0
 		if ((attrib_list[i].type == VASurfaceAttribUsageHint) &&
 			(attrib_list[i].flags & VA_SURFACE_ATTRIB_SETTABLE)) {
 			ASSERT_RET(attrib_list[i].value.type == VAGenericValueTypeInteger, VA_STATUS_ERROR_INVALID_PARAMETER);
 			surface_usage_hint = attrib_list[i].value.value.i;
 		}
+#endif
 
 		if ((attrib_list[i].type == VASurfaceAttribMemoryType) &&
 			(attrib_list[i].flags & VA_SURFACE_ATTRIB_SETTABLE)) {
