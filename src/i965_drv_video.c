@@ -136,57 +136,69 @@ static int get_sampling_from_fourcc(unsigned int fourcc);
 #define DEF_RGB(FOURCC, SUB, FLAG)                      DEF_FOUCC_INFO(FOURCC, RGB, SUB, FLAG)
 #define DEF_INDEX(FOURCC, SUB, FLAG)                    DEF_FOUCC_INFO(FOURCC, INDEX, SUB, FLAG)
 
+/* Sorted from smallest value to largest. */
 static const i965_fourcc_info i965_fourcc_infos[] = {
-	DEF_YUV(NV12, YUV420, I_SI),
-	DEF_YUV(I420, YUV420, I_SI),
-	DEF_YUV(IYUV, YUV420, I_S),
-	DEF_YUV(IMC3, YUV420, I_S),
-	DEF_YUV(YV12, YUV420, I_SI),
-	DEF_YUV(IMC1, YUV420, I_S),
-
-	DEF_YUV(P010, YUV420, I_SI),
-	DEF_YUV(I010, YUV420, I_S),
-
-	DEF_YUV(422H, YUV422H, I_SI),
-	DEF_YUV(422V, YUV422V, I_S),
-	DEF_YUV(YV16, YUV422H, I_S),
-	DEF_YUV(YUY2, YUV422H, I_SI),
-	DEF_YUV(UYVY, YUV422H, I_SI),
-
-	DEF_YUV(444P, YUV444, I_S),
-
-	DEF_YUV(411P, YUV411, I_S),
-
 	DEF_YUV(Y800, YUV400, I_S),
 
-	DEF_RGB(RGBA, RGBX, I_SI),
-	DEF_RGB(RGBX, RGBX, I_SI),
-	DEF_RGB(BGRA, RGBX, I_SI),
-	DEF_RGB(BGRX, RGBX, I_SI),
+	DEF_YUV(I010, YUV420, I_S),
+	DEF_YUV(P010, YUV420, I_SI),
 
-	DEF_RGB(ARGB, RGBX, I_SI),
-	DEF_RGB(ABGR, RGBX, I_I),
+	DEF_YUV(I420, YUV420, I_SI),
+	DEF_YUV(IMC1, YUV420, I_S),
+	DEF_YUV(NV12, YUV420, I_SI),
+	DEF_YUV(YV12, YUV420, I_SI),
+
+	DEF_YUV(YUY2, YUV422H, I_SI),
+	DEF_YUV(IMC3, YUV420, I_S),
+
+	DEF_INDEX(AI44, RGBX, I_I),
+	DEF_INDEX(IA44, RGBX, I_I),
+
+	DEF_YUV(YV16, YUV422H, I_S),
 
 	DEF_INDEX(IA88, RGBX, I_I),
 	DEF_INDEX(AI88, RGBX, I_I),
 
-	DEF_INDEX(IA44, RGBX, I_I),
-	DEF_INDEX(AI44, RGBX, I_I)
+	DEF_RGB(RGBA, RGBX, I_SI),
+	DEF_RGB(BGRA, RGBX, I_SI),
+	DEF_RGB(ARGB, RGBX, I_SI),
+
+	DEF_YUV(422H, YUV422H, I_SI),
+	DEF_YUV(411P, YUV411, I_S),
+	DEF_YUV(444P, YUV444, I_S),
+
+	DEF_RGB(ABGR, RGBX, I_I),
+
+	DEF_YUV(422V, YUV422V, I_S),
+	DEF_YUV(IYUV, YUV420, I_S),
+
+	DEF_RGB(RGBX, RGBX, I_SI),
+	DEF_RGB(BGRX, RGBX, I_SI),
+
+	DEF_YUV(UYVY, YUV422H, I_SI),
 };
+
+static int
+compare_fourcc_info(const void *key, const void *elem)
+{
+	unsigned int fourcc = *(const unsigned int *)key;
+	const i965_fourcc_info *info = (const i965_fourcc_info *)elem;
+	return (fourcc > info->fourcc) - (fourcc < info->fourcc);
+}
 
 const i965_fourcc_info *
 get_fourcc_info(unsigned int fourcc)
 {
-	unsigned int i;
-
-	for (i = 0; i < ARRAY_ELEMS(i965_fourcc_infos); i++) {
-		const i965_fourcc_info * const info = &i965_fourcc_infos[i];
-
-		if (info->fourcc == fourcc)
-			return info;
-	}
-
-	return NULL;
+#ifdef DEBUG
+	/* Validate table is sorted */
+	for (unsigned int i = 1; i < ARRAY_ELEMS(i965_fourcc_infos); i++)
+		assert(i965_fourcc_infos[i].fourcc > i965_fourcc_infos[i - 1].fourcc);
+#endif
+	return bsearch(&fourcc,
+				   i965_fourcc_infos,
+				   ARRAY_ELEMS(i965_fourcc_infos),
+				   sizeof(i965_fourcc_infos[0]),
+				   compare_fourcc_info);
 }
 
 static int
@@ -712,8 +724,7 @@ i965_QueryConfigEntrypoints(VADriverContextP ctx,
 			entrypoint_list[n++] = VAEntrypointEncSlice;
 
 #if defined(HAVE_HYBRID_CODEC)
-		if (i965->wrapper_pdrvctx && i965->intel.hybrid_vp8)
-		{
+		if (i965->wrapper_pdrvctx) {
 			VAStatus va_status = VA_STATUS_SUCCESS;
 			VADriverContextP pdrvctx = i965->wrapper_pdrvctx;
 			CALL_VTABLE(pdrvctx, va_status,
@@ -875,22 +886,19 @@ i965_validate_config(VADriverContextP ctx, VAProfile profile,
 		}
 
 #if defined(HAVE_HYBRID_CODEC)
-		if (i965->wrapper_pdrvctx && i965->intel.hybrid_vp8 && va_status != VA_STATUS_SUCCESS)
-		{
+		if (i965->wrapper_pdrvctx && va_status != VA_STATUS_SUCCESS) {
 			VAEntrypoint wrapper_entrypoints[5] = {0};
 			int32_t wrapper_num_entrypoints = 0;
 			VADriverContextP pdrvctx = i965->wrapper_pdrvctx;
 			CALL_VTABLE(pdrvctx, va_status,
 				vaQueryConfigEntrypoints(pdrvctx, profile, 
 					wrapper_entrypoints, &wrapper_num_entrypoints));
-			if (va_status == VA_STATUS_SUCCESS)
-			{
+			if (va_status == VA_STATUS_SUCCESS) {
 				va_status = VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
-				for (int i = 0; i < wrapper_num_entrypoints; i++)
-				{
-					if (entrypoint == wrapper_entrypoints[i])
-					{
+				for (int i = 0; i < wrapper_num_entrypoints; i++) {
+					if (entrypoint == wrapper_entrypoints[i]) {
 						va_status = VA_STATUS_SUCCESS;
+						break;
 					}
 				}
 			}
@@ -1146,7 +1154,8 @@ i965_get_enc_packed_attributes(VADriverContextP ctx, VAProfile profile, VAEntryp
 	return enc_packed_attribs;
 }
 
-static inline bool expose_frame_level_decoding(struct i965_driver_data *const i965, VAProfile profile, VAEntrypoint entrypoint)
+static inline bool
+expose_frame_level_decoding(struct i965_driver_data *const i965, VAProfile profile, VAEntrypoint entrypoint)
 {
 	if (!i965->intel.dec_base)
 		return false;
@@ -1157,8 +1166,39 @@ static inline bool expose_frame_level_decoding(struct i965_driver_data *const i9
 	if (!i965->codec_info->supports_short_slice_dec)
 		return false;
 
-	return profile == VAProfileH264ConstrainedBaseline
-		|| profile == VAProfileH264Main || profile == VAProfileH264High;
+	return profile == VAProfileH264ConstrainedBaseline ||
+		   profile == VAProfileH264Main ||
+		   profile == VAProfileH264High;
+}
+
+static inline int
+get_max_width_for_codec(struct i965_driver_data *const i965, VAProfile profile, VAEntrypoint entrypoint)
+{
+	switch (profile)
+	{
+		case VAProfileMPEG2Main:
+		case VAProfileMPEG2Simple:
+			return i965->codec_info->max_width_mpeg2;
+		case VAProfileJPEGBaseline:
+			return i965->codec_info->max_width_jpeg;
+		default:
+			return i965->codec_info->max_width;
+	}
+}
+
+static inline int
+get_max_height_for_codec(struct i965_driver_data *const i965, VAProfile profile, VAEntrypoint entrypoint)
+{
+	switch (profile)
+	{
+		case VAProfileMPEG2Main:
+		case VAProfileMPEG2Simple:
+			return i965->codec_info->max_height_mpeg2;
+		case VAProfileJPEGBaseline:
+			return i965->codec_info->max_height_jpeg;
+		default:
+			return i965->codec_info->max_height;
+	}
 }
 
 VAStatus
@@ -1327,9 +1367,8 @@ i965_GetConfigAttributes(VADriverContextP ctx,
 				 profile == VAProfileH264Main ||
 				 profile == VAProfileH264High) &&
 				entrypoint == VAEntrypointEncSlice) {
-				if (IS_GEN9(i965->intel.device_info))
-					attrib_list[i].value = VA_ATTRIB_NOT_SUPPORTED;
-				else if (IS_GEN10(i965->intel.device_info))
+				if (IS_GEN9(i965->intel.device_info) ||
+					IS_GEN10(i965->intel.device_info))
 					attrib_list[i].value = VA_ATTRIB_NOT_SUPPORTED;
 				else {
 					VAConfigAttribValEncRateControlExt *val_config = (VAConfigAttribValEncRateControlExt *) & (attrib_list[i].value);
@@ -1410,12 +1449,14 @@ i965_GetConfigAttributes(VADriverContextP ctx,
 		case VAConfigAttribMaxPictureWidth:
 			if (profile == VAProfileNone)
 				break;
+
 			attrib_list[i].value = get_max_width_for_codec(i965, profile, entrypoint);
 			break;
 
 		case VAConfigAttribMaxPictureHeight:
 			if (profile == VAProfileNone)
 				break;
+
 			attrib_list[i].value = get_max_height_for_codec(i965, profile, entrypoint);
 			break;
 
@@ -1427,35 +1468,6 @@ i965_GetConfigAttributes(VADriverContextP ctx,
 	}
 
 	return VA_STATUS_SUCCESS;
-}
-
-/* "Max resolution supported for MPEG2 is 1920x1088.  However, frame rate can go much higher than 30 FPS." (https://community.intel.com/t5/Media-Intel-Video-Processing/Queries-on-Hardware-accelerated-MPEG2-encoding-support/m-p/1088271/highlight/true) */
-int get_max_width_for_codec(struct i965_driver_data *const i965, VAProfile profile, VAEntrypoint entrypoint)
-{
-	switch (profile)
-	{
-	case VAProfileMPEG2Main:
-	case VAProfileMPEG2Simple:
-		return i965->codec_info->max_width_mpeg2;
-	case VAProfileJPEGBaseline:
-		return i965->codec_info->max_width_jpeg;
-	default:
-		return i965->codec_info->max_width;
-	}
-}
-
-int get_max_height_for_codec(struct i965_driver_data *const i965, VAProfile profile, VAEntrypoint entrypoint)
-{
-	switch (profile)
-	{
-	case VAProfileMPEG2Main:
-	case VAProfileMPEG2Simple:
-		return i965->codec_info->max_height_mpeg2;
-	case VAProfileJPEGBaseline:
-		return i965->codec_info->max_height_jpeg;
-	default:
-		return i965->codec_info->max_height;
-	}
 }
 
 static void
@@ -2067,7 +2079,7 @@ i965_CreateSurfaces2(
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
 	int i, j;
 	VAStatus vaStatus = VA_STATUS_SUCCESS;
-	int expected_fourcc = 0;
+	uint32_t expected_fourcc = 0;
 	int memory_type = I965_SURFACE_MEM_NATIVE; /* native */
 #if 0
 	int surface_usage_hint = VA_SURFACE_ATTRIB_USAGE_HINT_GENERIC;
@@ -2746,20 +2758,23 @@ i965_destroy_context(struct object_heap *heap, struct object_base *obj)
 }
 
 static inline void
+hw_formats(VADriverContextP ctx,
+		   struct object_config *obj_config,
+		   struct i965_driver_data *i965,
+		   int* i, VASurfaceAttrib *attribs)
+{
+	assert(i965->codec_info->get_hw_formats);
+	i965->codec_info->get_hw_formats(ctx, obj_config, i965, i, attribs);
+}
+
+static inline void
 max_resolution(struct i965_driver_data *i965,
 			   struct object_config *obj_config,
 			   int *w, /* out */
 			   int *h) /* out */
 {
-	if (i965->codec_info->max_resolution)
-	{
-		i965->codec_info->max_resolution(i965, obj_config, w, h);
-	}
-	else
-	{
-		*w = get_max_width_for_codec(i965, obj_config->profile, obj_config->entrypoint);
-		*h = get_max_height_for_codec(i965, obj_config->profile, obj_config->entrypoint);
-	}
+	assert(i965->codec_info->max_resolution);
+	i965->codec_info->max_resolution(i965, obj_config, w, h);
 }
 
 #if defined(HAVE_HYBRID_CODEC)
@@ -2836,7 +2851,6 @@ i965_CreateContext(VADriverContextP ctx,
 		return vaStatus;
 	}
 
-	*context = contextID;
 	obj_context->flags = flag;
 	obj_context->context_id = contextID;
 	obj_context->obj_config = obj_config;
@@ -2848,8 +2862,10 @@ i965_CreateContext(VADriverContextP ctx,
 	obj_context->hw_context = NULL;
 	obj_context->wrapper_context = VA_INVALID_ID;
 
-	if (!obj_context->render_targets)
+	if (!obj_context->render_targets) {
+		i965_destroy_context(&i965->context_heap, (struct object_base *)obj_context);
 		return VA_STATUS_ERROR_ALLOCATION_FAILED;
+	}
 
 	for (i = 0; i < num_render_targets; i++) {
 		if (NULL == SURFACE(render_targets[i])) {
@@ -2881,23 +2897,44 @@ i965_CreateContext(VADriverContextP ctx,
 			memset(&obj_context->codec_state.encode, 0, sizeof(obj_context->codec_state.encode));
 			obj_context->codec_state.encode.current_render_target = VA_INVALID_ID;
 			obj_context->codec_state.encode.max_packed_header_params_ext = NUM_SLICES;
+
 			obj_context->codec_state.encode.packed_header_params_ext =
 				calloc(obj_context->codec_state.encode.max_packed_header_params_ext,
 					   sizeof(struct buffer_store *));
+
+			if (!obj_context->codec_state.encode.packed_header_params_ext) {
+				i965_destroy_context(&i965->context_heap, (struct object_base *)obj_context);
+				return VA_STATUS_ERROR_ALLOCATION_FAILED;
+			}
 
 			obj_context->codec_state.encode.max_packed_header_data_ext = NUM_SLICES;
 			obj_context->codec_state.encode.packed_header_data_ext =
 				calloc(obj_context->codec_state.encode.max_packed_header_data_ext,
 					   sizeof(struct buffer_store *));
 
-			obj_context->codec_state.encode.max_slice_num = NUM_SLICES;
-			obj_context->codec_state.encode.slice_rawdata_index =
-				calloc(obj_context->codec_state.encode.max_slice_num, sizeof(int));
-			obj_context->codec_state.encode.slice_rawdata_count =
-				calloc(obj_context->codec_state.encode.max_slice_num, sizeof(int));
+			if (!obj_context->codec_state.encode.packed_header_data_ext) {
+				i965_destroy_context(&i965->context_heap, (struct object_base *)obj_context);
+				return VA_STATUS_ERROR_ALLOCATION_FAILED;
+			}			
 
-			obj_context->codec_state.encode.slice_header_index =
-				calloc(obj_context->codec_state.encode.max_slice_num, sizeof(int));
+			obj_context->codec_state.encode.max_slice_num = NUM_SLICES;
+
+			int *tmp_idx = calloc(obj_context->codec_state.encode.max_slice_num, sizeof(int));
+			int *tmp_cnt = calloc(obj_context->codec_state.encode.max_slice_num, sizeof(int));
+			int *tmp_hdr = calloc(obj_context->codec_state.encode.max_slice_num, sizeof(int));
+
+			if (!tmp_idx || !tmp_cnt || !tmp_hdr) {
+				free(tmp_idx);
+				free(tmp_cnt);
+				free(tmp_hdr);
+
+				i965_destroy_context(&i965->context_heap, (struct object_base *)obj_context);
+				return VA_STATUS_ERROR_ALLOCATION_FAILED;
+			}
+			
+			obj_context->codec_state.encode.slice_rawdata_index = tmp_idx;
+			obj_context->codec_state.encode.slice_rawdata_count = tmp_cnt;
+			obj_context->codec_state.encode.slice_header_index = tmp_hdr;
 
 			obj_context->codec_state.encode.vps_sps_seq_index = 0;
 
@@ -2947,8 +2984,11 @@ i965_CreateContext(VADriverContextP ctx,
 	}
 
 	attrib = i965_lookup_config_attribute(obj_config, VAConfigAttribRTFormat);
-	if (!attrib)
+	if (!attrib) {
+		i965_destroy_context(&i965->context_heap, (struct object_base *)obj_context);
 		return VA_STATUS_ERROR_INVALID_CONFIG;
+	}
+
 	obj_context->codec_state.base.chroma_formats = attrib->value;
 
 	if (obj_config->wrapper_config != VA_INVALID_ID) {
@@ -2981,6 +3021,7 @@ i965_CreateContext(VADriverContextP ctx,
 		i965_destroy_context(&i965->context_heap, (struct object_base *)obj_context);
 	}
 
+	*context = contextID;
 	i965->current_context_id = contextID;
 
 	return vaStatus;
@@ -3106,7 +3147,11 @@ i965_create_buffer_internal(VADriverContextP ctx,
 	obj_buffer->context_id = context;
 
 	buffer_store = calloc(1, sizeof(struct buffer_store));
-	assert(buffer_store);
+	if (!buffer_store) {
+		object_heap_free(&i965->buffer_heap, (struct object_base *)obj_buffer);
+		return VA_STATUS_ERROR_ALLOCATION_FAILED;
+	}
+
 	buffer_store->ref_count = 1;
 
 	if (obj_context &&
@@ -3122,6 +3167,7 @@ i965_create_buffer_internal(VADriverContextP ctx,
 			obj_buffer->wrapper_buffer = wrapper_buffer;
 		} else {
 			free(buffer_store);
+			object_heap_free(&i965->buffer_heap, (struct object_base *)obj_buffer);
 			return vaStatus;
 		}
 		wrapper_flag = 1;
@@ -3144,7 +3190,6 @@ i965_create_buffer_internal(VADriverContextP ctx,
 			   type == VAEncFEIMBCodeBufferType ||
 			   type == VAEncFEIDistortionBufferType ||
 			   type == VAEncFEIMBControlBufferType ||
-			   type == VAEncFEIMVPredictorBufferType ||
 			   type == VAEncFEIMVPredictorBufferType ||
 			   type == VAStatsStatisticsBufferType ||
 			   type == VAStatsStatisticsBottomFieldBufferType ||
@@ -3970,12 +4015,24 @@ i965_encoder_render_picture(VADriverContextP ctx,
 				}
 				if (encode->slice_index == encode->max_slice_num) {
 					int slice_num = encode->max_slice_num;
-					encode->slice_rawdata_index = realloc(encode->slice_rawdata_index,
-														  (slice_num + NUM_SLICES) * sizeof(int));
-					encode->slice_rawdata_count = realloc(encode->slice_rawdata_count,
-														  (slice_num + NUM_SLICES) * sizeof(int));
-					encode->slice_header_index = realloc(encode->slice_header_index,
-														 (slice_num + NUM_SLICES) * sizeof(int));
+					int *tmp_idx = realloc(encode->slice_rawdata_index,
+										   (slice_num + NUM_SLICES) * sizeof(int));
+					int *tmp_cnt = realloc(encode->slice_rawdata_count,
+										   (slice_num + NUM_SLICES) * sizeof(int));
+					int *tmp_hdr = realloc(encode->slice_header_index,
+										   (slice_num + NUM_SLICES) * sizeof(int));
+
+					if (!tmp_idx || !tmp_cnt || !tmp_hdr) {
+						free(tmp_idx);
+						free(tmp_cnt);
+						free(tmp_hdr);
+						return VA_STATUS_ERROR_ALLOCATION_FAILED;
+					}
+
+					encode->slice_rawdata_index = tmp_idx;
+					encode->slice_rawdata_count = tmp_cnt;
+					encode->slice_header_index = tmp_hdr;
+
 					memset(encode->slice_rawdata_index + slice_num, 0,
 						   sizeof(int) * NUM_SLICES);
 					memset(encode->slice_rawdata_count + slice_num, 0,
@@ -3984,12 +4041,6 @@ i965_encoder_render_picture(VADriverContextP ctx,
 						   sizeof(int) * NUM_SLICES);
 
 					encode->max_slice_num += NUM_SLICES;
-					if ((encode->slice_rawdata_index == NULL) ||
-						(encode->slice_header_index == NULL)  ||
-						(encode->slice_rawdata_count == NULL)) {
-						vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
-						return vaStatus;
-					}
 				}
 			}
 			break;
@@ -4056,13 +4107,24 @@ i965_encoder_render_picture(VADriverContextP ctx,
 						 */
 						if (encode->slice_index == encode->max_slice_num) {
 							int slice_num = encode->max_slice_num;
+							int *tmp_idx = realloc(encode->slice_rawdata_index,
+												   (slice_num + NUM_SLICES) * sizeof(int));
+							int *tmp_cnt = realloc(encode->slice_rawdata_count,
+												   (slice_num + NUM_SLICES) * sizeof(int));
+							int *tmp_hdr = realloc(encode->slice_header_index,
+												   (slice_num + NUM_SLICES) * sizeof(int));
 
-							encode->slice_rawdata_index = realloc(encode->slice_rawdata_index,
-																  (slice_num + NUM_SLICES) * sizeof(int));
-							encode->slice_rawdata_count = realloc(encode->slice_rawdata_count,
-																  (slice_num + NUM_SLICES) * sizeof(int));
-							encode->slice_header_index = realloc(encode->slice_header_index,
-																 (slice_num + NUM_SLICES) * sizeof(int));
+							if (!tmp_idx || !tmp_cnt || !tmp_hdr) {
+								free(tmp_idx);
+								free(tmp_cnt);
+								free(tmp_hdr);
+								return VA_STATUS_ERROR_ALLOCATION_FAILED;
+							}
+
+							encode->slice_rawdata_index = tmp_idx;
+							encode->slice_rawdata_count = tmp_cnt;
+							encode->slice_header_index = tmp_hdr;
+
 							memset(encode->slice_rawdata_index + slice_num, 0,
 								   sizeof(int) * NUM_SLICES);
 							memset(encode->slice_rawdata_count + slice_num, 0,
@@ -5897,7 +5959,7 @@ i965_hw_putimage(VADriverContextP ctx,
 
 	if (!obj_surface->bo) {
 		unsigned int tiling, swizzle;
-		int surface_sampling = get_sampling_from_fourcc(obj_image->image.format.fourcc);;
+		int surface_sampling = get_sampling_from_fourcc(obj_image->image.format.fourcc);
 		dri_bo_get_tiling(obj_image->bo, &tiling, &swizzle);
 
 		i965_check_alloc_surface_bo(ctx,
@@ -5936,8 +5998,6 @@ static Bool use_hw_put_image(struct i965_driver_data *const i965, struct object_
 	if (!HAS_VPP(i965))
 		return false;
 
-#define HAS_VPP_P010(ctx) ((ctx)->codec_info->has_vpp_p010 && \
-						   (ctx)->intel.has_bsd)
 	/* mpv will try to probe all formats, even if we don't have support for it. */
 	if (obj_image && obj_image->image.format.fourcc == VA_FOURCC_P010 && !HAS_VPP_P010(i965))
 		return false;
@@ -6445,7 +6505,7 @@ i965_QuerySurfaceAttributes(VADriverContextP ctx,
 	 * This has the benefit of being tider, at the cost of some additional
 	 * code overhead.
 	 */
-	i965->codec_info->get_hw_formats(ctx, obj_config, i965, &i, attribs);
+	hw_formats(ctx, obj_config, i965, &i, attribs);
 
 	attribs[i].type = VASurfaceAttribMemoryType;
 	attribs[i].value.type = VAGenericValueTypeInteger;
@@ -7360,7 +7420,13 @@ i965_initialize_wrapper(VADriverContextP ctx, const char *driver_name)
 	driver_dir = strtok_r(search_path, ":", &saveptr);
 	while (driver_dir && !driver_loaded) {
 		memset(driver_path, 0, sizeof(driver_path));
-		sprintf(driver_path, "%s/%s%s", driver_dir, driver_name, DRIVER_EXTENSION);
+
+		int n = snprintf(driver_path, sizeof(driver_path), "%s/%s%s",
+						 driver_dir, driver_name, DRIVER_EXTENSION);
+		if (n < 0 || n >= (int)sizeof(driver_path)) {
+			driver_dir = strtok_r(NULL, ":", &saveptr);
+			continue;
+		}
 
 		handle = dlopen(driver_path, RTLD_NOW | RTLD_GLOBAL | RTLD_NODELETE);
 		if (!handle) {
