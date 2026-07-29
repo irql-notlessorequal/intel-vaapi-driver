@@ -220,9 +220,11 @@ gen9_hcpd_pipe_mode_select(VADriverContextP ctx,
 			OUT_BCS_BATCH(batch, 0);
 
 		OUT_BCS_BATCH(batch, 0);
+#if defined(ENABLE_GEN10_SUPPORT)
 	} else if (IS_GEN10(i965->intel.device_info)) {
 		OUT_BCS_BATCH(batch, 0);
 		OUT_BCS_BATCH(batch, 0);
+#endif
 	}
 
 	ADVANCE_BCS_BATCH(batch);
@@ -353,6 +355,7 @@ gen9_hcpd_ind_obj_base_addr_state(VADriverContextP ctx,
 	ADVANCE_BCS_BATCH(batch);
 }
 
+#if defined(ENABLE_GEN10_SUPPORT)
 static void
 gen10_hcpd_ind_obj_base_addr_state(VADriverContextP ctx,
 								   dri_bo *slice_data_bo,
@@ -413,6 +416,7 @@ gen10_hcpd_ind_obj_base_addr_state(VADriverContextP ctx,
 
 	ADVANCE_BCS_BATCH(batch);
 }
+#endif
 
 static void
 gen9_hcpd_qm_state(VADriverContextP ctx,
@@ -1008,9 +1012,11 @@ gen9_hcpd_hevc_decode_picture(VADriverContextP ctx,
 		slice_param = (VASliceParameterBufferHEVC *)decode_state->slice_params[j]->buffer;
 		slice_data_bo = decode_state->slice_datas[j]->bo;
 
+#if defined(ENABLE_GEN10_SUPPORT)
 		if (IS_GEN10(i965->intel.device_info))
 			gen10_hcpd_ind_obj_base_addr_state(ctx, slice_data_bo, gen9_hcpd_context);
 		else
+#endif
 			gen9_hcpd_ind_obj_base_addr_state(ctx, slice_data_bo, gen9_hcpd_context);
 
 		if (j == decode_state->num_slice_params - 1)
@@ -1822,9 +1828,11 @@ gen9_hcpd_vp9_decode_picture(VADriverContextP ctx,
 
 	gen9_hcpd_vp9_pipe_buf_addr_state(ctx, decode_state, gen9_hcpd_context);
 
+#if defined(ENABLE_GEN10_SUPPORT)
 	if (IS_GEN10(i965->intel.device_info))
 		gen10_hcpd_ind_obj_base_addr_state(ctx, slice_data_bo, gen9_hcpd_context);
 	else
+#endif
 		gen9_hcpd_ind_obj_base_addr_state(ctx, slice_data_bo, gen9_hcpd_context);
 
 	//If segmentation is disabled, only SegParam[0] is valid,
