@@ -57,7 +57,12 @@
 #define VP9_PROFILE_MASK(PROFILE) \
 	(1U << PROFILE)
 
+static void generic_max_resolution(struct i965_driver_data *i965,
+								   struct object_config *obj_config,
+								   int *w, int *h);
+
 extern struct hw_context *i965_proc_context_init(VADriverContextP, struct object_config *);
+
 extern struct hw_context *g4x_dec_hw_context_init(VADriverContextP, struct object_config *);
 
 extern void g4x_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
@@ -71,6 +76,7 @@ static struct hw_codec_info g4x_hw_codec_info = {
 	.proc_hw_context_init = NULL,
 	.render_init = genx_render_init,
 	.post_processing_context_init = NULL,
+	.max_resolution = generic_max_resolution,
 	.get_hw_formats = g4x_get_hw_formats,
 
 	.max_width = 2048,
@@ -103,6 +109,7 @@ static struct hw_codec_info ilk_hw_codec_info = {
 	.proc_hw_context_init = i965_proc_context_init,
 	.render_init = genx_render_init,
 	.post_processing_context_init = i965_post_processing_context_init,
+	.max_resolution = generic_max_resolution,
 	.get_hw_formats = ironlake_get_hw_formats,
 
 	.max_width = 2048,
@@ -139,6 +146,7 @@ static struct hw_codec_info snb_hw_codec_info = {
 	.proc_hw_context_init = i965_proc_context_init,
 	.render_init = genx_render_init,
 	.post_processing_context_init = i965_post_processing_context_init,
+	.max_resolution = generic_max_resolution,
 	.preinit_hw_codec = gen6_hw_codec_preinit,
 	.get_hw_formats = gen6_get_hw_formats,
 
@@ -190,6 +198,7 @@ static struct hw_codec_info ivb_hw_codec_info = {
 	.proc_hw_context_init = i965_proc_context_init,
 	.render_init = genx_render_init,
 	.post_processing_context_init = i965_post_processing_context_init,
+	.max_resolution = generic_max_resolution,
 	.preinit_hw_codec = gen7_hw_codec_preinit,
 	.get_hw_formats = gen7_get_hw_formats,
 
@@ -199,8 +208,8 @@ static struct hw_codec_info ivb_hw_codec_info = {
 	.max_width_mpeg2 = 1920,
 	.max_height_mpeg2 = 1088,
 
-	.max_width_jpeg = 16384,
-	.max_height_jpeg = 16384,
+	.max_width_jpeg = 8192,
+	.max_height_jpeg = 8192,
 
 	.min_linear_wpitch = 64,
 	.min_linear_hpitch = 4,
@@ -244,6 +253,7 @@ static struct hw_codec_info hsw_hw_codec_info = {
 	.proc_hw_context_init = gen75_proc_context_init,
 	.render_init = genx_render_init,
 	.post_processing_context_init = i965_post_processing_context_init,
+	.max_resolution = generic_max_resolution,
 	.preinit_hw_codec = hsw_hw_codec_preinit,
 	.get_hw_formats = gen7_get_hw_formats,
 
@@ -253,8 +263,8 @@ static struct hw_codec_info hsw_hw_codec_info = {
 	.max_width_mpeg2 = 1920,
 	.max_height_mpeg2 = 1088,
 
-	.max_width_jpeg = 16384,
-	.max_height_jpeg = 16384,
+	.max_width_jpeg = 8192,
+	.max_height_jpeg = 8192,
 
 	.min_linear_wpitch = 64,
 	.min_linear_hpitch = 4,
@@ -305,6 +315,7 @@ static struct hw_codec_info bdw_hw_codec_info = {
 	.proc_hw_context_init = gen75_proc_context_init,
 	.render_init = gen8_render_init,
 	.post_processing_context_init = gen8_post_processing_context_init,
+	.max_resolution = generic_max_resolution,
 	.get_hw_formats = gen8_get_hw_formats,
 
 	.max_width = 4096,
@@ -313,8 +324,8 @@ static struct hw_codec_info bdw_hw_codec_info = {
 	.max_width_mpeg2 = 1920,
 	.max_height_mpeg2 = 1088,
 
-	.max_width_jpeg = 16384,
-	.max_height_jpeg = 16384,
+	.max_width_jpeg = 8192,
+	.max_height_jpeg = 8192,
 
 	.min_linear_wpitch = 64,
 	.min_linear_hpitch = 4,
@@ -361,6 +372,7 @@ static struct hw_codec_info chv_hw_codec_info = {
 	.proc_hw_context_init = gen75_proc_context_init,
 	.render_init = gen8_render_init,
 	.post_processing_context_init = gen8_post_processing_context_init,
+	.max_resolution = generic_max_resolution,
 	.get_hw_formats = gen8_get_hw_formats,
 
 	.max_width = 4096,
@@ -369,8 +381,8 @@ static struct hw_codec_info chv_hw_codec_info = {
 	.max_width_mpeg2 = 1920,
 	.max_height_mpeg2 = 1088,
 
-	.max_width_jpeg = 16384,
-	.max_height_jpeg = 16384,
+	.max_width_jpeg = 8192,
+	.max_height_jpeg = 8192,
 
 	.min_linear_wpitch = 64,
 	.min_linear_hpitch = 4,
@@ -417,14 +429,14 @@ static void gen9_hw_codec_preinit(VADriverContextP ctx, struct hw_codec_info *co
 
 extern struct hw_context *gen9_enc_hw_context_init(VADriverContextP, struct object_config *);
 extern void gen9_post_processing_context_init(VADriverContextP, void *, struct intel_batchbuffer *);
-extern void gen9_max_resolution(struct i965_driver_data *, struct object_config *, int *, int *);
+
 static struct hw_codec_info skl_hw_codec_info = {
 	.dec_hw_context_init = gen9_dec_hw_context_init,
 	.enc_hw_context_init = gen9_enc_hw_context_init,
 	.proc_hw_context_init = gen75_proc_context_init,
 	.render_init = gen9_render_init,
 	.post_processing_context_init = gen9_post_processing_context_init,
-	.max_resolution = gen9_max_resolution,
+	.max_resolution = generic_max_resolution,
 	.preinit_hw_codec = gen9_hw_codec_preinit,
 	.get_hw_formats = gen8_get_hw_formats,
 
@@ -434,8 +446,8 @@ static struct hw_codec_info skl_hw_codec_info = {
 	.max_width_mpeg2 = 1920,
 	.max_height_mpeg2 = 1088,
 
-	.max_width_jpeg = 16384,
-	.max_height_jpeg = 16384,
+	.max_width_jpeg = 8192,
+	.max_height_jpeg = 8192,
 
 	.min_linear_wpitch = 64,
 	.min_linear_hpitch = 4,
@@ -489,7 +501,7 @@ static struct hw_codec_info bxt_hw_codec_info = {
 	.proc_hw_context_init = gen75_proc_context_init,
 	.render_init = gen9_render_init,
 	.post_processing_context_init = gen9_post_processing_context_init,
-	.max_resolution = gen9_max_resolution,
+	.max_resolution = generic_max_resolution,
 	.preinit_hw_codec = gen9_hw_codec_preinit,
 	.get_hw_formats = gen8_get_hw_formats,
 
@@ -499,8 +511,8 @@ static struct hw_codec_info bxt_hw_codec_info = {
 	.max_width_mpeg2 = 1920,
 	.max_height_mpeg2 = 1088,
 
-	.max_width_jpeg = 16384,
-	.max_height_jpeg = 16384,
+	.max_width_jpeg = 8192,
+	.max_height_jpeg = 8192,
 
 	.min_linear_wpitch = 64,
 	.min_linear_hpitch = 4,
@@ -557,7 +569,7 @@ static struct hw_codec_info kbl_hw_codec_info = {
 	.proc_hw_context_init = gen75_proc_context_init,
 	.render_init = gen9_render_init,
 	.post_processing_context_init = gen9_post_processing_context_init,
-	.max_resolution = gen9_max_resolution,
+	.max_resolution = generic_max_resolution,
 	.preinit_hw_codec = gen9_hw_codec_preinit,
 	.get_hw_formats = gen8_get_hw_formats,
 
@@ -567,8 +579,8 @@ static struct hw_codec_info kbl_hw_codec_info = {
 	.max_width_mpeg2 = 1920,
 	.max_height_mpeg2 = 1088,
 
-	.max_width_jpeg = 16384,
-	.max_height_jpeg = 16384,
+	.max_width_jpeg = 8192,
+	.max_height_jpeg = 8192,
 
 	.min_linear_wpitch = 64,
 	.min_linear_hpitch = 4,
@@ -634,7 +646,7 @@ static struct hw_codec_info glk_hw_codec_info = {
 	.render_init = gen9_render_init,
 	.post_processing_context_init = gen9_post_processing_context_init,
 	.get_hw_formats = gen8_get_hw_formats,
-	.max_resolution = gen9_max_resolution,
+	.max_resolution = generic_max_resolution,
 	.preinit_hw_codec = gen9_hw_codec_preinit,
 
 	.max_width = 4096,
@@ -643,8 +655,8 @@ static struct hw_codec_info glk_hw_codec_info = {
 	.max_width_mpeg2 = 1920,
 	.max_height_mpeg2 = 1088,
 
-	.max_width_jpeg = 16384,
-	.max_height_jpeg = 16384,
+	.max_width_jpeg = 8192,
+	.max_height_jpeg = 8192,
 
 	.min_linear_wpitch = 64,
 	.min_linear_hpitch = 4,
@@ -709,7 +721,7 @@ static struct hw_codec_info cfl_hw_codec_info = {
 	.proc_hw_context_init = gen75_proc_context_init,
 	.render_init = gen9_render_init,
 	.post_processing_context_init = gen9_post_processing_context_init,
-	.max_resolution = gen9_max_resolution,
+	.max_resolution = generic_max_resolution,
 	.preinit_hw_codec = gen9_hw_codec_preinit,
 	.get_hw_formats = gen8_get_hw_formats,
 
@@ -719,8 +731,8 @@ static struct hw_codec_info cfl_hw_codec_info = {
 	.max_width_mpeg2 = 1920,
 	.max_height_mpeg2 = 1088,
 
-	.max_width_jpeg = 16384,
-	.max_height_jpeg = 16384,
+	.max_width_jpeg = 8192,
+	.max_height_jpeg = 8192,
 
 	.min_linear_wpitch = 64,
 	.min_linear_hpitch = 16,
@@ -785,7 +797,7 @@ static struct hw_codec_info cnl_hw_codec_info = {
 	.proc_hw_context_init = gen75_proc_context_init,
 	.render_init = gen9_render_init,
 	.post_processing_context_init = gen9_post_processing_context_init,
-	.max_resolution = gen9_max_resolution,
+	.max_resolution = generic_max_resolution,
 	.preinit_hw_codec = gen9_hw_codec_preinit,
 	.get_hw_formats = gen8_get_hw_formats,
 
@@ -795,8 +807,8 @@ static struct hw_codec_info cnl_hw_codec_info = {
 	.max_width_mpeg2 = 1920,
 	.max_height_mpeg2 = 1088,
 
-	.max_width_jpeg = 16384,
-	.max_height_jpeg = 16384,
+	.max_width_jpeg = 8192,
+	.max_height_jpeg = 8192,
 
 	.min_linear_wpitch = 64,
 	.min_linear_hpitch = 16,
@@ -1313,4 +1325,32 @@ static void gen9_hw_codec_preinit(VADriverContextP ctx, struct hw_codec_info *co
 
 	if (i965->intel.has_huc && codec_info->has_lp_vp9_encoding)
 		codec_info->lp_vp9_brc_mode |= (VA_RC_CQP | VA_RC_CBR | VA_RC_VBR);
+}
+
+static void
+generic_max_resolution(struct i965_driver_data *i965,
+					  struct object_config *obj_config,
+					  int *w, int *h)
+{
+	switch (obj_config->profile)
+	{
+		case VAProfileMPEG2Main:
+		case VAProfileMPEG2Simple: {
+			*w = i965->codec_info->max_width_mpeg2;
+			*h = i965->codec_info->max_height_mpeg2;
+			break;
+		}
+
+		case VAProfileJPEGBaseline: {
+			*w = i965->codec_info->max_width_jpeg;
+			*h = i965->codec_info->max_height_jpeg;
+			break;
+		}
+
+		default: {
+			*w = i965->codec_info->max_width;
+			*h = i965->codec_info->max_height;
+			break;
+		}
+	}
 }

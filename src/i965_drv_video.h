@@ -605,9 +605,6 @@ i965_check_alloc_surface_bo(VADriverContextP ctx,
 int
 va_enc_packed_type_to_idx(int packed_type);
 
-int get_max_width_for_codec(struct i965_driver_data *const i965, VAProfile profile, VAEntrypoint entrypoint);
-int get_max_height_for_codec(struct i965_driver_data *const i965, VAProfile profile, VAEntrypoint entrypoint);
-
 /* reserve 2 byte for internal using */
 #define CODEC_H264      0
 #define CODEC_MPEG2     1
