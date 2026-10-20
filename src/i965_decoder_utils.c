@@ -1363,19 +1363,24 @@ intel_decoder_check_vp9_parameter(VADriverContextP ctx,
 								  struct decode_state *decode_state)
 {
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
-	VADecPictureParameterBufferVP9 *pic_param = (VADecPictureParameterBufferVP9 *)decode_state->pic_param->buffer;
+	VADecPictureParameterBufferVP9 *pic_param;
 	VAStatus va_status = VA_STATUS_ERROR_INVALID_PARAMETER;
 	struct object_surface *obj_surface;
 	int i = 0, index = 0;
+
+	if (!decode_state->pic_param || !decode_state->pic_param->buffer)
+		return va_status;
+
+	pic_param = (VADecPictureParameterBufferVP9 *)decode_state->pic_param->buffer;
 
 	if ((profile - VAProfileVP9Profile0) < pic_param->profile)
 		return va_status;
 
 	/* Max support up to 4k for BXT */
-	if ((pic_param->frame_width - 1 < 0) || (pic_param->frame_width - 1 > 4095))
+	if (pic_param->frame_width == 0 || pic_param->frame_width > 4096)
 		return va_status;
 
-	if ((pic_param->frame_height - 1 < 0) || (pic_param->frame_height - 1 > 4095))
+	if (pic_param->frame_height == 0 || pic_param->frame_height > 4096)
 		return va_status;
 
 	/* Set the reference object in decode state for last reference */
