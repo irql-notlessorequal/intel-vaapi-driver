@@ -77,7 +77,8 @@ int
 mpeg2_wa_slice_vertical_position(struct decode_state *decode_state,
 								 VAPictureParameterBufferMPEG2 *pic_param)
 {
-	unsigned int i, j, mb_height, vpos, last_vpos = 0;
+	unsigned int i, j, mb_height, vpos;
+	int last_vpos = -1;
 
 	/* Assume progressive sequence if we got a progressive frame */
 	if (pic_param->picture_coding_extension.bits.progressive_frame)
@@ -100,11 +101,12 @@ mpeg2_wa_slice_vertical_position(struct decode_state *decode_state,
 				((VASliceParameterBufferMPEG2 *)buffer_store->buffer) + i;
 
 			vpos = slice_param->slice_vertical_position;
-			if (vpos >= mb_height || vpos == last_vpos + 2) {
+			if (vpos >= mb_height ||
+			   (last_vpos >= 0 && vpos == (unsigned int)(last_vpos + 2))) {
 				WARN_ONCE("codec layer incorrectly fills in MPEG-2 slice_vertical_position. Workaround applied\n");
 				return 1;
 			}
-			last_vpos = vpos;
+			last_vpos = (int)vpos;
 		}
 	}
 	return 0;
