@@ -1171,3 +1171,27 @@ intel_avc_find_skipemulcnt(unsigned char *buf, int bits_length)
 	}
 	return skip_cnt;
 }
+
+/*
+ * Return the number of bytes of the packed header data that the
+ * application has provided for a header of length_in_bits bits.
+ *
+ * Returns 0 when the application asked the driver to use more data
+ * than it provided.
+ */
+unsigned int
+intel_encoder_packed_header_size(struct buffer_store *data_store,
+								 unsigned int length_in_bits)
+{
+	unsigned int data_size;
+
+	if (!data_store)
+		return 0;
+
+	data_size = data_store->size_element * data_store->num_elements;
+
+	if ((length_in_bits + 7) / 8 > data_size)
+		return 0;
+	else
+		return (length_in_bits + 7) / 8;
+}

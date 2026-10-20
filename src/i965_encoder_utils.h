@@ -65,4 +65,9 @@ build_hevc_idr_sei_buffer_timing(unsigned int init_cpb_removal_delay_length,
 int
 intel_avc_find_skipemulcnt(unsigned char *buf, int bits_length);
 
+unsigned int
+intel_encoder_packed_header_size(struct buffer_store *data_store,
+								 unsigned int length_in_bits);
+
+
 #endif /* __I965_ENCODER_UTILS_H__ */
