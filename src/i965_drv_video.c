@@ -3439,7 +3439,6 @@ i965_create_buffer_internal(VADriverContextP ctx,
 			   type == VAEncFEIDistortionBufferType ||
 			   type == VAEncFEIMBControlBufferType ||
 			   type == VAEncFEIMVPredictorBufferType ||
-			   type == VAEncFEIMVPredictorBufferType ||
 			   type == VAStatsStatisticsBufferType ||
 			   type == VAStatsStatisticsBottomFieldBufferType ||
 			   type == VAStatsMVBufferType ||
