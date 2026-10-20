@@ -587,7 +587,8 @@ gen8_pp_set_media_rw_message_surface(VADriverContextP ctx, struct i965_post_proc
 			/* the format is MSB: X-B-G-R */
 			pp_static_parameter->grf2.save_avs_rgb_swap = 0;
 			if ((fourcc == VA_FOURCC_BGRA) ||
-				(fourcc == VA_FOURCC_BGRX)) {
+				(fourcc == VA_FOURCC_BGRX) ||
+				(fourcc == VA_FOURCC_ARGB)) {
 				/* It is stored as MSB: X-R-G-B */
 				pp_static_parameter->grf2.save_avs_rgb_swap = 1;
 			}
@@ -614,7 +615,8 @@ gen8_pp_set_media_rw_message_surface(VADriverContextP ctx, struct i965_post_proc
 			format0 = SURFACE_FORMAT_R8G8B8A8_UNORM;
 			pp_static_parameter->grf2.src_avs_rgb_swap = 0;
 			if ((fourcc == VA_FOURCC_BGRA) ||
-				(fourcc == VA_FOURCC_BGRX)) {
+				(fourcc == VA_FOURCC_BGRX) ||
+				(fourcc == VA_FOURCC_ARGB)) {
 				pp_static_parameter->grf2.src_avs_rgb_swap = 1;
 			}
 		}
@@ -2217,6 +2219,7 @@ gen8_gpe_context_8bit_420_rgb32_scaling_curbe(VADriverContextP ctx,
 		break;
 
 	case VA_FOURCC_BGRA:
+	case VA_FOURCC_ARGB: /* stored as B:G:R:A in memory, like BGRA */
 		dst_format = DST_FORMAT_BGRA;
 		break;
 
