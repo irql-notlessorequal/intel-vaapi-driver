@@ -57,12 +57,9 @@ static const int fptype_to_picture_type[8][2] = {
 
 /* Set reference surface if backing store exists */
 static inline int
-set_ref_frame(
-	struct i965_driver_data *i965,
-	GenFrameStore           *ref_frame,
-	VASurfaceID              va_surface,
-	struct object_surface   *obj_surface
-)
+set_ref_frame(GenFrameStore           *ref_frame,
+			  VASurfaceID              va_surface,
+			  struct object_surface   *obj_surface)
 {
 	if (va_surface == VA_INVALID_ID)
 		return 0;
@@ -77,10 +74,8 @@ set_ref_frame(
 
 /* Check whether codec layer incorrectly fills in slice_vertical_position */
 int
-mpeg2_wa_slice_vertical_position(
-	struct decode_state           *decode_state,
-	VAPictureParameterBufferMPEG2 *pic_param
-)
+mpeg2_wa_slice_vertical_position(struct decode_state *decode_state,
+								 VAPictureParameterBufferMPEG2 *pic_param)
 {
 	unsigned int i, j, mb_height, vpos, last_vpos = 0;
 
