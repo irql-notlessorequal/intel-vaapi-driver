@@ -6043,13 +6043,14 @@ i965_proc_picture_fast(VADriverContextP ctx,
 	intel_batchbuffer_flush(proc_context->pp_context.batch);
 
 	if (status == VA_STATUS_SUCCESS &&
-		dst_obj_surface->fourcc == VA_FOURCC_BGRA &&
+		(dst_obj_surface->fourcc == VA_FOURCC_BGRA ||
+		 dst_obj_surface->fourcc == VA_FOURCC_ARGB) &&
 		(i965->intel.device_info->driver_workarounds &
 		 HW_WORKAROUND_INVALID_RGBX_SHADER_USE))
 	{
 		dri_bo_map(dst_obj_surface->bo, 1);
 		fill_alpha_rows(dst_obj_surface->bo->virtual,
-						dst_obj_surface->width / 4, /* BGRA is four bytes per pixel. */
+						dst_obj_surface->width / 4, /* Both ARGB and BGRA are four bytes per pixel. */
 						dst_obj_surface->height,
 						dst_obj_surface->width);
 		dri_bo_unmap(dst_obj_surface->bo);
