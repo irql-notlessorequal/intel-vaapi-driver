@@ -2676,7 +2676,7 @@ gen9_hevc_get_pic_header_size(struct encode_state *encode_state)
 			if (param->type == VAEncPackedHeaderSlice)
 				continue;
 
-			header_data = (unsigned char *)encode_state->packed_header_data[start_index]->buffer;
+			header_data = (unsigned char *)encode_state->packed_header_data[start_index + i]->buffer;
 			length_in_bytes = (param->bit_length + 7) / 8;
 
 			accum_size += length_in_bytes;
