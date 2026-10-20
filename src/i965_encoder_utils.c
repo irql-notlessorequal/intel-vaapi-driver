@@ -112,7 +112,7 @@ avc_bitstream_end(avc_bitstream *bs)
 		bs->buffer[pos] = swap32((bs->buffer[pos] << bit_left));
 	}
 
-	// free(bs->buffer);
+	/* the caller owns the buffer */
 }
 
 static void
