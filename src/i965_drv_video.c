@@ -3400,7 +3400,11 @@ i965_create_buffer_internal(VADriverContextP ctx,
 	obj_buffer->context_id = context;
 
 	buffer_store = calloc(1, sizeof(struct buffer_store));
-	assert(buffer_store);
+	if (!buffer_store) {
+		object_heap_free(&i965->buffer_heap, (struct object_base *)obj_buffer);
+		return VA_STATUS_ERROR_ALLOCATION_FAILED;
+	}
+
 	buffer_store->ref_count = 1;
 
 	if (obj_context &&
@@ -3416,6 +3420,7 @@ i965_create_buffer_internal(VADriverContextP ctx,
 			obj_buffer->wrapper_buffer = wrapper_buffer;
 		} else {
 			free(buffer_store);
+			object_heap_free(&i965->buffer_heap, (struct object_base *)obj_buffer);
 			return vaStatus;
 		}
 		wrapper_flag = 1;
