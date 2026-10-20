@@ -1355,8 +1355,8 @@ error:
 	return va_status;
 }
 
-//Obtains reference frames from the picture parameter and
-//then sets the reference frames in the decode_state
+/* Obtains reference frames from the picture parameter and
+ * then sets the reference frames in the decode_state */
 static VAStatus
 intel_decoder_check_vp9_parameter(VADriverContextP ctx,
 								  VAProfile profile,
@@ -1371,14 +1371,14 @@ intel_decoder_check_vp9_parameter(VADriverContextP ctx,
 	if ((profile - VAProfileVP9Profile0) < pic_param->profile)
 		return va_status;
 
-	//Max support upto 4k for BXT
+	/* Max support up to 4k for BXT */
 	if ((pic_param->frame_width - 1 < 0) || (pic_param->frame_width - 1 > 4095))
 		return va_status;
 
 	if ((pic_param->frame_height - 1 < 0) || (pic_param->frame_height - 1 > 4095))
 		return va_status;
 
-	//Set the reference object in decode state for last reference
+	/* Set the reference object in decode state for last reference */
 	index = pic_param->pic_fields.bits.last_ref_frame;
 	if (pic_param->reference_frames[index] != VA_INVALID_SURFACE) {
 		obj_surface = SURFACE(pic_param->reference_frames[index]);
@@ -1389,7 +1389,7 @@ intel_decoder_check_vp9_parameter(VADriverContextP ctx,
 			decode_state->reference_objects[i++] = NULL;
 	}
 
-	//Set the reference object in decode state for golden reference
+	/* Set the reference object in decode state for golden reference */
 	index = pic_param->pic_fields.bits.golden_ref_frame;
 	if (pic_param->reference_frames[index] != VA_INVALID_SURFACE) {
 		obj_surface = SURFACE(pic_param->reference_frames[index]);
@@ -1400,7 +1400,7 @@ intel_decoder_check_vp9_parameter(VADriverContextP ctx,
 			decode_state->reference_objects[i++] = NULL;
 	}
 
-	//Set the reference object in decode state for altref reference
+	/* Set the reference object in decode state for altref reference */
 	index = pic_param->pic_fields.bits.alt_ref_frame;
 	if (pic_param->reference_frames[index] != VA_INVALID_SURFACE) {
 		obj_surface = SURFACE(pic_param->reference_frames[index]);
