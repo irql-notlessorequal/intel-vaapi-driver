@@ -27,12 +27,6 @@ build_avc_sei_buffer_timing(unsigned int init_cpb_removal_length,
 							unsigned int dpb_output_delay,
 							unsigned char **sei_buffer);
 
-int
-build_mpeg2_slice_header(VAEncSequenceParameterBufferMPEG2 *sps_param,
-						 VAEncPictureParameterBufferMPEG2 *pic_param,
-						 VAEncSliceParameterBufferMPEG2 *slice_param,
-						 unsigned char **slice_header_buffer);
-
 /* HEVC */
 
 int

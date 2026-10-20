@@ -504,21 +504,6 @@ build_avc_sei_buffer_timing(unsigned int init_cpb_removal_length,
 	return nal_bs.bit_offset;
 }
 
-int
-build_mpeg2_slice_header(VAEncSequenceParameterBufferMPEG2 *sps_param,
-						 VAEncPictureParameterBufferMPEG2 *pic_param,
-						 VAEncSliceParameterBufferMPEG2 *slice_param,
-						 unsigned char **slice_header_buffer)
-{
-	avc_bitstream bs;
-
-	avc_bitstream_start(&bs);
-	avc_bitstream_end(&bs);
-	*slice_header_buffer = (unsigned char *)bs.buffer;
-
-	return bs.bit_offset;
-}
-
 static void binarize_qindex_delta(avc_bitstream *bs, int qindex_delta)
 {
 	if (qindex_delta == 0)
