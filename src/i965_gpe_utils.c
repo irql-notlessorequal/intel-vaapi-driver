@@ -2082,7 +2082,7 @@ i965_gpe_allocate_2d_resource(dri_bufmgr *bufmgr,
 	res->bo = dri_bo_alloc(bufmgr, name, res->size, 4096);
 	res->map = NULL;
 
-	return true;
+	return (res->bo != NULL);
 }
 
 void
