@@ -142,11 +142,16 @@ avc_bitstream_put_ui(avc_bitstream *bs, unsigned int val, int size_in_bits)
 		bs->buffer[pos] = swap32(bs->buffer[pos]);
 
 		if (pos + 1 == bs->max_size_in_dword) {
-			bs->max_size_in_dword += BITSTREAM_ALLOCATE_STEPPING;
-			bs->buffer = realloc(bs->buffer, bs->max_size_in_dword * sizeof(unsigned int));
+			unsigned int *new_buffer;
 
-			if (!bs->buffer)
-				return;
+			new_buffer = realloc(bs->buffer,
+					     (bs->max_size_in_dword + BITSTREAM_ALLOCATE_STEPPING) *
+					     sizeof(unsigned int));
+			if (!new_buffer)
+ 				return;
+
+			bs->buffer = new_buffer;
+			bs->max_size_in_dword += BITSTREAM_ALLOCATE_STEPPING;
 		}
 
 		bs->buffer[pos + 1] = val;
