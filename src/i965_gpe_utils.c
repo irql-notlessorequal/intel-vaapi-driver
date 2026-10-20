@@ -1463,7 +1463,7 @@ i965_zero_gpe_resource(struct i965_gpe_resource *res)
 {
 	if (res->bo) {
 		dri_bo_map(res->bo, 1);
-		memset(res->bo->virtual, 0, res->size);
+		memset(res->bo->virtual, 0, MIN(res->size, res->bo->size));
 		dri_bo_unmap(res->bo);
 	}
 }
