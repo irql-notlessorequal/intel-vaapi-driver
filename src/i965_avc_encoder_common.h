@@ -57,6 +57,9 @@
 #define INTEL_AVC_WP_MODE_EXPLICIT 1
 #define INTEL_AVC_WP_MODE_IMPLICIT 2
 
+/* The reference is not in the picture's reference list */
+#define INTEL_AVC_NO_REF_IDX   0xff
+
 #define AVC_NAL_DELIMITER           9
 
 struct avc_param {

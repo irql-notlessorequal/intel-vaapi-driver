@@ -8541,7 +8541,8 @@ gen9_avc_vme_gpe_kernel_prepare(VADriverContextP ctx,
 		VAPictureH264 *va_pic;
 
 		assert(ARRAY_ELEMS(slice_param->RefPicList0) == ARRAY_ELEMS(avc_state->list_ref_idx[0]));
-		avc_state->list_ref_idx[0][i] = 0;
+
+		avc_state->list_ref_idx[0][i] = INTEL_AVC_NO_REF_IDX;
 
 		if (i >= avc_state->num_refs[0])
 			continue;
@@ -8566,7 +8567,8 @@ gen9_avc_vme_gpe_kernel_prepare(VADriverContextP ctx,
 		VAPictureH264 *va_pic;
 
 		assert(ARRAY_ELEMS(slice_param->RefPicList1) == ARRAY_ELEMS(avc_state->list_ref_idx[1]));
-		avc_state->list_ref_idx[1][i] = 0;
+
+		avc_state->list_ref_idx[1][i] = INTEL_AVC_NO_REF_IDX;
 
 		if (i >= avc_state->num_refs[1])
 			continue;
@@ -10200,6 +10202,9 @@ gen9_mfc_avc_ref_idx_state(VADriverContextP ctx,
 			ref_pic = &slice_param->RefPicList0[i];
 			ref_idx_shift = i * 8;
 
+			if (avc_state->list_ref_idx[0][i] == INTEL_AVC_NO_REF_IDX)
+				continue;
+
 			fwd_ref_entry &= ~(0xFF << ref_idx_shift);
 			fwd_ref_entry += (gen9_mfc_avc_get_ref_idx_state(ref_pic, avc_state->list_ref_idx[0][i]) << ref_idx_shift);
 		}
@@ -10210,6 +10215,9 @@ gen9_mfc_avc_ref_idx_state(VADriverContextP ctx,
 		for (i = 0; i < MIN(avc_state->num_refs[1], 4); i++) {
 			ref_pic = &slice_param->RefPicList1[i];
 			ref_idx_shift = i * 8;
+
+			if (avc_state->list_ref_idx[1][i] == INTEL_AVC_NO_REF_IDX)
+				continue;
 
 			bwd_ref_entry &= ~(0xFF << ref_idx_shift);
 			bwd_ref_entry += (gen9_mfc_avc_get_ref_idx_state(ref_pic, avc_state->list_ref_idx[1][i]) << ref_idx_shift);
@@ -11391,7 +11399,7 @@ gen9_avc_vme_context_init(VADriverContextP ctx, struct intel_encoder_context *en
 
 	avc_state->num_refs[0] = 0;
 	avc_state->num_refs[1] = 0;
-	memset(avc_state->list_ref_idx, 0, 32 * 2 * sizeof(uint32_t));
+	memset(avc_state->list_ref_idx, INTEL_AVC_NO_REF_IDX, 32 * 2 * sizeof(uint32_t));
 	memset(avc_state->top_field_poc, 0, NUM_MFC_AVC_DMV_BUFFERS * sizeof(int32_t));
 	avc_state->tq_rounding = 0;
 	avc_state->zero_mv_threshold = 0;
