@@ -3641,10 +3641,14 @@ i965_MapBuffer2(VADriverContextP ctx,
 		vaStatus = VA_STATUS_SUCCESS;
 
 		if (obj_buffer->type == VAEncCodedBufferType) {
-			int i;
 			unsigned char *buffer = NULL;
 			unsigned int  header_offset = I965_CODEDBUFFER_HEADER_SIZE;
+			unsigned int  data_size;
 			struct i965_coded_buffer_segment *coded_buffer_segment = (struct i965_coded_buffer_segment *)(obj_buffer->buffer_store->bo->virtual);
+
+			/* The coded buffer holds the header, the encoded data and 0x1000 bytes of slack. */
+			data_size = obj_buffer->size_element > header_offset + 0x1000 ?
+				obj_buffer->size_element - header_offset - 0x1000 : 0;
 
 			if (!coded_buffer_segment->mapped) {
 				unsigned char delimiter0, delimiter1, delimiter2, delimiter3, delimiter4;
@@ -3685,7 +3689,7 @@ i965_MapBuffer2(VADriverContextP ctx,
 					}
 
 					if (coded_buffer_segment->codec == CODEC_JPEG) {
-						int len = obj_buffer->size_element - header_offset - 1 - 0x1000;
+						size_t len = data_size > 1 ? data_size - 1 : 0;
 						unsigned char *end_of_file_marker = memmem(buffer, len, "\xff\xd9", 2);
 						if (end_of_file_marker == NULL)
 							coded_buffer_segment->base.size = len + 2;
@@ -3694,22 +3698,29 @@ i965_MapBuffer2(VADriverContextP ctx,
 					} else if (coded_buffer_segment->codec != CODEC_VP8) {
 						/* vp8 coded buffer size can be told by vp8 internal statistics buffer,
 						   so it don't need to traversal the coded buffer */
-						for (i = 0; i < obj_buffer->size_element - header_offset - 3 - 0x1000; i++) {
-							if ((buffer[i] == delimiter0) &&
-								(buffer[i + 1] == delimiter1) &&
-								(buffer[i + 2] == delimiter2) &&
-								(buffer[i + 3] == delimiter3) &&
-								(buffer[i + 4] == delimiter4))
-								break;
-						}
+						unsigned char delimiter[5];
+						unsigned int limit;
+						unsigned char *end;
 
-						if (i == obj_buffer->size_element - header_offset - 3 - 0x1000) {
-							coded_buffer_segment->base.status |= VA_CODED_BUF_STATUS_SLICE_OVERFLOW_MASK;
-						}
-						coded_buffer_segment->base.size = i;
+						delimiter[0] = delimiter0;
+						delimiter[1] = delimiter1;
+						delimiter[2] = delimiter2;
+						delimiter[3] = delimiter3;
+						delimiter[4] = delimiter4;
+
+						/* The delimiter is 5 bytes long */
+						limit = data_size > 3 ? data_size - 3 : 0;
+
+						end = limit ? memmem(buffer, limit + 4, delimiter, sizeof(delimiter)) : NULL;
+						if (!end) {
+ 							coded_buffer_segment->base.status |= VA_CODED_BUF_STATUS_SLICE_OVERFLOW_MASK;
+							coded_buffer_segment->base.size = limit;
+						} else {
+							coded_buffer_segment->base.size = end - buffer;
+ 						}
 					}
 
-					if (coded_buffer_segment->base.size >= obj_buffer->size_element - header_offset - 0x1000) {
+					if (coded_buffer_segment->base.size >= data_size) {
 						coded_buffer_segment->base.status |= VA_CODED_BUF_STATUS_SLICE_OVERFLOW_MASK;
 					}
 
