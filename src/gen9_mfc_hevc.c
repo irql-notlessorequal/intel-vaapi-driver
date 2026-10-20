@@ -1700,8 +1700,8 @@ gen9_hcpe_hevc_pipeline_slice_programing(VADriverContextP ctx,
 		if (slice_type == HEVC_SLICE_B) {
 			if (pSequenceParameter->ip_period == 1) {
 				qp = mfc_context->bit_rate_control_context[HEVC_SLICE_P].QpPrimeY;
-
-			} else if (mfc_context->vui_hrd.i_frame_number % pSequenceParameter->ip_period == 1) {
+			} else if (pSequenceParameter->ip_period &&
+					   mfc_context->vui_hrd.i_frame_number % pSequenceParameter->ip_period == 1) {
 				qp = mfc_context->bit_rate_control_context[HEVC_SLICE_P].QpPrimeY;
 			}
 		}
@@ -2328,7 +2328,8 @@ int intel_hcpe_brc_postpack(struct encode_state *encode_state,
 	if (slicetype == HEVC_SLICE_B) {
 		if (pSequenceParameter->ip_period == 1) {
 			slicetype = HEVC_SLICE_P;
-		} else if (mfc_context->vui_hrd.i_frame_number % pSequenceParameter->ip_period == 1) {
+		} else if (pSequenceParameter->ip_period &&
+				   mfc_context->vui_hrd.i_frame_number % pSequenceParameter->ip_period == 1) {
 			slicetype = HEVC_SLICE_P;
 		}
 	}
