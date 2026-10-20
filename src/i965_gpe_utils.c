@@ -1429,7 +1429,7 @@ i965_dri_object_to_buffer_gpe_resource(struct i965_gpe_resource *res,
 	res->width = bo->size;
 	res->height = 1;
 	res->pitch = res->width;
-	res->size = res->pitch * res->width;
+	res->size = bo->size;
 	res->bo = bo;
 	res->map = NULL;
 
@@ -1450,7 +1450,7 @@ i965_dri_object_to_2d_gpe_resource(struct i965_gpe_resource *res,
 	res->width = width;
 	res->height = height;
 	res->pitch = pitch;
-	res->size = res->pitch * res->width;
+	res->size = res->pitch * res->height;
 	res->bo = bo;
 	res->map = NULL;
 
