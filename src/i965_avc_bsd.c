@@ -140,8 +140,8 @@ i965_avc_bsd_img_state(VADriverContextP ctx,
     mbaff_frame_flag = (pic_param->seq_fields.bits.mb_adaptive_frame_field_flag &&
                         !pic_param->pic_fields.bits.field_pic_flag);
 
-    width_in_mbs = ((pic_param->picture_width_in_mbs_minus1 + 1) & 0xff);
-    height_in_mbs = ((pic_param->picture_height_in_mbs_minus1 + 1) & 0xff); /* frame height */
+    width_in_mbs = pic_param->picture_width_in_mbs_minus1 + 1;
+    height_in_mbs = pic_param->picture_height_in_mbs_minus1 + 1; /* frame height */
 
     assert(!((width_in_mbs * height_in_mbs) & 0x8000)); /* hardware requirement */
 
