@@ -971,8 +971,8 @@ gen9_vdenc_update_roi_in_streamin_state(VADriverContextP ctx,
 	if (!streamin_state)
 		return;
 
-	for (col = 0;  col < vdenc_context->frame_width_in_mbs; col++) {
-		for (row = 0; row < vdenc_context->frame_height_in_mbs; row++) {
+	for (row = 0; row < vdenc_context->frame_height_in_mbs; row++) {
+		for (col = 0; col < vdenc_context->frame_width_in_mbs; col++) {
 			streamin_state[row * vdenc_context->frame_width_in_mbs + col].dw0.roi_selection = 0; /* non-ROI region */
 
 			/* The last one has higher priority */
