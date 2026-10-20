@@ -276,17 +276,17 @@ static uint32_t drm_format_of_separate_plane(uint32_t fourcc, int plane)
 		case VA_FOURCC_ABGR:
 			return DRM_FORMAT_ABGR8888;
 		case VA_FOURCC_RGBA:
-			return DRM_FORMAT_RGBA8888;
+			return DRM_FORMAT_ABGR8888;
 		case VA_FOURCC_BGRA:
-			return DRM_FORMAT_BGRA8888;
+			return DRM_FORMAT_ARGB8888;
 		case VA_FOURCC_XRGB:
 			return DRM_FORMAT_XRGB8888;
 		case VA_FOURCC_XBGR:
 			return DRM_FORMAT_XBGR8888;
 		case VA_FOURCC_RGBX:
-			return DRM_FORMAT_RGBX8888;
+			return DRM_FORMAT_XBGR8888;
 		case VA_FOURCC_BGRX:
-			return DRM_FORMAT_BGRX8888;
+			return DRM_FORMAT_XRGB8888;
 		case VA_FOURCC_A2R10G10B10:
 			return DRM_FORMAT_ARGB2101010;
 		case VA_FOURCC_A2B10G10R10:
@@ -400,17 +400,17 @@ static uint32_t drm_format_of_composite_object(uint32_t fourcc)
 	case VA_FOURCC_ABGR:
 		return DRM_FORMAT_ABGR8888;
 	case VA_FOURCC_RGBA:
-		return DRM_FORMAT_RGBA8888;
+		return DRM_FORMAT_ABGR8888;
 	case VA_FOURCC_BGRA:
-		return DRM_FORMAT_BGRA8888;
+		return DRM_FORMAT_ARGB8888;
 	case VA_FOURCC_XRGB:
 		return DRM_FORMAT_XRGB8888;
 	case VA_FOURCC_XBGR:
 		return DRM_FORMAT_XBGR8888;
 	case VA_FOURCC_RGBX:
-		return DRM_FORMAT_RGBX8888;
+		return DRM_FORMAT_XBGR8888;
 	case VA_FOURCC_BGRX:
-		return DRM_FORMAT_BGRX8888;
+		return DRM_FORMAT_XRGB8888;
 	case VA_FOURCC_A2R10G10B10:
 		return DRM_FORMAT_ARGB2101010;
 	case VA_FOURCC_A2B10G10R10:
