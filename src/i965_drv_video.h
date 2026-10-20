@@ -201,6 +201,7 @@ struct buffer_store {
 	dri_bo *bo;
 	int ref_count;
 	int num_elements;
+	int size_element;
 };
 
 struct object_config {

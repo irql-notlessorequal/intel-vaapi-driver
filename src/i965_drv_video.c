@@ -3510,6 +3510,7 @@ i965_create_buffer_internal(VADriverContextP ctx,
 	}
 
 	buffer_store->num_elements = obj_buffer->num_elements;
+	buffer_store->size_element = obj_buffer->size_element;
 	i965_reference_buffer_store(&obj_buffer->buffer_store, buffer_store);
 	i965_release_buffer_store(&buffer_store);
 	*buf_id = bufferID;
