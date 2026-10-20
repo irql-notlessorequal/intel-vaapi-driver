@@ -591,7 +591,7 @@ compare_avc_ref_store_func(const void *p1, const void *p2)
 	const GenFrameStore * const fs1 = *((GenFrameStore **)p1);
 	const GenFrameStore * const fs2 = *((GenFrameStore **)p2);
 
-	return fs1->ref_age - fs2->ref_age;
+	return (fs1->ref_age > fs2->ref_age) - (fs1->ref_age < fs2->ref_age);
 }
 
 static void
