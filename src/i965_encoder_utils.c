@@ -35,7 +35,7 @@
 #include "gen6_mfc.h"
 #include "i965_encoder_utils.h"
 
-#define BITSTREAM_ALLOCATE_STEPPING     4096
+#define BITSTREAM_INITIAL_SIZE_IN_DWORD	16
 
 #define NAL_REF_IDC_NONE        0
 #define NAL_REF_IDC_LOW         1
@@ -96,8 +96,8 @@ swap32(unsigned int val)
 static void
 avc_bitstream_start(avc_bitstream *bs)
 {
-	bs->max_size_in_dword = BITSTREAM_ALLOCATE_STEPPING;
-	bs->buffer = calloc(bs->max_size_in_dword * sizeof(int), 1);
+	bs->max_size_in_dword = BITSTREAM_INITIAL_SIZE_IN_DWORD;
+	bs->buffer = calloc(bs->max_size_in_dword, sizeof(unsigned int));
 	bs->bit_offset = 0;
 }
 
@@ -145,13 +145,12 @@ avc_bitstream_put_ui(avc_bitstream *bs, unsigned int val, int size_in_bits)
 			unsigned int *new_buffer;
 
 			new_buffer = realloc(bs->buffer,
-					     (bs->max_size_in_dword + BITSTREAM_ALLOCATE_STEPPING) *
-					     sizeof(unsigned int));
+					     		 2 * bs->max_size_in_dword * sizeof(unsigned int));
 			if (!new_buffer)
  				return;
 
 			bs->buffer = new_buffer;
-			bs->max_size_in_dword += BITSTREAM_ALLOCATE_STEPPING;
+			bs->max_size_in_dword *= 2;
 		}
 
 		bs->buffer[pos + 1] = val;
