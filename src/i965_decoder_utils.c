@@ -362,11 +362,13 @@ avc_get_first_mb_bit_offset_with_epb(
 	if (!buf)
 		goto out;
 
-	ret = dri_bo_get_subdata(
-			  slice_data_bo, slice_param->slice_data_offset,
-			  buf_size, buf
-		  );
-	assert(ret == 0);
+	ret = dri_bo_get_subdata(slice_data_bo,
+							 slice_param->slice_data_offset,
+							 buf_size, buf);
+	if (ret != 0) {
+		free(buf);
+		goto out;
+	}
 
 	for (i = 2, j = 2, n = 0; i < buf_size && j < header_size; i++, j++) {
 		if (buf[i] == 0x03 && buf[i - 1] == 0x00 && buf[i - 2] == 0x00)
