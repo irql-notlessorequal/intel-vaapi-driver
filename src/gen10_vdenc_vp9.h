@@ -85,6 +85,10 @@ struct encode_state;
 #define VDENC_VDENC_CMD0_STATE_SIZE_IN_DWS              (VDENC_VDENC_CMD0_STATE_SIZE >> 2)
 #define VDENC_VDENC_CMD1_STATE_SIZE_IN_DWS              (VDENC_VDENC_CMD1_STATE_SIZE >> 2)
 
+#define VDENC_VP9_PAK_INSERT_HEADER_BUFFER_SIZE       80
+#define VDENC_VP9_PAK_INSERT_HEADER_SIZE              \
+	(VDENC_VP9_PAK_INSERT_HEADER_BUFFER_SIZE - 4 * sizeof(unsigned int))
+
 enum gen10_vdenc_vp9_walker_degree {
 	VP9_NO_DEGREE = 0,
 	VP9_26_DEGREE,
