@@ -761,7 +761,6 @@ gen7_mfd_avc_decode_init(VADriverContextP ctx,
 	VASliceParameterBufferH264 *slice_param;
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
 	struct object_surface *obj_surface;
-	dri_bo *bo;
 	int i, j, enable_avc_ildb = 0;
 	unsigned int width_in_mbs, height_in_mbs;
 
@@ -815,41 +814,21 @@ gen7_mfd_avc_decode_init(VADriverContextP ctx,
 	dri_bo_reference(gen7_mfd_context->pre_deblocking_output.bo);
 	gen7_mfd_context->pre_deblocking_output.valid = !enable_avc_ildb;
 
-	dri_bo_unreference(gen7_mfd_context->intra_row_store_scratch_buffer.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
-					  "intra row store",
-					  width_in_mbs * 64,
-					  0x1000);
-	assert(bo);
-	gen7_mfd_context->intra_row_store_scratch_buffer.bo = bo;
-	gen7_mfd_context->intra_row_store_scratch_buffer.valid = 1;
+	intel_ensure_gen_buffer(ctx, &gen7_mfd_context->intra_row_store_scratch_buffer,
+							"intra row store",
+							width_in_mbs * 64);
 
-	dri_bo_unreference(gen7_mfd_context->deblocking_filter_row_store_scratch_buffer.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
-					  "deblocking filter row store",
-					  width_in_mbs * 64 * 4,
-					  0x1000);
-	assert(bo);
-	gen7_mfd_context->deblocking_filter_row_store_scratch_buffer.bo = bo;
-	gen7_mfd_context->deblocking_filter_row_store_scratch_buffer.valid = 1;
+	intel_ensure_gen_buffer(ctx, &gen7_mfd_context->deblocking_filter_row_store_scratch_buffer,
+							"deblocking filter row store",
+							width_in_mbs * 64 * 4);
 
-	dri_bo_unreference(gen7_mfd_context->bsd_mpc_row_store_scratch_buffer.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
-					  "bsd mpc row store",
-					  width_in_mbs * 64 * 2,
-					  0x1000);
-	assert(bo);
-	gen7_mfd_context->bsd_mpc_row_store_scratch_buffer.bo = bo;
-	gen7_mfd_context->bsd_mpc_row_store_scratch_buffer.valid = 1;
+	intel_ensure_gen_buffer(ctx, &gen7_mfd_context->bsd_mpc_row_store_scratch_buffer,
+							"bsd mpc row store",
+							width_in_mbs * 64 * 2);
 
-	dri_bo_unreference(gen7_mfd_context->mpr_row_store_scratch_buffer.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
-					  "mpr row store",
-					  width_in_mbs * 64 * 2,
-					  0x1000);
-	assert(bo);
-	gen7_mfd_context->mpr_row_store_scratch_buffer.bo = bo;
-	gen7_mfd_context->mpr_row_store_scratch_buffer.valid = 1;
+	intel_ensure_gen_buffer(ctx, &gen7_mfd_context->mpr_row_store_scratch_buffer,
+							"mpr row store",
+							width_in_mbs * 64 * 2);
 
 	gen7_mfd_context->bitplane_read_buffer.valid = 0;
 }
@@ -926,7 +905,6 @@ gen7_mfd_mpeg2_decode_init(VADriverContextP ctx,
 	VAPictureParameterBufferMPEG2 *pic_param;
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
 	struct object_surface *obj_surface;
-	dri_bo *bo;
 	unsigned int width_in_mbs;
 
 	assert(decode_state->pic_param && decode_state->pic_param->buffer);
@@ -949,14 +927,9 @@ gen7_mfd_mpeg2_decode_init(VADriverContextP ctx,
 	dri_bo_reference(gen7_mfd_context->pre_deblocking_output.bo);
 	gen7_mfd_context->pre_deblocking_output.valid = 1;
 
-	dri_bo_unreference(gen7_mfd_context->bsd_mpc_row_store_scratch_buffer.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
-					  "bsd mpc row store",
-					  width_in_mbs * 96,
-					  0x1000);
-	assert(bo);
-	gen7_mfd_context->bsd_mpc_row_store_scratch_buffer.bo = bo;
-	gen7_mfd_context->bsd_mpc_row_store_scratch_buffer.valid = 1;
+	intel_ensure_gen_buffer(ctx, &gen7_mfd_context->bsd_mpc_row_store_scratch_buffer,
+							"bsd mpc row store",
+							width_in_mbs * 96);
 
 	gen7_mfd_context->post_deblocking_output.valid = 0;
 	gen7_mfd_context->intra_row_store_scratch_buffer.valid = 0;
@@ -1518,32 +1491,17 @@ gen7_mfd_vc1_decode_init(VADriverContextP ctx,
 		}
 	}
 
-	dri_bo_unreference(gen7_mfd_context->intra_row_store_scratch_buffer.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
-					  "intra row store",
-					  width_in_mbs * 64,
-					  0x1000);
-	assert(bo);
-	gen7_mfd_context->intra_row_store_scratch_buffer.bo = bo;
-	gen7_mfd_context->intra_row_store_scratch_buffer.valid = 1;
+	intel_ensure_gen_buffer(ctx, &gen7_mfd_context->intra_row_store_scratch_buffer,
+							"intra row store",
+							width_in_mbs * 64);
 
-	dri_bo_unreference(gen7_mfd_context->deblocking_filter_row_store_scratch_buffer.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
-					  "deblocking filter row store",
-					  width_in_mbs * 7 * 64,
-					  0x1000);
-	assert(bo);
-	gen7_mfd_context->deblocking_filter_row_store_scratch_buffer.bo = bo;
-	gen7_mfd_context->deblocking_filter_row_store_scratch_buffer.valid = 1;
+	intel_ensure_gen_buffer(ctx, &gen7_mfd_context->deblocking_filter_row_store_scratch_buffer,
+							"deblocking filter row store",
+							width_in_mbs * 7 * 64);
 
-	dri_bo_unreference(gen7_mfd_context->bsd_mpc_row_store_scratch_buffer.bo);
-	bo = dri_bo_alloc(i965->intel.bufmgr,
-					  "bsd mpc row store",
-					  width_in_mbs * 96,
-					  0x1000);
-	assert(bo);
-	gen7_mfd_context->bsd_mpc_row_store_scratch_buffer.bo = bo;
-	gen7_mfd_context->bsd_mpc_row_store_scratch_buffer.valid = 1;
+	intel_ensure_gen_buffer(ctx, &gen7_mfd_context->bsd_mpc_row_store_scratch_buffer,
+							"bsd mpc row store",
+							width_in_mbs * 96);
 
 	gen7_mfd_context->mpr_row_store_scratch_buffer.valid = 0;
 
