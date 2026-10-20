@@ -2310,7 +2310,8 @@ void intel_vme_hevc_update_mbmv_cost(VADriverContextP ctx,
 				slice_type = HEVC_SLICE_P;
 				qp = mfc_context->bit_rate_control_context[HEVC_SLICE_P].QpPrimeY;
 
-			} else if (mfc_context->vui_hrd.i_frame_number % pSequenceParameter->ip_period == 1) {
+			} else if (pSequenceParameter->ip_period &&
+					   mfc_context->vui_hrd.i_frame_number % pSequenceParameter->ip_period == 1) {
 				slice_type = HEVC_SLICE_P;
 				qp = mfc_context->bit_rate_control_context[HEVC_SLICE_P].QpPrimeY;
 			}
