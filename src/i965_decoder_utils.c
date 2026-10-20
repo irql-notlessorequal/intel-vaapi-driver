@@ -75,7 +75,7 @@ set_ref_frame(
 	return 1;
 }
 
-/* Check wether codec layer incorrectly fills in slice_vertical_position */
+/* Check whether codec layer incorrectly fills in slice_vertical_position */
 int
 mpeg2_wa_slice_vertical_position(
 	struct decode_state           *decode_state,
