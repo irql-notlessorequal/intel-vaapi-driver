@@ -1498,6 +1498,22 @@ intel_ensure_vp8_segmentation_buffer(VADriverContextP ctx, GenBuffer *buf,
 }
 
 void
+intel_ensure_gen_buffer(VADriverContextP ctx, GenBuffer *buf,
+						const char *name, unsigned int size)
+{
+	struct i965_driver_data *const i965 = i965_driver_data(ctx);
+
+	/* The size of the scratch buffers only depends on the resolution */
+	if (!buf->bo || buf->bo->size < size) {
+		dri_bo_unreference(buf->bo);
+		buf->bo = dri_bo_alloc(i965->intel.bufmgr, name, size, 0x1000);
+		assert(buf->bo);
+	}
+
+	buf->valid = buf->bo != NULL;
+}
+
+void
 hevc_gen_default_iq_matrix(VAIQMatrixBufferHEVC *iq_matrix)
 {
 	*iq_matrix = hevc_default_iq;

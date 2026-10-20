@@ -176,6 +176,10 @@ intel_ensure_vp8_segmentation_buffer(VADriverContextP ctx, GenBuffer *buf,
 									 unsigned int mb_width, unsigned int mb_height);
 
 void
+intel_ensure_gen_buffer(VADriverContextP ctx, GenBuffer *buf,
+						const char *name, unsigned int size);
+
+void
 hevc_gen_default_iq_matrix(VAIQMatrixBufferHEVC *iq_matrix);
 
 VAStatus
