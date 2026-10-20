@@ -119,7 +119,6 @@ mpeg2_set_reference_surfaces(
 	VAPictureParameterBufferMPEG2 *pic_param
 )
 {
-	struct i965_driver_data * const i965 = i965_driver_data(ctx);
 	VASurfaceID va_surface;
 	unsigned pic_structure, is_second_field, n = 0;
 	struct object_surface *obj_surface;
@@ -137,20 +136,20 @@ mpeg2_set_reference_surfaces(
 		if (is_second_field && pic_structure == MPEG_BOTTOM_FIELD) {
 			va_surface = decode_state->current_render_target;
 			obj_surface = decode_state->render_object;
-			n += set_ref_frame(i965, &ref_frames[n], va_surface, obj_surface);
+			n += set_ref_frame(&ref_frames[n], va_surface, obj_surface);
 		}
 		va_surface = pic_param->forward_reference_picture;
 		obj_surface = decode_state->reference_objects[0];
-		n += set_ref_frame(i965, &ref_frames[n], va_surface, obj_surface);
+		n += set_ref_frame(&ref_frames[n], va_surface, obj_surface);
 		break;
 
 	case MPEG_B_PICTURE:
 		va_surface = pic_param->forward_reference_picture;
 		obj_surface = decode_state->reference_objects[0];
-		n += set_ref_frame(i965, &ref_frames[n], va_surface, obj_surface);
+		n += set_ref_frame(&ref_frames[n], va_surface, obj_surface);
 		va_surface = pic_param->backward_reference_picture;
 		obj_surface = decode_state->reference_objects[1];
-		n += set_ref_frame(i965, &ref_frames[n], va_surface, obj_surface);
+		n += set_ref_frame(&ref_frames[n], va_surface, obj_surface);
 		break;
 	}
 
@@ -171,20 +170,20 @@ mpeg2_set_reference_surfaces(
 		if (is_second_field && pic_structure == MPEG_TOP_FIELD) {
 			va_surface = decode_state->current_render_target;
 			obj_surface = decode_state->render_object;
-			n += set_ref_frame(i965, &ref_frames[n], va_surface, obj_surface);
+			n += set_ref_frame(&ref_frames[n], va_surface, obj_surface);
 		}
 		va_surface = pic_param->forward_reference_picture;
 		obj_surface = decode_state->reference_objects[0];
-		n += set_ref_frame(i965, &ref_frames[n], va_surface, obj_surface);
+		n += set_ref_frame(&ref_frames[n], va_surface, obj_surface);
 		break;
 
 	case MPEG_B_PICTURE:
 		va_surface = pic_param->forward_reference_picture;
 		obj_surface = decode_state->reference_objects[0];
-		n += set_ref_frame(i965, &ref_frames[n], va_surface, obj_surface);
+		n += set_ref_frame(&ref_frames[n], va_surface, obj_surface);
 		va_surface = pic_param->backward_reference_picture;
 		obj_surface = decode_state->reference_objects[1];
-		n += set_ref_frame(i965, &ref_frames[n], va_surface, obj_surface);
+		n += set_ref_frame(&ref_frames[n], va_surface, obj_surface);
 		break;
 	}
 
