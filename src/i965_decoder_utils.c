@@ -606,12 +606,12 @@ intel_update_codec_frame_store_index(
 	GenFrameStoreContext         *fs_ctx
 )
 {
-	GenFrameStore **free_refs = calloc(num_elements, sizeof(GenFrameStore *));
+	GenFrameStore *free_refs[MAX_GEN_REFERENCE_FRAMES] = {0};
 	uint32_t used_refs = 0, add_refs = 0;
 	uint64_t age;
 	int i, n, num_free_refs;
 
-	if (!free_refs)
+	if (num_elements > MAX_GEN_REFERENCE_FRAMES)
 		return;
 
 	/* Detect changes of access unit */
@@ -676,8 +676,6 @@ intel_update_codec_frame_store_index(
 		}
 		WARN_ONCE("No free slot found for DPB reference list!!!\n");
 	}
-
-	free(free_refs);
 }
 
 void
