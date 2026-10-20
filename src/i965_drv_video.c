@@ -2051,16 +2051,14 @@ static VAStatus
 i965_surface_external_memory2(VADriverContextP ctx,
 							  struct object_surface *obj_surface,
 							  int external_memory_type,
-							  VADRMPRIMESurfaceDescriptor *memory_attribute,
-							  int index)
+							  VADRMPRIMESurfaceDescriptor *memory_attribute)
 {
 	assert(external_memory_type == I965_SURFACE_MEM_DRM_PRIME_2);
 
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
 	unsigned int tiling, swizzle;
 
-	if (!memory_attribute ||
-		index >= memory_attribute->num_objects)
+	if (!memory_attribute)
 		return VA_STATUS_ERROR_INVALID_PARAMETER;
 
 	/* Driver does not support more than one object. */
@@ -2381,6 +2379,9 @@ i965_CreateSurfaces2(
 		}
 	}
 
+	if (memory_type == I965_SURFACE_MEM_DRM_PRIME_2)
+		ASSERT_RET(external_buf, VA_STATUS_ERROR_INVALID_PARAMETER);
+
 	/* support 420 & 422 & RGB32 format, 422 and RGB32 are only used
 	 * for post-processing (including color conversion) */
 	switch (format)
@@ -2514,8 +2515,7 @@ i965_CreateSurfaces2(
 			vaStatus = i965_surface_external_memory2(ctx,
 													 obj_surface,
 													 memory_type,
-													 (VADRMPRIMESurfaceDescriptor *)external_buf,
-													 i);
+													 ((VADRMPRIMESurfaceDescriptor *)external_buf) + i);
 			break;
 
 		default:
