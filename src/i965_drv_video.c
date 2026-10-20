@@ -2531,11 +2531,18 @@ i965_CreateSurfaces2(
 
 	/* Error recovery */
 	if (VA_STATUS_SUCCESS != vaStatus) {
-		/* surfaces[i-1] was the last successful allocation */
-		for (; i--;) {
-			struct object_surface *obj_surface = SURFACE(surfaces[i]);
+		/* surfaces[i] is the surface that failed to be created */
+		surfaces[i] = VA_INVALID_SURFACE;
 
-			surfaces[i] = VA_INVALID_SURFACE;
+		/* the surfaces after it were never created */
+		for (j = i + 1; j < num_surfaces; j++)
+			surfaces[j] = VA_INVALID_SURFACE;
+
+		/* surfaces[i-1] was the last successful allocation */
+		for (j = i - 1; j >= 0; j--) {
+			struct object_surface *obj_surface = SURFACE(surfaces[j]);
+
+			surfaces[j] = VA_INVALID_SURFACE;
 			assert(obj_surface);
 			i965_destroy_surface(&i965->surface_heap, (struct object_base *)obj_surface);
 		}
