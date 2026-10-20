@@ -1860,7 +1860,7 @@ gen9_hevc_brc_init_rest_set_curbe(VADriverContextP ctx,
 
 	if (priv_state->num_b_in_gop[1] ||
 		priv_state->num_b_in_gop[2]) {
-		cmd->dw8.brc_param_a = priv_state->gop_size / priv_state->gop_ref_dist;
+		cmd->dw8.brc_param_a = priv_state->gop_ref_dist ? priv_state->gop_size / priv_state->gop_ref_dist : 0;
 		cmd->dw9.brc_param_b = cmd->dw8.brc_param_a;
 		cmd->dw13.brc_param_c = cmd->dw8.brc_param_a * 2;
 		cmd->dw14.brc_param_d = priv_state->gop_size - cmd->dw8.brc_param_a -
