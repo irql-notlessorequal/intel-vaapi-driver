@@ -143,7 +143,7 @@ object_base_p object_heap_lookup(object_heap_p heap, int id)
 	int bucket_index, obj_index;
 
 	_i965LockMutex(&heap->mutex);
-	if ((id < heap->id_offset) || (id > (heap->heap_size + heap->id_offset))) {
+	if ((id < heap->id_offset) || (id >= (heap->heap_size + heap->id_offset))) {
 		_i965UnlockMutex(&heap->mutex);
 		return NULL;
 	}
