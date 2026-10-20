@@ -2375,9 +2375,7 @@ gen9_avc_init_brc_const_data(VADriverContextP ctx,
 	unsigned int block_based_skip_enable = avc_state->block_based_skip_enable;
 	int i = 0;
 
-	struct object_surface *obj_surface;
 	VAEncSliceParameterBufferH264 * slice_param = avc_state->slice_param[0];
-	VASurfaceID surface_id;
 	unsigned int transform_8x8_mode_flag = avc_state->transform_8x8_mode_enable;
 
 	gpe_resource = &(avc_ctx->res_brc_const_data_buffer);
@@ -2424,32 +2422,26 @@ gen9_avc_init_brc_const_data(VADriverContextP ctx,
 	switch (generic_state->frame_type) {
 	case SLICE_TYPE_P: {
 		for (i = 0 ; i <  slice_param->num_ref_idx_l0_active_minus1 + 1; i++) {
-			surface_id = slice_param->RefPicList0[i].picture_id;
-			obj_surface = SURFACE(surface_id);
-			if (!obj_surface)
+			if (avc_state->list_ref_idx[0][i] == INTEL_AVC_NO_REF_IDX)
 				break;
-			*(data + i) = avc_state->list_ref_idx[0][i];//?
+			*(data + i) = avc_state->list_ref_idx[0][i];
 		}
 	}
 	break;
 	case SLICE_TYPE_B: {
 		data = data + 32 + 32;
 		for (i = 0 ; i <  slice_param->num_ref_idx_l1_active_minus1 + 1; i++) {
-			surface_id = slice_param->RefPicList1[i].picture_id;
-			obj_surface = SURFACE(surface_id);
-			if (!obj_surface)
+			if (avc_state->list_ref_idx[1][i] == INTEL_AVC_NO_REF_IDX)
 				break;
-			*(data + i) = avc_state->list_ref_idx[1][i];//?
+			*(data + i) = avc_state->list_ref_idx[1][i];
 		}
 
 		data = data - 32 - 32;
 
 		for (i = 0 ; i <  slice_param->num_ref_idx_l0_active_minus1 + 1; i++) {
-			surface_id = slice_param->RefPicList0[i].picture_id;
-			obj_surface = SURFACE(surface_id);
-			if (!obj_surface)
+			if (avc_state->list_ref_idx[0][i] == INTEL_AVC_NO_REF_IDX)
 				break;
-			*(data + i) = avc_state->list_ref_idx[0][i];//?
+			*(data + i) = avc_state->list_ref_idx[0][i];
 		}
 	}
 	break;
