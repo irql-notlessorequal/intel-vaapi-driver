@@ -30,6 +30,20 @@
 #include "i965_decoder_utils.h"
 #include "i965_defines.h"
 
+static const VAIQMatrixBufferH264 avc_default_iq = {
+	.ScalingList4x4 = { [0 ... 5] = { [0 ... 15] = 16 } },
+	.ScalingList8x8 = { [0 ... 1] = { [0 ... 63] = 16 } },
+};
+
+static const VAIQMatrixBufferHEVC hevc_default_iq = {
+	.ScalingList4x4      = { [0 ... 5]  = { [0 ... 15] = 16 } },
+	.ScalingList8x8      = { [0 ... 5]  = { [0 ... 63] = 16 } },
+	.ScalingList16x16    = { [0 ... 5]  = { [0 ... 63] = 16 } },
+	.ScalingList32x32    = { [0 ... 1]  = { [0 ... 63] = 16 } },
+	.ScalingListDC16x16  = { [0 ... 5]  = 16 },
+	.ScalingListDC32x32  = { [0 ... 1]  = 16 },
+};
+
 static const int fptype_to_picture_type[8][2] = {
 	{VC1_I_PICTURE, VC1_I_PICTURE},
 	{VC1_I_PICTURE, VC1_P_PICTURE},
@@ -258,11 +272,7 @@ avc_ensure_surface_bo(
 void
 avc_gen_default_iq_matrix(VAIQMatrixBufferH264 *iq_matrix)
 {
-	/* Flat_4x4_16 */
-	memset(&iq_matrix->ScalingList4x4, 16, sizeof(iq_matrix->ScalingList4x4));
-
-	/* Flat_8x8_16 */
-	memset(&iq_matrix->ScalingList8x8, 16, sizeof(iq_matrix->ScalingList8x8));
+	*iq_matrix = avc_default_iq;
 }
 
 /* Returns the POC of the supplied VA picture */
@@ -1543,21 +1553,5 @@ intel_ensure_vp8_segmentation_buffer(VADriverContextP ctx, GenBuffer *buf,
 void
 hevc_gen_default_iq_matrix(VAIQMatrixBufferHEVC *iq_matrix)
 {
-	/* Flat_4x4_16 */
-	memset(&iq_matrix->ScalingList4x4, 16, sizeof(iq_matrix->ScalingList4x4));
-
-	/* Flat_8x8_16 */
-	memset(&iq_matrix->ScalingList8x8, 16, sizeof(iq_matrix->ScalingList8x8));
-
-	/* Flat_16x16_16 */
-	memset(&iq_matrix->ScalingList16x16, 16, sizeof(iq_matrix->ScalingList16x16));
-
-	/* Flat_32x32_16 */
-	memset(&iq_matrix->ScalingList32x32, 16, sizeof(iq_matrix->ScalingList32x32));
-
-	/* Flat_16x16_dc_16 */
-	memset(&iq_matrix->ScalingListDC16x16, 16, sizeof(iq_matrix->ScalingListDC16x16));
-
-	/* Flat_32x32_dc_16 */
-	memset(&iq_matrix->ScalingListDC32x32, 16, sizeof(iq_matrix->ScalingListDC32x32));
+	*iq_matrix = hevc_default_iq;
 }
