@@ -41627,6 +41627,7 @@ const unsigned int bdw_avc_encoder_kernels[AVC_ENC_BDW_SZ] = {
 	0x00000000, 0x00000000, 0x00000000, 0x00000000
 };
 
+#if defined(ENABLE_GEN10_SUPPORT)
 const unsigned int cnl_avc_encoder_kernels[AVC_ENC_CNL_SZ] = {
 	0x0000001b, 0x00000088, 0x000013c8, 0x00008f88, 0x00012ec8, 0x00014208, 0x0001bdc8, 0x00025d08,
 	0x00027048, 0x0002b288, 0x00030fc8, 0x000323c8, 0x0003b788, 0x000456c8, 0x000466c8, 0x00048388,
@@ -54295,3 +54296,4 @@ const unsigned int cnl_avc_encoder_kernels[AVC_ENC_CNL_SZ] = {
 	0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 	0x00000000, 0x00000000
 };
+#endif
