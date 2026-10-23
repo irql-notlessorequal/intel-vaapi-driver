@@ -757,7 +757,7 @@ i965_media_h264_free_private_context(void **data)
 	*data = NULL;
 }
 
-void
+VAStatus
 i965_media_h264_decode_init(VADriverContextP ctx,
 							struct decode_state *decode_state,
 							struct i965_media_context *media_context)
@@ -766,12 +766,23 @@ i965_media_h264_decode_init(VADriverContextP ctx,
 	struct i965_h264_context *i965_h264_context = media_context->private_context;
 	dri_bo *bo;
 	VAPictureParameterBufferH264 *pic_param;
+	unsigned int width_in_mbs;
+	unsigned int height_in_mbs;
 
 	assert(decode_state->pic_param && decode_state->pic_param->buffer);
 	pic_param = (VAPictureParameterBufferH264 *)decode_state->pic_param->buffer;
-	i965_h264_context->picture.width_in_mbs = ((pic_param->picture_width_in_mbs_minus1 + 1) & 0xff);
-	i965_h264_context->picture.height_in_mbs = ((pic_param->picture_height_in_mbs_minus1 + 1) & 0xff) /
+
+	width_in_mbs = pic_param->picture_width_in_mbs_minus1 + 1;
+	height_in_mbs = pic_param->picture_height_in_mbs_minus1 + 1; /* frame height */
+
+	/* The frame macroblock count is a 15 bit field in the image state */
+	if ((unsigned long long)width_in_mbs * height_in_mbs > AVC_MAX_FRAME_MBS)
+		return VA_STATUS_ERROR_INVALID_PARAMETER;
+
+	i965_h264_context->picture.width_in_mbs = width_in_mbs;
+	i965_h264_context->picture.height_in_mbs = height_in_mbs /
 											   (1 + !!pic_param->pic_fields.bits.field_pic_flag); /* picture height */
+
 	i965_h264_context->picture.mbaff_frame_flag = (pic_param->seq_fields.bits.mb_adaptive_frame_field_flag &&
 												   !pic_param->pic_fields.bits.field_pic_flag);
 	i965_h264_context->avc_it_command_mb_info.mbs = (i965_h264_context->picture.width_in_mbs *
@@ -826,6 +837,8 @@ i965_media_h264_decode_init(VADriverContextP ctx,
 					  sizeof(struct i965_vfe_state_ex), 32);
 	assert(bo);
 	media_context->extended_state.bo = bo;
+
+	return VA_STATUS_SUCCESS;
 }
 
 void

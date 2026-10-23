@@ -274,9 +274,4 @@ intel_hevc_slice_insert_packed_data(VADriverContextP ctx,
 									int slice_index,
 									struct intel_batchbuffer *slice_batch);
 
-extern
-Bool gen9_hcpe_context_init(VADriverContextP ctx, struct intel_encoder_context *encoder_context);
-
-void gen9_hcpe_context_destroy(void *context);
-
 #endif  /* GEN9_MFC_H */

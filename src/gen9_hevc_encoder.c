@@ -1860,7 +1860,7 @@ gen9_hevc_brc_init_rest_set_curbe(VADriverContextP ctx,
 
 	if (priv_state->num_b_in_gop[1] ||
 		priv_state->num_b_in_gop[2]) {
-		cmd->dw8.brc_param_a = priv_state->gop_size / priv_state->gop_ref_dist;
+		cmd->dw8.brc_param_a = priv_state->gop_ref_dist ? priv_state->gop_size / priv_state->gop_ref_dist : 0;
 		cmd->dw9.brc_param_b = cmd->dw8.brc_param_a;
 		cmd->dw13.brc_param_c = cmd->dw8.brc_param_a * 2;
 		cmd->dw14.brc_param_d = priv_state->gop_size - cmd->dw8.brc_param_a -
@@ -2165,10 +2165,9 @@ gen9_hevc_brc_update_lcu_based_set_roi_parameters(VADriverContextP ctx,
 	struct gen9_hevc_encoder_state *priv_state = NULL;
 	struct intel_roi *roi_par = NULL;
 	unsigned int width_in_mb_aligned = 0;
+	unsigned int stride = 0;
 	unsigned int roi_level, qp_delta;
-	unsigned int mb_num = 0;
 	unsigned int *pdata = NULL;
-	unsigned int out_data = 0;
 	int i = 0;
 
 	vme_context = (struct encoder_vme_mfc_context *)encoder_context->vme_context;
@@ -2177,55 +2176,53 @@ gen9_hevc_brc_update_lcu_based_set_roi_parameters(VADriverContextP ctx,
 	priv_state = (struct gen9_hevc_encoder_state *)vme_context->private_enc_state;
 
 	width_in_mb_aligned = ALIGN(priv_state->width_in_mb * 4, 64);
-	mb_num = priv_state->width_in_mb * priv_state->height_in_mb;
+	stride = width_in_mb_aligned >> 2;
 
 	pdata = i965_map_gpe_resource(&priv_ctx->res_roi_buffer);
 	if (!pdata)
 		return;
 
-	for (i = 0 ; i < mb_num; i++) {
-		int cur_mb_y = i / priv_state->width_in_mb;
-		int cur_mb_x = i - cur_mb_y * priv_state->width_in_mb;
-		int roi_idx = 0;
+	/* The macroblocks that are not in a region of interest are in no region */
+	memset(pdata, 0, priv_ctx->res_roi_buffer.size);
 
-		out_data = 0;
+	/*
+	 * The regions are written from the last one to the first one, so that
+	 * the region with the lowest index has the highest priority.
+	 */
+	for (i = (int)priv_state->num_roi - 1; i >= 0; i--) {
+		int band;
+		int left, right, top, bottom;
+		unsigned int out_data;
 
-		for (roi_idx = (priv_state->num_roi - 1); roi_idx >= 0; roi_idx--) {
-			roi_par = &priv_state->roi[roi_idx];
+		roi_par = &priv_state->roi[i];
+		roi_level = qp_delta = 0;
 
-			roi_level = qp_delta = 0;
-			if (generic_state->brc_enabled && !priv_state->roi_value_is_qp_delta)
-				roi_level = roi_par->value * 5;
-			else
-				qp_delta = roi_par->value;
+		if (generic_state->brc_enabled && !priv_state->roi_value_is_qp_delta)
+			roi_level = roi_par->value * 5;
+		else
+			qp_delta = roi_par->value;
 
-			if (roi_level == 0 && qp_delta == 0)
+		/*
+		 * The region is extended by up to 3 macroblocks. The extended
+		 * regions are nested, so the widest one is written first.
+		 */
+		for (band = 3; band >= 0; band--) {
+			int x, y;
+
+			left = MAX(roi_par->left - band, 0);
+			right = MIN(roi_par->right + band, (int)priv_state->width_in_mb);
+			top = MAX(roi_par->top - band, 0);
+			bottom = MIN(roi_par->bottom + band, (int)priv_state->height_in_mb);
+
+			if (left >= right || top >= bottom)
 				continue;
 
-			if ((cur_mb_x >= roi_par->left) &&
-				(cur_mb_x < roi_par->right) &&
-				(cur_mb_y >= roi_par->top) &&
-				(cur_mb_y < roi_par->bottom))
-				out_data = 15 | (((roi_level) & 0xFF) << 8) | ((qp_delta & 0xFF) << 16);
-			else if ((cur_mb_x >= roi_par->left - 1) &&
-					 (cur_mb_x < roi_par->right + 1) &&
-					 (cur_mb_y >= roi_par->top - 1) &&
-					 (cur_mb_y < roi_par->bottom + 1))
-				out_data = 14 | (((roi_level) & 0xFF) << 8) | ((qp_delta & 0xFF) << 16);
-			else if ((cur_mb_x >= roi_par->left - 2) &&
-					 (cur_mb_x < roi_par->right + 2) &&
-					 (cur_mb_y >= roi_par->top - 2) &&
-					 (cur_mb_y < roi_par->bottom + 2))
-				out_data = 13 | (((roi_level) & 0xFF) << 8) | ((qp_delta & 0xFF) << 16);
-			else if ((cur_mb_x >= roi_par->left - 3) &&
-					 (cur_mb_x < roi_par->right + 3) &&
-					 (cur_mb_y >= roi_par->top - 3) &&
-					 (cur_mb_y < roi_par->bottom + 3)) {
-				out_data = 12 | (((roi_level) & 0xFF) << 8) | ((qp_delta & 0xFF) << 16);
-			}
-		}
+			out_data = (15 - band) | (((roi_level) & 0xFF) << 8) | ((qp_delta & 0xFF) << 16);
 
-		pdata[(cur_mb_y * (width_in_mb_aligned >> 2)) + cur_mb_x] = out_data;
+			for (y = top; y < bottom; y++)
+				for (x = left; x < right; x++)
+					pdata[y * stride + x] = out_data;
+		}
 	}
 
 	i965_unmap_gpe_resource(&priv_ctx->res_roi_buffer);
@@ -2676,7 +2673,7 @@ gen9_hevc_get_pic_header_size(struct encode_state *encode_state)
 			if (param->type == VAEncPackedHeaderSlice)
 				continue;
 
-			header_data = (unsigned char *)encode_state->packed_header_data[start_index]->buffer;
+			header_data = (unsigned char *)encode_state->packed_header_data[start_index + i]->buffer;
 			length_in_bytes = (param->bit_length + 7) / 8;
 
 			accum_size += length_in_bytes;

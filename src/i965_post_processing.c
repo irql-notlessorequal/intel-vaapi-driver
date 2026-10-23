@@ -1784,10 +1784,12 @@ static void i965_update_src_surface_static_parameter(
 		break;
 	case VA_FOURCC_BGRX:
 	case VA_FOURCC_BGRA:
+	case VA_FOURCC_ARGB:
 		pp_static_parameter->grf1.source_rgb_layout = 0;
 		break;
 	case VA_FOURCC_RGBX:
 	case VA_FOURCC_RGBA:
+	case VA_FOURCC_ABGR:
 		pp_static_parameter->grf1.source_rgb_layout = 1;
 		break;
 	default:
@@ -1815,10 +1817,12 @@ static void i965_update_dst_surface_static_parameter(
 		break;
 	case VA_FOURCC_BGRX:
 	case VA_FOURCC_BGRA:
+	case VA_FOURCC_ARGB:
 		pp_static_parameter->grf1.r1_2.csc.destination_rgb_layout = 0;
 		break;
 	case VA_FOURCC_RGBX:
 	case VA_FOURCC_RGBA:
+	case VA_FOURCC_ABGR:
 		pp_static_parameter->grf1.r1_2.csc.destination_rgb_layout = 1;
 		break;
 	default:
@@ -2202,7 +2206,8 @@ gen7_pp_set_media_rw_message_surface(VADriverContextP ctx, struct i965_post_proc
 			/* the format is MSB: X-B-G-R */
 			pp_static_parameter->grf2.save_avs_rgb_swap = 0;
 			if ((fourcc == VA_FOURCC_BGRA) ||
-				(fourcc == VA_FOURCC_BGRX)) {
+				(fourcc == VA_FOURCC_BGRX) ||
+				(fourcc == VA_FOURCC_ARGB)) {
 				/* It is stored as MSB: X-R-G-B */
 				pp_static_parameter->grf2.save_avs_rgb_swap = 1;
 			}
@@ -2229,7 +2234,8 @@ gen7_pp_set_media_rw_message_surface(VADriverContextP ctx, struct i965_post_proc
 			format0 = SURFACE_FORMAT_R8G8B8A8_UNORM;
 			pp_static_parameter->grf2.src_avs_rgb_swap = 0;
 			if ((fourcc == VA_FOURCC_BGRA) ||
-				(fourcc == VA_FOURCC_BGRX)) {
+				(fourcc == VA_FOURCC_BGRX) ||
+				(fourcc == VA_FOURCC_ARGB)) {
 				pp_static_parameter->grf2.src_avs_rgb_swap = 1;
 			}
 		}
@@ -5749,11 +5755,11 @@ i965_post_processing_context_init(VADriverContextP ctx,
 
 	/* static & inline parameters */
 	if (IS_GEN7(i965->intel.device_info)) {
-		pp_context->pp_static_parameter = calloc(sizeof(struct gen7_pp_static_parameter), 1);
-		pp_context->pp_inline_parameter = calloc(sizeof(struct gen7_pp_inline_parameter), 1);
+		pp_context->pp_static_parameter = calloc(1, sizeof(struct gen7_pp_static_parameter));
+		pp_context->pp_inline_parameter = calloc(1, sizeof(struct gen7_pp_inline_parameter));
 	} else {
-		pp_context->pp_static_parameter = calloc(sizeof(struct pp_static_parameter), 1);
-		pp_context->pp_inline_parameter = calloc(sizeof(struct pp_inline_parameter), 1);
+		pp_context->pp_static_parameter = calloc(1, sizeof(struct pp_static_parameter));
+		pp_context->pp_inline_parameter = calloc(1, sizeof(struct pp_inline_parameter));
 	}
 
 	pp_context->batch = batch;
@@ -6037,13 +6043,14 @@ i965_proc_picture_fast(VADriverContextP ctx,
 	intel_batchbuffer_flush(proc_context->pp_context.batch);
 
 	if (status == VA_STATUS_SUCCESS &&
-		dst_obj_surface->fourcc == VA_FOURCC_BGRA &&
+		(dst_obj_surface->fourcc == VA_FOURCC_BGRA ||
+		 dst_obj_surface->fourcc == VA_FOURCC_ARGB) &&
 		(i965->intel.device_info->driver_workarounds &
 		 HW_WORKAROUND_INVALID_RGBX_SHADER_USE))
 	{
 		dri_bo_map(dst_obj_surface->bo, 1);
 		fill_alpha_rows(dst_obj_surface->bo->virtual,
-						dst_obj_surface->width / 4, /* BGRA is four bytes per pixel. */
+						dst_obj_surface->width / 4, /* Both ARGB and BGRA are four bytes per pixel. */
 						dst_obj_surface->height,
 						dst_obj_surface->width);
 		dri_bo_unmap(dst_obj_surface->bo);

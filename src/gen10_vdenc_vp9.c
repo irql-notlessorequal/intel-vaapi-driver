@@ -1914,7 +1914,7 @@ gen10_vdenc_vp9_allocate_resources(VADriverContextP ctx,
 								res_size,
 								"HuC prob output buffer");
 
-	res_size = 80;
+	res_size = VDENC_VP9_PAK_INSERT_HEADER_BUFFER_SIZE;
 	i965_free_gpe_resource(&vdenc_context->huc_pak_insert_uncompressed_header_input_2nd_batchbuffer_res);
 	ALLOC_VDENC_BUFFER_RESOURCE(vdenc_context->huc_pak_insert_uncompressed_header_input_2nd_batchbuffer_res,
 								res_size,
@@ -2122,10 +2122,16 @@ gen10_vdenc_vp9_uncompressed_header(VADriverContextP ctx,
 		if (param->type == VAEncPackedHeaderRawData) {
 			char *header_data;
 			unsigned int length_in_bits;
+			unsigned int header_size;
 
 			header_data = (char *)encode_state->packed_header_data_ext[0]->buffer;
 			length_in_bits = param->bit_length;
 			driver_header_flag = 0;
+
+			header_size = intel_encoder_packed_header_size(encode_state->packed_header_data_ext[0],
+														   length_in_bits);
+			if (!header_size || header_size > VDENC_VP9_PAK_INSERT_HEADER_SIZE)
+				return VA_STATUS_ERROR_INVALID_PARAMETER;
 
 			vdenc_context->frame_header.bit_offset_first_partition_size = pic_param->bit_offset_first_partition_size;
 			vdenc_context->frame_header_length = ALIGN(length_in_bits, 8) >> 3;
@@ -2325,7 +2331,7 @@ gen10_vdenc_vp9_prepare(VADriverContextP ctx,
 	i965_check_alloc_surface_bo(ctx, obj_surface, 1, VA_FOURCC_NV12, SUBSAMPLE_YUV420);
 
 	if (obj_surface->private_data == NULL) {
-		vdenc_vp9_surface = calloc(sizeof(VDEncVP9Surface), 1);
+		vdenc_vp9_surface = calloc(1, sizeof(VDEncVP9Surface));
 		assert(vdenc_vp9_surface);
 
 		vdenc_vp9_surface->ctx = ctx;
@@ -2528,7 +2534,10 @@ gen10_vdenc_vp9_prepare(VADriverContextP ctx,
 	if (va_status != VA_STATUS_SUCCESS)
 		return va_status;
 
-	gen10_vdenc_vp9_uncompressed_header(ctx, encode_state, encoder_context);
+	va_status = gen10_vdenc_vp9_uncompressed_header(ctx, encode_state, encoder_context);
+	if (va_status != VA_STATUS_SUCCESS)
+		return va_status;
+
 	gen10_vdenc_vp9_gpe_kernel_init(ctx, encode_state, encoder_context);
 	gen10_vdenc_vp9_dys_src_frame(ctx, encode_state, encoder_context);
 	gen10_vdenc_vp9_update_streamin_state(ctx, encoder_context);

@@ -696,7 +696,7 @@ VAStatus intel_mfc_avc_prepare(VADriverContextP ctx,
 	i965_check_alloc_surface_bo(ctx, obj_surface, 1, VA_FOURCC_NV12, SUBSAMPLE_YUV420);
 
 	if (obj_surface->private_data == NULL) {
-		gen6_avc_surface = calloc(sizeof(GenAvcSurface), 1);
+		gen6_avc_surface = calloc(1, sizeof(GenAvcSurface));
 		assert(gen6_avc_surface);
 		gen6_avc_surface->dmv_top =
 			dri_bo_alloc(i965->intel.bufmgr,
@@ -743,7 +743,7 @@ VAStatus intel_mfc_avc_prepare(VADriverContextP ctx,
 			/* Check DMV buffer */
 			if (obj_surface->private_data == NULL) {
 
-				gen6_avc_surface = calloc(sizeof(GenAvcSurface), 1);
+				gen6_avc_surface = calloc(1, sizeof(GenAvcSurface));
 				assert(gen6_avc_surface);
 				gen6_avc_surface->dmv_top =
 					dri_bo_alloc(i965->intel.bufmgr,
@@ -2310,7 +2310,8 @@ void intel_vme_hevc_update_mbmv_cost(VADriverContextP ctx,
 				slice_type = HEVC_SLICE_P;
 				qp = mfc_context->bit_rate_control_context[HEVC_SLICE_P].QpPrimeY;
 
-			} else if (mfc_context->vui_hrd.i_frame_number % pSequenceParameter->ip_period == 1) {
+			} else if (pSequenceParameter->ip_period &&
+					   mfc_context->vui_hrd.i_frame_number % pSequenceParameter->ip_period == 1) {
 				slice_type = HEVC_SLICE_P;
 				qp = mfc_context->bit_rate_control_context[HEVC_SLICE_P].QpPrimeY;
 			}

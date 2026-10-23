@@ -1456,7 +1456,8 @@ VAStatus hsw_veb_pre_format_convert(VADriverContextP ctx,
 		obj_surf_input->fourcc ==  VA_FOURCC_IMC1 ||
 		obj_surf_input->fourcc ==  VA_FOURCC_IMC3 ||
 		obj_surf_input->fourcc ==  VA_FOURCC_RGBA ||
-		obj_surf_input->fourcc ==  VA_FOURCC_BGRA) {
+		obj_surf_input->fourcc ==  VA_FOURCC_BGRA ||
+		obj_surf_input->fourcc ==  VA_FOURCC_ARGB) {
 
 		proc_ctx->format_convert_flags |= PRE_FORMAT_CONVERT;
 
@@ -1498,7 +1499,8 @@ VAStatus hsw_veb_pre_format_convert(VADriverContextP ctx,
 		obj_surf_output->fourcc ==  VA_FOURCC_IMC1 ||
 		obj_surf_output->fourcc ==  VA_FOURCC_IMC3 ||
 		obj_surf_output->fourcc ==  VA_FOURCC_RGBA ||
-		obj_surf_output->fourcc ==  VA_FOURCC_BGRA) {
+		obj_surf_output->fourcc ==  VA_FOURCC_BGRA ||
+		obj_surf_output->fourcc ==  VA_FOURCC_ARGB) {
 
 		proc_ctx->format_convert_flags |= POST_FORMAT_CONVERT;
 	} else if (obj_surf_output->fourcc ==  VA_FOURCC_AYUV ||

@@ -50,7 +50,7 @@ i965_avc_bsd_init_avc_bsd_surface(VADriverContextP ctx,
     obj_surface->free_private_data = gen_free_avc_surface;
 
     if (!avc_bsd_surface) {
-        avc_bsd_surface = calloc(sizeof(GenAvcSurface), 1);
+        avc_bsd_surface = calloc(1, sizeof(GenAvcSurface));
         assert(avc_bsd_surface);
         avc_bsd_surface->base.frame_store_id = -1;
         assert((obj_surface->size & 0x3f) == 0);
@@ -140,8 +140,8 @@ i965_avc_bsd_img_state(VADriverContextP ctx,
     mbaff_frame_flag = (pic_param->seq_fields.bits.mb_adaptive_frame_field_flag &&
                         !pic_param->pic_fields.bits.field_pic_flag);
 
-    width_in_mbs = ((pic_param->picture_width_in_mbs_minus1 + 1) & 0xff);
-    height_in_mbs = ((pic_param->picture_height_in_mbs_minus1 + 1) & 0xff); /* frame height */
+    width_in_mbs = pic_param->picture_width_in_mbs_minus1 + 1;
+    height_in_mbs = pic_param->picture_height_in_mbs_minus1 + 1; /* frame height */
 
     assert(!((width_in_mbs * height_in_mbs) & 0x8000)); /* hardware requirement */
 

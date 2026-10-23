@@ -35,7 +35,7 @@
 #include "gen6_mfc.h"
 #include "i965_encoder_utils.h"
 
-#define BITSTREAM_ALLOCATE_STEPPING     4096
+#define BITSTREAM_INITIAL_SIZE_IN_DWORD	16
 
 #define NAL_REF_IDC_NONE        0
 #define NAL_REF_IDC_LOW         1
@@ -96,8 +96,8 @@ swap32(unsigned int val)
 static void
 avc_bitstream_start(avc_bitstream *bs)
 {
-	bs->max_size_in_dword = BITSTREAM_ALLOCATE_STEPPING;
-	bs->buffer = calloc(bs->max_size_in_dword * sizeof(int), 1);
+	bs->max_size_in_dword = BITSTREAM_INITIAL_SIZE_IN_DWORD;
+	bs->buffer = calloc(bs->max_size_in_dword, sizeof(unsigned int));
 	bs->bit_offset = 0;
 }
 
@@ -112,7 +112,7 @@ avc_bitstream_end(avc_bitstream *bs)
 		bs->buffer[pos] = swap32((bs->buffer[pos] << bit_left));
 	}
 
-	// free(bs->buffer);
+	/* the caller owns the buffer */
 }
 
 static void
@@ -142,11 +142,15 @@ avc_bitstream_put_ui(avc_bitstream *bs, unsigned int val, int size_in_bits)
 		bs->buffer[pos] = swap32(bs->buffer[pos]);
 
 		if (pos + 1 == bs->max_size_in_dword) {
-			bs->max_size_in_dword += BITSTREAM_ALLOCATE_STEPPING;
-			bs->buffer = realloc(bs->buffer, bs->max_size_in_dword * sizeof(unsigned int));
+			unsigned int *new_buffer;
 
-			if (!bs->buffer)
-				return;
+			new_buffer = realloc(bs->buffer,
+					     		 2 * bs->max_size_in_dword * sizeof(unsigned int));
+			if (!new_buffer)
+ 				return;
+
+			bs->buffer = new_buffer;
+			bs->max_size_in_dword *= 2;
 		}
 
 		bs->buffer[pos + 1] = val;
@@ -498,21 +502,6 @@ build_avc_sei_buffer_timing(unsigned int init_cpb_removal_length,
 	*sei_buffer = (unsigned char *)nal_bs.buffer;
 
 	return nal_bs.bit_offset;
-}
-
-int
-build_mpeg2_slice_header(VAEncSequenceParameterBufferMPEG2 *sps_param,
-						 VAEncPictureParameterBufferMPEG2 *pic_param,
-						 VAEncSliceParameterBufferMPEG2 *slice_param,
-						 unsigned char **slice_header_buffer)
-{
-	avc_bitstream bs;
-
-	avc_bitstream_start(&bs);
-	avc_bitstream_end(&bs);
-	*slice_header_buffer = (unsigned char *)bs.buffer;
-
-	return bs.bit_offset;
 }
 
 static void binarize_qindex_delta(avc_bitstream *bs, int qindex_delta)
@@ -1170,4 +1159,28 @@ intel_avc_find_skipemulcnt(unsigned char *buf, int bits_length)
 				  "It is beyond the HW range.!!!\n");
 	}
 	return skip_cnt;
+}
+
+/*
+ * Return the number of bytes of the packed header data that the
+ * application has provided for a header of length_in_bits bits.
+ *
+ * Returns 0 when the application asked the driver to use more data
+ * than it provided.
+ */
+unsigned int
+intel_encoder_packed_header_size(struct buffer_store *data_store,
+								 unsigned int length_in_bits)
+{
+	unsigned int data_size;
+
+	if (!data_store)
+		return 0;
+
+	data_size = data_store->size_element * data_store->num_elements;
+
+	if ((length_in_bits + 7) / 8 > data_size)
+		return 0;
+	else
+		return (length_in_bits + 7) / 8;
 }
