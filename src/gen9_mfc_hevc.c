@@ -2637,27 +2637,3 @@ VAStatus gen9_hcpe_pipeline(VADriverContextP ctx,
 
 	return vaStatus;
 }
-
-Bool gen9_hcpe_context_init(VADriverContextP ctx, struct intel_encoder_context *encoder_context)
-{
-	struct gen9_hcpe_context *hcpe_context = calloc(1, sizeof(struct gen9_hcpe_context));
-
-	assert(hcpe_context);
-	hcpe_context->pipe_mode_select = gen9_hcpe_pipe_mode_select;
-	hcpe_context->set_surface_state = gen9_hcpe_surface_state;
-	hcpe_context->ind_obj_base_addr_state = gen9_hcpe_ind_obj_base_addr_state;
-	hcpe_context->pic_state = gen9_hcpe_hevc_pic_state;
-	hcpe_context->qm_state = gen9_hcpe_hevc_qm_state;
-	hcpe_context->fqm_state = gen9_hcpe_hevc_fqm_state;
-	hcpe_context->insert_object = gen9_hcpe_hevc_insert_object;
-	hcpe_context->buffer_suface_setup = gen8_gpe_buffer_suface_setup;
-
-	encoder_context->mfc_context = hcpe_context;
-	encoder_context->mfc_context_destroy = gen9_hcpe_context_destroy;
-	encoder_context->mfc_pipeline = gen9_hcpe_pipeline;
-	encoder_context->mfc_brc_prepare = intel_hcpe_brc_prepare;
-
-	hevc_gen_default_iq_matrix_encoder(&hcpe_context->iq_matrix_hevc);
-
-	return True;
-}
