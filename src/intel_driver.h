@@ -186,16 +186,6 @@ struct intel_device_info {
  * for more information.
  */
 #define HW_WORKAROUND_USE_ALTERNATE_SEARCH_TABLE				(1 << 1)
-/**
- * ILK and SNB only has a RGBX capable VPP shader for converting NV12
- * into RGBA.
- * 
- * The driver for some reason tries to reuse this shader for BGRA and other
- * formats with alpha in them, causing them to explode horribly.
- * 
- * To be fair this is my fault since I'm the one that exposed BGRA to Chromium.
- */
-#define HW_WORKAROUND_INVALID_RGBX_SHADER_USE					(1 << 2)
 	uint32_t driver_workarounds;
 
 	unsigned int is_g4x         : 1; /* gen4 */

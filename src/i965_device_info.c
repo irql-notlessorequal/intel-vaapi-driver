@@ -878,8 +878,6 @@ static const struct intel_device_info ilk_device_info = {
 
 	.urb_size = 1024,
 	.max_wm_threads = 72,       /* 12 * 6 */
-
-	.driver_workarounds = HW_WORKAROUND_INVALID_RGBX_SHADER_USE
 };
 
 static const struct intel_device_info snb_gt1_device_info = {
@@ -888,8 +886,6 @@ static const struct intel_device_info snb_gt1_device_info = {
 
 	.urb_size = 1024,
 	.max_wm_threads = 40,
-
-	.driver_workarounds = HW_WORKAROUND_INVALID_RGBX_SHADER_USE
 };
 
 static const struct intel_device_info snb_gt2_device_info = {
@@ -898,8 +894,6 @@ static const struct intel_device_info snb_gt2_device_info = {
 
 	.urb_size = 1024,
 	.max_wm_threads = 80,
-
-	.driver_workarounds = HW_WORKAROUND_INVALID_RGBX_SHADER_USE
 };
 
 static const struct intel_device_info ivb_gt1_device_info = {
