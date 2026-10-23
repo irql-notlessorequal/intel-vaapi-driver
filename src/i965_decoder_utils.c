@@ -1099,7 +1099,6 @@ intel_decoder_check_mpeg2_parameter(VADriverContextP ctx,
 {
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
 	VAPictureParameterBufferMPEG2 *pic_param = (VAPictureParameterBufferMPEG2 *)decode_state->pic_param->buffer;
-	struct object_surface *obj_surface;
 	int i = 0;
 
 	if (pic_param->picture_coding_type == MPEG_P_PICTURE) {

@@ -1053,7 +1053,6 @@ gen75_mfd_avc_decode_init(VADriverContextP ctx,
 {
 	VAPictureParameterBufferH264 *pic_param;
 	VASliceParameterBufferH264 *slice_param;
-	struct i965_driver_data *i965 = i965_driver_data(ctx);
 	struct object_surface *obj_surface;
 	int i, j, enable_avc_ildb = 0;
 	unsigned int width_in_mbs, height_in_mbs;
@@ -1203,7 +1202,6 @@ gen75_mfd_mpeg2_decode_init(VADriverContextP ctx,
 							struct gen7_mfd_context *gen7_mfd_context)
 {
 	VAPictureParameterBufferMPEG2 *pic_param;
-	struct i965_driver_data *i965 = i965_driver_data(ctx);
 	struct object_surface *obj_surface;
 	unsigned int width_in_mbs;
 
