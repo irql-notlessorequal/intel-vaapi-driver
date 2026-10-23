@@ -10,3 +10,9 @@ option('with_wayland_drm',
 option('enable_hybrid_codec', type : 'boolean', value : false,
     description: 'Enables support for loading the separate hybrid codec driver.')
 option('enable_tests', type : 'boolean', value : false)
+option('with_gen4asm',
+    description: 'Regenerate the gen5_6 post-processing shader binaries with gen4asm',
+    type : 'combo',
+    choices : ['yes', 'no', 'auto'],
+    value : 'auto'
+)

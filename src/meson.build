@@ -253,3 +253,5 @@ i965_drv_video = shared_module(
   install_dir : driverdir,
   link_whole : libi965_drv_video,
   dependencies : shared_deps)
+
+subdir('shaders/post_processing/gen5_6')
