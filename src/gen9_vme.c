@@ -1777,7 +1777,7 @@ static VAStatus gen9_intel_init_hevc_surface(VADriverContextP ctx,
 				   ((pSequenceParameter->pic_height_in_luma_samples + 31) >> 5);
 		size <<= 6; /* in unit of 64bytes */
 
-		hevc_encoder_surface = calloc(sizeof(GenHevcSurface), 1);
+		hevc_encoder_surface = calloc(1, sizeof(GenHevcSurface));
 
 		assert(hevc_encoder_surface);
 		hevc_encoder_surface->motion_vector_temporal_bo =

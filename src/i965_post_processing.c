@@ -5755,11 +5755,11 @@ i965_post_processing_context_init(VADriverContextP ctx,
 
 	/* static & inline parameters */
 	if (IS_GEN7(i965->intel.device_info)) {
-		pp_context->pp_static_parameter = calloc(sizeof(struct gen7_pp_static_parameter), 1);
-		pp_context->pp_inline_parameter = calloc(sizeof(struct gen7_pp_inline_parameter), 1);
+		pp_context->pp_static_parameter = calloc(1, sizeof(struct gen7_pp_static_parameter));
+		pp_context->pp_inline_parameter = calloc(1, sizeof(struct gen7_pp_inline_parameter));
 	} else {
-		pp_context->pp_static_parameter = calloc(sizeof(struct pp_static_parameter), 1);
-		pp_context->pp_inline_parameter = calloc(sizeof(struct pp_inline_parameter), 1);
+		pp_context->pp_static_parameter = calloc(1, sizeof(struct pp_static_parameter));
+		pp_context->pp_inline_parameter = calloc(1, sizeof(struct pp_inline_parameter));
 	}
 
 	pp_context->batch = batch;

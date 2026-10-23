@@ -50,7 +50,7 @@ i965_avc_bsd_init_avc_bsd_surface(VADriverContextP ctx,
     obj_surface->free_private_data = gen_free_avc_surface;
 
     if (!avc_bsd_surface) {
-        avc_bsd_surface = calloc(sizeof(GenAvcSurface), 1);
+        avc_bsd_surface = calloc(1, sizeof(GenAvcSurface));
         assert(avc_bsd_surface);
         avc_bsd_surface->base.frame_store_id = -1;
         assert((obj_surface->size & 0x3f) == 0);

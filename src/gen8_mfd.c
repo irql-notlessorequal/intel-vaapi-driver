@@ -73,7 +73,7 @@ gen8_mfd_init_avc_surface(VADriverContextP ctx,
 	height_in_mbs = pic_param->picture_height_in_mbs_minus1 + 1; /* frame height */
 
 	if (!gen7_avc_surface) {
-		gen7_avc_surface = calloc(sizeof(GenAvcSurface), 1);
+		gen7_avc_surface = calloc(1, sizeof(GenAvcSurface));
 
 		if (!gen7_avc_surface)
 			return;
@@ -1295,7 +1295,7 @@ gen8_mfd_init_vc1_surface(VADriverContextP ctx,
 	obj_surface->free_private_data = gen8_mfd_free_vc1_surface;
 
 	if (!gen7_vc1_surface) {
-		gen7_vc1_surface = calloc(sizeof(struct gen7_vc1_surface), 1);
+		gen7_vc1_surface = calloc(1, sizeof(struct gen7_vc1_surface));
 
 		if (!gen7_vc1_surface)
 			return;

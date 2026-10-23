@@ -1036,7 +1036,7 @@ gen9_vdenc_avc_prepare(VADriverContextP ctx,
 	i965_check_alloc_surface_bo(ctx, obj_surface, 1, VA_FOURCC_NV12, SUBSAMPLE_YUV420);
 
 	if (obj_surface->private_data == NULL) {
-		vdenc_avc_surface = calloc(sizeof(VDEncAvcSurface), 1);
+		vdenc_avc_surface = calloc(1, sizeof(VDEncAvcSurface));
 		assert(vdenc_avc_surface);
 
 		vdenc_avc_surface->ctx = ctx;
@@ -1089,7 +1089,7 @@ gen9_vdenc_avc_prepare(VADriverContextP ctx,
 			i965_object_surface_to_2d_gpe_resource(&vdenc_context->list_reference_res[i], obj_surface);
 
 			if (obj_surface->private_data == NULL) {
-				vdenc_avc_surface = calloc(sizeof(VDEncAvcSurface), 1);
+				vdenc_avc_surface = calloc(1, sizeof(VDEncAvcSurface));
 				assert(vdenc_avc_surface);
 
 				vdenc_avc_surface->ctx = ctx;

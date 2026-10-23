@@ -77,7 +77,7 @@ gen9_hcpd_init_hevc_surface(VADriverContextP ctx,
 	gen9_hevc_surface = obj_surface->private_data;
 
 	if (!gen9_hevc_surface) {
-		gen9_hevc_surface = calloc(sizeof(GenHevcSurface), 1);
+		gen9_hevc_surface = calloc(1, sizeof(GenHevcSurface));
 		assert(gen9_hevc_surface);
 		gen9_hevc_surface->base.frame_store_id = -1;
 		obj_surface->private_data = gen9_hevc_surface;
@@ -1281,7 +1281,7 @@ gen9_hcpd_init_vp9_surface(VADriverContextP ctx,
 	gen9_vp9_surface = obj_surface->private_data;
 
 	if (!gen9_vp9_surface) {
-		gen9_vp9_surface = calloc(sizeof(GenVP9Surface), 1);
+		gen9_vp9_surface = calloc(1, sizeof(GenVP9Surface));
 		assert(gen9_vp9_surface);
 		gen9_vp9_surface->base.frame_store_id = -1;
 		obj_surface->private_data = gen9_vp9_surface;

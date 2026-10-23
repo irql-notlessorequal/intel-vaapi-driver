@@ -1661,8 +1661,8 @@ gen8_post_processing_context_common_init(VADriverContextP ctx,
 	dri_bo_unmap(pp_context->instruction_state.bo);
 
 	/* static & inline parameters */
-	pp_context->pp_static_parameter = calloc(sizeof(struct gen7_pp_static_parameter), 1);
-	pp_context->pp_inline_parameter = calloc(sizeof(struct gen7_pp_inline_parameter), 1);
+	pp_context->pp_static_parameter = calloc(1, sizeof(struct gen7_pp_static_parameter));
+	pp_context->pp_inline_parameter = calloc(1, sizeof(struct gen7_pp_inline_parameter));
 
 	pp_context->batch = batch;
 

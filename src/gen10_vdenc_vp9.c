@@ -2331,7 +2331,7 @@ gen10_vdenc_vp9_prepare(VADriverContextP ctx,
 	i965_check_alloc_surface_bo(ctx, obj_surface, 1, VA_FOURCC_NV12, SUBSAMPLE_YUV420);
 
 	if (obj_surface->private_data == NULL) {
-		vdenc_vp9_surface = calloc(sizeof(VDEncVP9Surface), 1);
+		vdenc_vp9_surface = calloc(1, sizeof(VDEncVP9Surface));
 		assert(vdenc_vp9_surface);
 
 		vdenc_vp9_surface->ctx = ctx;

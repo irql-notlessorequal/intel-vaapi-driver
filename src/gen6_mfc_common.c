@@ -696,7 +696,7 @@ VAStatus intel_mfc_avc_prepare(VADriverContextP ctx,
 	i965_check_alloc_surface_bo(ctx, obj_surface, 1, VA_FOURCC_NV12, SUBSAMPLE_YUV420);
 
 	if (obj_surface->private_data == NULL) {
-		gen6_avc_surface = calloc(sizeof(GenAvcSurface), 1);
+		gen6_avc_surface = calloc(1, sizeof(GenAvcSurface));
 		assert(gen6_avc_surface);
 		gen6_avc_surface->dmv_top =
 			dri_bo_alloc(i965->intel.bufmgr,
@@ -743,7 +743,7 @@ VAStatus intel_mfc_avc_prepare(VADriverContextP ctx,
 			/* Check DMV buffer */
 			if (obj_surface->private_data == NULL) {
 
-				gen6_avc_surface = calloc(sizeof(GenAvcSurface), 1);
+				gen6_avc_surface = calloc(1, sizeof(GenAvcSurface));
 				assert(gen6_avc_surface);
 				gen6_avc_surface->dmv_top =
 					dri_bo_alloc(i965->intel.bufmgr,
