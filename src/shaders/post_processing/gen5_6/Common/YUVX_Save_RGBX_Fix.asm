@@ -195,6 +195,10 @@
     // R
     mov (8) ubDEST_RGBX(0,ROW_NUM*64+2   )<4>  REG2(r,nTEMP1, 0)<0;8,1>:ub
     mov (8) ubDEST_RGBX(0,ROW_NUM*64+2+32)<4>  REG2(r,nTEMP1, 8)<0;8,1>:ub
+    // A/X = 0xFF. Keep alpha byte of every processed pixel opaque, the
+    // kernel only generates RGB data and this byte is otherwise undefined.
+    mov (8) ubDEST_RGBX(0,ROW_NUM*64+3   )<4>  0xff
+    mov (8) ubDEST_RGBX(0,ROW_NUM*64+3+32)<4>  0xff
 #if (!ONE_ROW_DEBUG)    
     }
 #endif
