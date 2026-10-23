@@ -709,7 +709,7 @@ gen6_mfd_avc_bsd_object(VADriverContextP ctx,
 	ADVANCE_BCS_BATCH(batch);
 }
 
-static void
+static inline void
 gen6_mfd_avc_phantom_slice_first(VADriverContextP ctx,
 								 VAPictureParameterBufferH264 *pic_param,
 								 VASliceParameterBufferH264 *next_slice_param,
@@ -718,7 +718,7 @@ gen6_mfd_avc_phantom_slice_first(VADriverContextP ctx,
 	gen6_mfd_avc_phantom_slice(ctx, pic_param, next_slice_param, gen6_mfd_context->base.batch);
 }
 
-static void
+static inline void
 gen6_mfd_avc_phantom_slice_last(VADriverContextP ctx,
 								VAPictureParameterBufferH264 *pic_param,
 								struct gen6_mfd_context *gen6_mfd_context)
