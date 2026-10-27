@@ -3399,8 +3399,12 @@ i965_create_buffer_internal(VADriverContextP ctx,
 		dri_bo_reference(buffer_store->bo);
 
 		/* If the buffer is wrapped, the buffer_store is bogus. Unnecessary to copy it */
-		if (data && !wrapper_flag)
-			dri_bo_subdata(buffer_store->bo, 0, size * num_elements, data);
+		if (data && !wrapper_flag) {
+			int ret = dri_bo_subdata(buffer_store->bo, 0, size * num_elements, data);
+			if (ret != 0) {
+				goto error;
+			}
+		}
 	} else if (type == VASliceDataBufferType ||
 			   type == VAImageBufferType ||
 			   type == VAEncCodedBufferType ||
@@ -3450,7 +3454,10 @@ i965_create_buffer_internal(VADriverContextP ctx,
 				coded_buffer_segment->status_support = 0;
 				dri_bo_unmap(buffer_store->bo);
 			} else if (data) {
-				dri_bo_subdata(buffer_store->bo, 0, size * num_elements, data);
+				int ret = dri_bo_subdata(buffer_store->bo, 0, size * num_elements, data);
+				if (ret != 0) {
+					goto error;
+				}
 			}
 		}
 
@@ -3482,6 +3489,16 @@ i965_create_buffer_internal(VADriverContextP ctx,
 	*buf_id = bufferID;
 
 	return VA_STATUS_SUCCESS;
+
+error:
+	/*
+	 * buffer_store is still local, not attached to obj_buffer.
+	 * Release its BO reference and the store itself.
+	 * object_heap_free only returns the reserved slot to the free list.
+	 */
+	i965_release_buffer_store(&buffer_store);
+	object_heap_free(&i965->buffer_heap, &obj_buffer->base);
+	return VA_STATUS_ERROR_OPERATION_FAILED;
 }
 
 VAStatus
