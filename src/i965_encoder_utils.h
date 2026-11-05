@@ -27,12 +27,6 @@ build_avc_sei_buffer_timing(unsigned int init_cpb_removal_length,
 							unsigned int dpb_output_delay,
 							unsigned char **sei_buffer);
 
-int
-build_mpeg2_slice_header(VAEncSequenceParameterBufferMPEG2 *sps_param,
-						 VAEncPictureParameterBufferMPEG2 *pic_param,
-						 VAEncSliceParameterBufferMPEG2 *slice_param,
-						 unsigned char **slice_header_buffer);
-
 /* HEVC */
 
 int
@@ -64,5 +58,10 @@ build_hevc_idr_sei_buffer_timing(unsigned int init_cpb_removal_delay_length,
 
 int
 intel_avc_find_skipemulcnt(unsigned char *buf, int bits_length);
+
+unsigned int
+intel_encoder_packed_header_size(struct buffer_store *data_store,
+								 unsigned int length_in_bits);
+
 
 #endif /* __I965_ENCODER_UTILS_H__ */

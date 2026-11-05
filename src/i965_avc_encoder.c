@@ -2375,9 +2375,7 @@ gen9_avc_init_brc_const_data(VADriverContextP ctx,
 	unsigned int block_based_skip_enable = avc_state->block_based_skip_enable;
 	int i = 0;
 
-	struct object_surface *obj_surface;
 	VAEncSliceParameterBufferH264 * slice_param = avc_state->slice_param[0];
-	VASurfaceID surface_id;
 	unsigned int transform_8x8_mode_flag = avc_state->transform_8x8_mode_enable;
 
 	gpe_resource = &(avc_ctx->res_brc_const_data_buffer);
@@ -2424,32 +2422,26 @@ gen9_avc_init_brc_const_data(VADriverContextP ctx,
 	switch (generic_state->frame_type) {
 	case SLICE_TYPE_P: {
 		for (i = 0 ; i <  slice_param->num_ref_idx_l0_active_minus1 + 1; i++) {
-			surface_id = slice_param->RefPicList0[i].picture_id;
-			obj_surface = SURFACE(surface_id);
-			if (!obj_surface)
+			if (avc_state->list_ref_idx[0][i] == INTEL_AVC_NO_REF_IDX)
 				break;
-			*(data + i) = avc_state->list_ref_idx[0][i];//?
+			*(data + i) = avc_state->list_ref_idx[0][i];
 		}
 	}
 	break;
 	case SLICE_TYPE_B: {
 		data = data + 32 + 32;
 		for (i = 0 ; i <  slice_param->num_ref_idx_l1_active_minus1 + 1; i++) {
-			surface_id = slice_param->RefPicList1[i].picture_id;
-			obj_surface = SURFACE(surface_id);
-			if (!obj_surface)
+			if (avc_state->list_ref_idx[1][i] == INTEL_AVC_NO_REF_IDX)
 				break;
-			*(data + i) = avc_state->list_ref_idx[1][i];//?
+			*(data + i) = avc_state->list_ref_idx[1][i];
 		}
 
 		data = data - 32 - 32;
 
 		for (i = 0 ; i <  slice_param->num_ref_idx_l0_active_minus1 + 1; i++) {
-			surface_id = slice_param->RefPicList0[i].picture_id;
-			obj_surface = SURFACE(surface_id);
-			if (!obj_surface)
+			if (avc_state->list_ref_idx[0][i] == INTEL_AVC_NO_REF_IDX)
 				break;
-			*(data + i) = avc_state->list_ref_idx[0][i];//?
+			*(data + i) = avc_state->list_ref_idx[0][i];
 		}
 	}
 	break;
@@ -8541,7 +8533,8 @@ gen9_avc_vme_gpe_kernel_prepare(VADriverContextP ctx,
 		VAPictureH264 *va_pic;
 
 		assert(ARRAY_ELEMS(slice_param->RefPicList0) == ARRAY_ELEMS(avc_state->list_ref_idx[0]));
-		avc_state->list_ref_idx[0][i] = 0;
+
+		avc_state->list_ref_idx[0][i] = INTEL_AVC_NO_REF_IDX;
 
 		if (i >= avc_state->num_refs[0])
 			continue;
@@ -8566,7 +8559,8 @@ gen9_avc_vme_gpe_kernel_prepare(VADriverContextP ctx,
 		VAPictureH264 *va_pic;
 
 		assert(ARRAY_ELEMS(slice_param->RefPicList1) == ARRAY_ELEMS(avc_state->list_ref_idx[1]));
-		avc_state->list_ref_idx[1][i] = 0;
+
+		avc_state->list_ref_idx[1][i] = INTEL_AVC_NO_REF_IDX;
 
 		if (i >= avc_state->num_refs[1])
 			continue;
@@ -10200,6 +10194,9 @@ gen9_mfc_avc_ref_idx_state(VADriverContextP ctx,
 			ref_pic = &slice_param->RefPicList0[i];
 			ref_idx_shift = i * 8;
 
+			if (avc_state->list_ref_idx[0][i] == INTEL_AVC_NO_REF_IDX)
+				continue;
+
 			fwd_ref_entry &= ~(0xFF << ref_idx_shift);
 			fwd_ref_entry += (gen9_mfc_avc_get_ref_idx_state(ref_pic, avc_state->list_ref_idx[0][i]) << ref_idx_shift);
 		}
@@ -10210,6 +10207,9 @@ gen9_mfc_avc_ref_idx_state(VADriverContextP ctx,
 		for (i = 0; i < MIN(avc_state->num_refs[1], 4); i++) {
 			ref_pic = &slice_param->RefPicList1[i];
 			ref_idx_shift = i * 8;
+
+			if (avc_state->list_ref_idx[1][i] == INTEL_AVC_NO_REF_IDX)
+				continue;
 
 			bwd_ref_entry &= ~(0xFF << ref_idx_shift);
 			bwd_ref_entry += (gen9_mfc_avc_get_ref_idx_state(ref_pic, avc_state->list_ref_idx[1][i]) << ref_idx_shift);
@@ -11391,7 +11391,7 @@ gen9_avc_vme_context_init(VADriverContextP ctx, struct intel_encoder_context *en
 
 	avc_state->num_refs[0] = 0;
 	avc_state->num_refs[1] = 0;
-	memset(avc_state->list_ref_idx, 0, 32 * 2 * sizeof(uint32_t));
+	memset(avc_state->list_ref_idx, INTEL_AVC_NO_REF_IDX, 32 * 2 * sizeof(uint32_t));
 	memset(avc_state->top_field_poc, 0, NUM_MFC_AVC_DMV_BUFFERS * sizeof(int32_t));
 	avc_state->tq_rounding = 0;
 	avc_state->zero_mv_threshold = 0;

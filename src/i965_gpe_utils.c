@@ -1429,7 +1429,7 @@ i965_dri_object_to_buffer_gpe_resource(struct i965_gpe_resource *res,
 	res->width = bo->size;
 	res->height = 1;
 	res->pitch = res->width;
-	res->size = res->pitch * res->width;
+	res->size = bo->size;
 	res->bo = bo;
 	res->map = NULL;
 
@@ -1450,7 +1450,7 @@ i965_dri_object_to_2d_gpe_resource(struct i965_gpe_resource *res,
 	res->width = width;
 	res->height = height;
 	res->pitch = pitch;
-	res->size = res->pitch * res->width;
+	res->size = res->pitch * res->height;
 	res->bo = bo;
 	res->map = NULL;
 
@@ -1463,7 +1463,7 @@ i965_zero_gpe_resource(struct i965_gpe_resource *res)
 {
 	if (res->bo) {
 		dri_bo_map(res->bo, 1);
-		memset(res->bo->virtual, 0, res->size);
+		memset(res->bo->virtual, 0, MIN(res->size, res->bo->size));
 		dri_bo_unmap(res->bo);
 	}
 }
@@ -2082,7 +2082,7 @@ i965_gpe_allocate_2d_resource(dri_bufmgr *bufmgr,
 	res->bo = dri_bo_alloc(bufmgr, name, res->size, 4096);
 	res->map = NULL;
 
-	return true;
+	return (res->bo != NULL);
 }
 
 void

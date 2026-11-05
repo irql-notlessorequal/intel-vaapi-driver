@@ -2,7 +2,7 @@ project(
   'intel-vaapi-driver', 'c',
   version : '2.4.6.1',
   meson_version : '>= 0.60.0',
-  default_options : [ 'warning_level=1',
+  default_options : [ 'warning_level=2',
                       'buildtype=debugoptimized' ])
 
 version_arr = meson.project_version().split('.')

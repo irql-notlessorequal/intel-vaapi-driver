@@ -235,7 +235,6 @@ struct intel_driver_data {
 	unsigned int has_vebox  : 1; /* Flag: has VEBOX unit */
 	unsigned int has_bsd2   : 1; /* Flag: has the second BSD video ring unit */
 	unsigned int has_huc    : 1; /* Flag: has a fully loaded HuC firmware? */
-	unsigned int hybrid_vp8 : 1; /* Flag: User has enrolled in experimental VP8 encoding support. */
 	unsigned int rc_hw_mode : 1; /* Flag: User has enrolled in RateControlCounter */
 	unsigned int dec_base	: 1; /* Flag: User has enrolled in experimental VA_DEC_SLICE_MODE_BASE support  */
 };

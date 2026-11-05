@@ -49,6 +49,11 @@ struct intel_encoder_context;
 #define INTEL_BRC_VBR    2
 #define INTEL_BRC_CQP    3
 
+#define VP9_PAK_UNCOMPRESSED_INPUT_BUFFER_SIZE       4096
+#define VP9_PAK_UNCOMPRESSED_INPUT_HEADER_SIZE       \
+	(VP9_PAK_UNCOMPRESSED_INPUT_BUFFER_SIZE - 4 * sizeof(unsigned int))
+
+
 typedef enum _VP9_MEDIA_STATE_TYPE {
 	VP9_MEDIA_STATE_ENC_I_FRAME_DIST        = 0,
 	VP9_MEDIA_STATE_32X_SCALING                ,

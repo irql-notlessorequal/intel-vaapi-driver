@@ -194,13 +194,14 @@ i965_media_pipeline_setup(VADriverContextP ctx,
 	intel_batchbuffer_end_atomic(batch);
 }
 
-static void
+static VAStatus
 i965_media_decode_init(VADriverContextP ctx,
 					   VAProfile profile,
 					   struct decode_state *decode_state,
 					   struct i965_media_context *media_context)
 {
 	int i;
+	VAStatus vaStatus = VA_STATUS_SUCCESS;
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
 	dri_bo *bo;
 
@@ -254,13 +255,15 @@ i965_media_decode_init(VADriverContextP ctx,
 	case VAProfileH264ConstrainedBaseline:
 	case VAProfileH264Main:
 	case VAProfileH264High:
-		i965_media_h264_decode_init(ctx, decode_state, media_context);
+		vaStatus = i965_media_h264_decode_init(ctx, decode_state, media_context);
 		break;
 
 	default:
 		assert(0);
 		break;
 	}
+
+	return vaStatus;
 }
 
 static VAStatus
@@ -274,11 +277,13 @@ i965_media_decode_picture(VADriverContextP ctx,
 	VAStatus vaStatus;
 
 	vaStatus = intel_decoder_sanity_check_input(ctx, profile, decode_state);
-
 	if (vaStatus != VA_STATUS_SUCCESS)
 		goto out;
 
-	i965_media_decode_init(ctx, profile, decode_state, media_context);
+	vaStatus = i965_media_decode_init(ctx, profile, decode_state, media_context);
+	if (vaStatus != VA_STATUS_SUCCESS)
+		goto out;
+
 	assert(media_context->media_states_setup);
 	media_context->media_states_setup(ctx, decode_state, media_context);
 	i965_media_pipeline_setup(ctx, decode_state, media_context);

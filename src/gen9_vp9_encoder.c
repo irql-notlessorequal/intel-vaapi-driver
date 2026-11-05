@@ -40,6 +40,7 @@
 #include "i965_defines.h"
 #include "i965_drv_video.h"
 #include "i965_encoder.h"
+#include "i965_encoder_utils.h"
 #include "gen9_vp9_encapi.h"
 #include "gen9_vp9_encoder.h"
 #include "gen9_vp9_encoder_kernels.h"
@@ -744,11 +745,10 @@ gen9_vp9_allocate_resources(VADriverContextP ctx,
 	if (!allocate_flag)
 		goto failed_allocation;
 
-	res_size = 128;
 	i965_free_gpe_resource(&vme_context->res_pak_uncompressed_input_buffer);
 	allocate_flag = i965_allocate_gpe_resource(i965->intel.bufmgr,
 											   &vme_context->res_pak_uncompressed_input_buffer,
-											   ALIGN(res_size, 4096),
+											   VP9_PAK_UNCOMPRESSED_INPUT_BUFFER_SIZE,
 											   "VP9 pak_uncompressed_input");
 	if (!allocate_flag)
 		goto failed_allocation;
@@ -3895,10 +3895,16 @@ gen9_vme_gpe_kernel_prepare_vp9(VADriverContextP ctx,
 		if (param->type == VAEncPackedHeaderRawData) {
 			char *header_data;
 			unsigned int length_in_bits;
+			unsigned int header_size;
 
 			header_data = (char *)encode_state->packed_header_data_ext[0]->buffer;
 			length_in_bits = param->bit_length;
 			driver_header_flag = 0;
+
+			header_size = intel_encoder_packed_header_size(encode_state->packed_header_data_ext[0],
+								       					   length_in_bits);
+			if (!header_size || header_size > VP9_PAK_UNCOMPRESSED_INPUT_HEADER_SIZE)
+				return VA_STATUS_ERROR_INVALID_PARAMETER;
 
 			vp9_state->frame_header.bit_offset_first_partition_size =
 				pic_param->bit_offset_first_partition_size;

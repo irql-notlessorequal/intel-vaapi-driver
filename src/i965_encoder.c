@@ -480,6 +480,9 @@ intel_encoder_check_brc_hevc_sequence_parameter(VADriverContextP ctx,
 		gop_size = 1;
 		num_pframes_in_gop = 0;
 	} else {
+		if (seq_param->ip_period == 0)
+			return VA_STATUS_ERROR_INVALID_PARAMETER;
+
 		gop_size = seq_param->intra_period;
 		num_pframes_in_gop = (seq_param->intra_period + seq_param->ip_period - 1) / seq_param->ip_period - 1;
 	}

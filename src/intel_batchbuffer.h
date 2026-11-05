@@ -74,7 +74,6 @@ void intel_batchbuffer_start_atomic_bcs_override(struct intel_batchbuffer *batch
 	} while (0)
 
 #define __OUT_RELOC(batch, bo, read_domains, write_domain, delta) do {  \
-		assert((delta) >= 0);                                           \
 		intel_batchbuffer_emit_reloc(batch, bo,                         \
 									 read_domains, write_domain,        \
 									 delta);                            \

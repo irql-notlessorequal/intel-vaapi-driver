@@ -1539,6 +1539,7 @@ gen9_gpe_context_8bit_420_rgb32_scaling_curbe(VADriverContextP ctx,
 		break;
 
 	case VA_FOURCC_BGRA:
+	case VA_FOURCC_ARGB:
 		dst_format = DST_FORMAT_BGRA;
 		break;
 

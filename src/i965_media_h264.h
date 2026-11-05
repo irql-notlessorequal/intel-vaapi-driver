@@ -9,6 +9,8 @@
 struct decode_state;
 struct i965_media_context;
 
+#define AVC_MAX_FRAME_MBS  0x7fff
+
 #define INST_UNIT_GEN4  16
 #define INST_UNIT_GEN5  8
 
@@ -67,7 +69,10 @@ struct i965_h264_context {
 	struct intel_batchbuffer *batch;
 };
 
-void i965_media_h264_decode_init(VADriverContextP ctx, struct decode_state *decode_state, struct i965_media_context *media_context);
+VAStatus i965_media_h264_decode_init(VADriverContextP ctx,
+									 struct decode_state *decode_state,
+									 struct i965_media_context *media_context);
+
 void i965_media_h264_dec_context_init(VADriverContextP ctx, struct i965_media_context *media_context);
 
 #endif /* _I965_MEDIA_H264_H_ */
