@@ -9,4 +9,6 @@ option('with_wayland_drm',
 )
 option('enable_hybrid_codec', type : 'boolean', value : false,
     description: 'Enables support for loading the separate hybrid codec driver.')
+option('enable_gen10_support', type : 'boolean', value : false,
+    description: 'Enables support for never-released Cannonlake (Gen10) graphics')
 option('enable_tests', type : 'boolean', value : false)
