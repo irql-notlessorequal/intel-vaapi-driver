@@ -3303,7 +3303,6 @@ i965_create_buffer_internal(VADriverContextP ctx,
 	struct object_buffer *obj_buffer = NULL;
 	struct buffer_store *buffer_store = NULL;
 	int bufferID;
-	VAStatus vaStatus = VA_STATUS_ERROR_UNKNOWN;
 	struct object_context *obj_context = CONTEXT(context);
 	int wrapper_flag = 0;
 
@@ -3373,13 +3372,17 @@ i965_create_buffer_internal(VADriverContextP ctx,
 	obj_buffer->context_id = context;
 
 	buffer_store = calloc(1, sizeof(struct buffer_store));
-	assert(buffer_store);
+	if (unlikely(!buffer_store)) {
+		object_heap_free(&i965->buffer_heap, &obj_buffer->base);
+		return VA_STATUS_ERROR_ALLOCATION_FAILED;
+	}
 	buffer_store->ref_count = 1;
 
 	if (obj_context &&
 		(obj_context->wrapper_context != VA_INVALID_ID) &&
 		i965->wrapper_pdrvctx) {
 		VAGenericID wrapper_buffer;
+		VAStatus vaStatus = VA_STATUS_ERROR_UNKNOWN;
 		VADriverContextP pdrvctx = i965->wrapper_pdrvctx;
 
 		CALL_VTABLE(pdrvctx, vaStatus,
@@ -3389,6 +3392,7 @@ i965_create_buffer_internal(VADriverContextP ctx,
 			obj_buffer->wrapper_buffer = wrapper_buffer;
 		} else {
 			free(buffer_store);
+			object_heap_free(&i965->buffer_heap, &obj_buffer->base);
 			return vaStatus;
 		}
 		wrapper_flag = 1;
@@ -3402,6 +3406,7 @@ i965_create_buffer_internal(VADriverContextP ctx,
 		if (data && !wrapper_flag) {
 			int ret = dri_bo_subdata(buffer_store->bo, 0, size * num_elements, data);
 			if (ret != 0) {
+				i965_release_buffer_store(&buffer_store);
 				goto error;
 			}
 		}
@@ -3432,7 +3437,11 @@ i965_create_buffer_internal(VADriverContextP ctx,
 			buffer_store->bo = dri_bo_alloc(i965->intel.bufmgr,
 											"Buffer",
 											size * num_elements, 64);
-		assert(buffer_store->bo);
+		if (unlikely(!buffer_store->bo)) {
+			free(buffer_store);
+			buffer_store = NULL;
+			goto error;
+		}
 
 		/* If the buffer is wrapped, the bo/buffer of buffer_store is bogus.
 		 * In fact it can be skipped. But it is still allocated and it is
@@ -3456,6 +3465,7 @@ i965_create_buffer_internal(VADriverContextP ctx,
 			} else if (data) {
 				int ret = dri_bo_subdata(buffer_store->bo, 0, size * num_elements, data);
 				if (ret != 0) {
+					i965_release_buffer_store(&buffer_store);
 					goto error;
 				}
 			}
@@ -3473,7 +3483,12 @@ i965_create_buffer_internal(VADriverContextP ctx,
 			buffer_store->buffer = malloc(4);
 		else
 			buffer_store->buffer = malloc(msize * num_elements);
-		assert(buffer_store->buffer);
+		
+		if (unlikely(!buffer_store->buffer)) {
+			free(buffer_store);
+			buffer_store = NULL;
+			goto error;
+		}
 
 		if (!wrapper_flag) {
 			if (data)
@@ -3492,11 +3507,16 @@ i965_create_buffer_internal(VADriverContextP ctx,
 
 error:
 	/*
-	 * buffer_store is still local, not attached to obj_buffer.
-	 * Release its BO reference and the store itself.
-	 * object_heap_free only returns the reserved slot to the free list.
+	 * If a wrapper buffer was created, destroy it before freeing the
+	 * reserved heap slot.
 	 */
-	i965_release_buffer_store(&buffer_store);
+	if (obj_buffer->wrapper_buffer != VA_INVALID_ID &&
+		i965->wrapper_pdrvctx) {
+		i965->wrapper_pdrvctx->vtable->vaDestroyBuffer(i965->wrapper_pdrvctx,
+								obj_buffer->wrapper_buffer);
+		obj_buffer->wrapper_buffer = VA_INVALID_ID;
+	}
+
 	object_heap_free(&i965->buffer_heap, &obj_buffer->base);
 	return VA_STATUS_ERROR_OPERATION_FAILED;
 }
