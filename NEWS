@@ -3,6 +3,13 @@ Copyright (C) 2009-2023 Intel Corporation
 
 Version 2.4.6 - XX.XX.XXXX (IRQL fork)
 
+* Disabled Gen 10 (Cannon Lake) support by default.
+
+    The graphics hardware was never released and all support
+    for it in Mesa and Linux was removed between 2020 and 2021.
+
+    A build time option remains if someone for some reason needs it.
+
 * Add support for VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2 in vaCreateSurfaces.
 * Fully fix video decoding on Ironlake and Sandy Bridge in Chromium
 

@@ -2474,6 +2474,7 @@ gen9_vebox_process_picture(VADriverContextP ctx,
 	return status;
 }
 
+#if defined(ENABLE_GEN10_SUPPORT)
 void
 cnl_veb_state_command(VADriverContextP ctx, struct intel_vebox_context *proc_ctx)
 {
@@ -2731,3 +2732,4 @@ gen10_vebox_process_picture(VADriverContextP ctx, struct intel_vebox_context *pr
 
 	return status;
 }
+#endif

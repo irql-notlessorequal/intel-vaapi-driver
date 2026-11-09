@@ -52,10 +52,12 @@ gen9_hevc_vme_context_init(VADriverContextP ctx, struct intel_encoder_context *e
 extern Bool
 gen9_hevc_pak_context_init(VADriverContextP ctx, struct intel_encoder_context *encoder_context);
 
+#if defined(ENABLE_GEN10_SUPPORT)
 extern Bool
 gen10_hevc_vme_context_init(VADriverContextP ctx, struct intel_encoder_context *encoder_context);
 
 extern Bool
 gen10_hevc_pak_context_init(VADriverContextP ctx, struct intel_encoder_context *encoder_context);
+#endif
 
 #endif  // _I965_ENCODER_API_H_
