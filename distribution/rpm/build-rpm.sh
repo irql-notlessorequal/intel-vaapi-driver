@@ -15,7 +15,7 @@ cd "$src"
 # dnf provides "pkgconfig(egl)" "pkgconfig(libdrm)" "pkgconfig(libva)" "pkgconfig(libva-drm)" "pkgconfig(libva-wayland)" "pkgconfig(libva-x11)" "pkgconfig(wayland-client)" "pkgconfig(wayland-scanner)"
 echo 'Installing build dependencies...'
 sudo dnf install gcc meson rpm-build jq \
-  libglvnd-devel libdrm-devel libva-devel wayland-devel
+  libappstream-glib libglvnd-devel libdrm-devel libva-devel wayland-devel
 
 declare -r version="${1:-"$(latest_version)"}"
 echo "Building rpm for version $version..."
