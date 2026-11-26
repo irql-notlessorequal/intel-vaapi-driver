@@ -48,24 +48,6 @@
 #define log2f(x) (logf(x)/(float)M_LN2)
 #endif
 
-int intel_avc_enc_slice_type_fixup(int slice_type)
-{
-	if (slice_type == SLICE_TYPE_SP ||
-		slice_type == SLICE_TYPE_P)
-		slice_type = SLICE_TYPE_P;
-	else if (slice_type == SLICE_TYPE_SI ||
-			 slice_type == SLICE_TYPE_I)
-		slice_type = SLICE_TYPE_I;
-	else {
-		if (slice_type != SLICE_TYPE_B)
-			WARN_ONCE("Invalid slice type for H.264 encoding!\n");
-
-		slice_type = SLICE_TYPE_B;
-	}
-
-	return slice_type;
-}
-
 static void
 intel_mfc_bit_rate_control_context_init(struct encode_state *encode_state,
 										struct intel_encoder_context *encoder_context)

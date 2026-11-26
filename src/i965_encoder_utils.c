@@ -33,6 +33,7 @@
 #include <va/va_enc_hevc.h>
 #include <math.h>
 #include "gen6_mfc.h"
+#include "i965_defines.h"
 #include "i965_encoder_utils.h"
 
 #define BITSTREAM_ALLOCATE_STEPPING     4096
@@ -48,13 +49,27 @@
 #define NAL_PPS                 8
 #define NAL_SEI                 6
 
-#define SLICE_TYPE_P            0
-#define SLICE_TYPE_B            1
-#define SLICE_TYPE_I            2
-
 #define IS_I_SLICE(type) (SLICE_TYPE_I == (type) || SLICE_TYPE_I == (type - 5))
 #define IS_P_SLICE(type) (SLICE_TYPE_P == (type) || SLICE_TYPE_P == (type - 5))
 #define IS_B_SLICE(type) (SLICE_TYPE_B == (type) || SLICE_TYPE_B == (type - 5))
+
+int intel_avc_enc_slice_type_fixup(int slice_type)
+{
+	if (slice_type == SLICE_TYPE_SP ||
+		slice_type == SLICE_TYPE_P)
+		slice_type = SLICE_TYPE_P;
+	else if (slice_type == SLICE_TYPE_SI ||
+			 slice_type == SLICE_TYPE_I)
+		slice_type = SLICE_TYPE_I;
+	else {
+		if (slice_type != SLICE_TYPE_B)
+			WARN_ONCE("Invalid slice type for H.264 encoding!\n");
+
+		slice_type = SLICE_TYPE_B;
+	}
+
+	return slice_type;
+}
 
 #define ENTROPY_MODE_CAVLC      0
 #define ENTROPY_MODE_CABAC      1

@@ -10,8 +10,9 @@ AM_CPPFLAGS =								\
 	-DGTEST_LANG_CXX11=1						\
 	-DGTEST_HAS_TR1_TUPLE=1						\
 	-DPTHREADS							\
-	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH)\""			\
+	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH)\""	\
 	-DTEST_VA_DRIVERS_PATH="\"$(abs_top_builddir)/src/.libs\""	\
+	$(GEN_SUPPORT_CPPFLAGS)					\
 	-std=c++11							\
 	$(NULL)
 

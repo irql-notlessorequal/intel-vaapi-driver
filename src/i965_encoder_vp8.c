@@ -5154,19 +5154,28 @@ i965_encoder_vp8_vme_kernels_context_init(VADriverContextP ctx,
 	return True;
 }
 
+#if defined(ENABLE_GEN8_BDW_SUPPORT) || defined(ENABLE_GEN8_LP_SUPPORT)
 extern Bool
 gen8_encoder_vp8_context_init(VADriverContextP, struct intel_encoder_context *, struct i965_encoder_vp8_context *);
+#endif
 
+#if defined(ENABLE_GEN9_SUPPORT)
 extern Bool
 gen9_encoder_vp8_context_init(VADriverContextP, struct intel_encoder_context *, struct i965_encoder_vp8_context *);
+#endif
 
+#if defined(ENABLE_GEN10_SUPPORT)
 extern Bool
 gen10_encoder_vp8_context_init(VADriverContextP, struct intel_encoder_context *, struct i965_encoder_vp8_context *);
+#endif
 
 Bool
 i965_encoder_vp8_vme_context_init(VADriverContextP ctx, struct intel_encoder_context *encoder_context)
 {
+#if defined(ENABLE_GEN8_BDW_SUPPORT) || defined(ENABLE_GEN8_LP_SUPPORT) || \
+	defined(ENABLE_GEN9_SUPPORT) || defined(ENABLE_GEN10_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 	struct i965_encoder_vp8_context *vp8_context = NULL;
 
 	vp8_context = calloc(1, sizeof(struct i965_encoder_vp8_context));
@@ -5176,13 +5185,22 @@ i965_encoder_vp8_vme_context_init(VADriverContextP ctx, struct intel_encoder_con
 
 	i965_encoder_vp8_vme_var_init(ctx, encoder_context, vp8_context);
 
-	if (IS_CHERRYVIEW(i965->intel.device_info))
+#if defined(ENABLE_GEN8_BDW_SUPPORT) || defined(ENABLE_GEN8_LP_SUPPORT)
+	if (IS_CHERRYVIEW(i965->intel.device_info)) {
 		gen8_encoder_vp8_context_init(ctx, encoder_context, vp8_context);
-	else if (IS_GEN9(i965->intel.device_info)) {
+	} else
+#endif
+#if defined(ENABLE_GEN9_SUPPORT)
+	if (IS_GEN9(i965->intel.device_info)) {
 		gen9_encoder_vp8_context_init(ctx, encoder_context, vp8_context);
-	} else if (IS_GEN10(i965->intel.device_info)) {
+	} else
+#endif
+#if defined(ENABLE_GEN10_SUPPORT)
+	if (IS_GEN10(i965->intel.device_info)) {
 		gen10_encoder_vp8_context_init(ctx, encoder_context, vp8_context);
-	} else {
+	} else
+#endif
+	{
 		free(vp8_context);
 
 		return False;

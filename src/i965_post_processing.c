@@ -5379,6 +5379,7 @@ static struct object_surface *derive_surface(VADriverContextP ctx,
 	return obj_surface;
 }
 
+#if defined(ENABLE_GEN75_SUPPORT)
 static VAStatus
 vebox_processing_simple(VADriverContextP ctx,
 						struct i965_post_processing_context *pp_context,
@@ -5386,7 +5387,9 @@ vebox_processing_simple(VADriverContextP ctx,
 						struct object_surface *dst_obj_surface,
 						const VARectangle *rect)
 {
+#if defined(ENABLE_GEN9_SUPPORT) || defined(ENABLE_GEN10_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 	VAProcPipelineParameterBuffer pipeline_param;
 	VAStatus status = VA_STATUS_ERROR_UNIMPLEMENTED;
 
@@ -5406,11 +5409,14 @@ vebox_processing_simple(VADriverContextP ctx,
 
 	if (IS_GEN9(i965->intel.device_info))
 		status = gen9_vebox_process_picture(ctx, pp_context->vebox_proc_ctx);
+#if defined(ENABLE_GEN10_SUPPORT)
 	else if (IS_GEN10(i965->intel.device_info))
 		status = gen10_vebox_process_picture(ctx, pp_context->vebox_proc_ctx);
+#endif
 
 	return status;
 }
+#endif
 
 static VAStatus
 i965_image_p010_processing(VADriverContextP ctx,
@@ -5509,11 +5515,15 @@ i965_image_p010_processing(VADriverContextP ctx,
 			goto EXIT;
 		}
 
+#if defined(ENABLE_GEN75_SUPPORT)
 		vaStatus = vebox_processing_simple(ctx,
 										   pp_context,
 										   src_obj_surface,
 										   dst_obj_surface,
 										   src_rect);
+#else
+		vaStatus = VA_STATUS_ERROR_UNIMPLEMENTED;
+#endif
 		if (vaStatus != VA_STATUS_SUCCESS)
 			goto EXIT;
 

@@ -735,6 +735,7 @@ gen8_mfc_pipe_buf_addr_state(VADriverContextP ctx,
 	ADVANCE_BCS_BATCH(batch);
 }
 
+#if defined(ENABLE_GEN10_SUPPORT)
 static void
 gen10_mfc_pipe_buf_addr_state(VADriverContextP ctx,
 							  struct intel_encoder_context *encoder_context)
@@ -846,6 +847,7 @@ gen10_mfc_pipe_buf_addr_state(VADriverContextP ctx,
 
 	ADVANCE_BCS_BATCH(batch);
 }
+#endif
 
 static void
 gen8_mfc_avc_directmode_state(VADriverContextP ctx,
@@ -1717,7 +1719,9 @@ gen8_mfc_avc_batchbuffer_pipeline(VADriverContextP ctx,
 								  struct encode_state *encode_state,
 								  struct intel_encoder_context *encoder_context)
 {
+#if defined(ENABLE_GEN9_SUPPORT) || defined(ENABLE_GEN10_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 	struct gen6_mfc_context *mfc_context = encoder_context->mfc_context;
 	struct intel_batchbuffer *batch = encoder_context->base.batch;
 	int i;
@@ -4204,6 +4208,7 @@ gen8_mfc_vp8_bsp_buf_base_addr_state(VADriverContextP ctx,
 
 #define ENCODE_INPUT_SOURCE     4
 
+#if defined(ENABLE_GEN10_SUPPORT)
 static void
 gen10_vp8_mfc_input_surface(VADriverContextP ctx, struct intel_encoder_context *encoder_context)
 {
@@ -4232,6 +4237,7 @@ gen10_vp8_mfc_input_surface(VADriverContextP ctx, struct intel_encoder_context *
 
 	ADVANCE_BCS_BATCH(batch);
 }
+#endif
 
 static void
 gen8_mfc_vp8_pipeline_picture_programing(VADriverContextP ctx,
@@ -4239,19 +4245,25 @@ gen8_mfc_vp8_pipeline_picture_programing(VADriverContextP ctx,
 										 struct intel_encoder_context *encoder_context)
 {
 	struct gen6_mfc_context *mfc_context = encoder_context->mfc_context;
+#if defined(ENABLE_GEN10_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 
 	mfc_context->pipe_mode_select(ctx, MFX_FORMAT_VP8, encoder_context);
 	mfc_context->set_surface_state(ctx, encoder_context);
 
+#if defined(ENABLE_GEN10_SUPPORT)
 	if (IS_GEN10(i965->intel.device_info))
 		gen10_vp8_mfc_input_surface(ctx, encoder_context);
+#endif
 
 	mfc_context->ind_obj_base_addr_state(ctx, encoder_context);
 
+#if defined(ENABLE_GEN10_SUPPORT)
 	if (IS_GEN10(i965->intel.device_info))
 		gen10_mfc_pipe_buf_addr_state(ctx, encoder_context);
 	else
+#endif
 		gen8_mfc_pipe_buf_addr_state(ctx, encoder_context);
 
 	gen8_mfc_bsp_buf_base_addr_state(ctx, encoder_context);

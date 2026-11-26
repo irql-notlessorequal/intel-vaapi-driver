@@ -62,6 +62,49 @@ endif
 va_driver_init_func = '__vaDriverInit_@0@_@1@'.format(va_api_major_version,
                                                       va_api_minor_version)
 
+gen6_enabled = true
+gen7_enabled = true
+gen75_enabled = true
+gen8_bdw_enabled = true
+gen8_lp_enabled = true
+gen9_enabled = true
+gen10_enabled = false
+
+generation_preset = get_option('generations')
+if generation_preset == 'all'
+  gen10_enabled = true
+elif generation_preset == 'enforced'
+  gen8_bdw_enabled = false
+  gen9_enabled = false
+  gen10_enabled = false
+elif generation_preset == 'custom'
+  gen6_enabled = get_option('enable_gen6')
+  gen7_enabled = get_option('enable_gen7')
+  gen75_enabled = get_option('enable_gen75')
+  gen8_bdw_enabled = get_option('enable_gen8_bdw')
+  gen8_lp_enabled = get_option('enable_gen8_lp')
+  gen9_enabled = get_option('enable_gen9')
+  gen10_enabled = get_option('enable_gen10')
+elif generation_preset != 'default'
+  error('Invalid generations preset: @0@'.format(generation_preset))
+endif
+
+if gen7_enabled and not gen6_enabled
+  error('Gen7 support requires Gen6 support')
+endif
+if gen75_enabled and not gen7_enabled
+  error('Gen7.5 support requires Gen7 support')
+endif
+if (gen8_bdw_enabled or gen8_lp_enabled) and not gen75_enabled
+  error('Gen8 support requires Gen7.5 support')
+endif
+if gen9_enabled and not (gen8_bdw_enabled or gen8_lp_enabled)
+  error('Gen9 support requires Gen8 support')
+endif
+if gen10_enabled and not gen9_enabled
+  error('Gen10 support requires Gen9 support')
+endif
+
 WITH_X11 = false
 if get_option('with_x11') != 'no'
   libva_x11_dep = dependency(

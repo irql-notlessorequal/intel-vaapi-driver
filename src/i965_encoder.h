@@ -138,14 +138,20 @@ struct intel_encoder_context {
 						  struct i965_coded_buffer_segment *coded_buffer_segment);
 };
 
+#if defined(ENABLE_GEN75_SUPPORT)
 extern struct hw_context *
 gen75_enc_hw_context_init(VADriverContextP ctx, struct object_config *obj_config);
+#endif
 
+#if defined(ENABLE_GEN8_BDW_SUPPORT) || defined(ENABLE_GEN8_LP_SUPPORT)
 extern struct hw_context *
 gen8_enc_hw_context_init(VADriverContextP ctx, struct object_config *obj_config);
+#endif
 
+#if defined(ENABLE_GEN9_SUPPORT)
 extern struct hw_context *
 gen9_enc_hw_context_init(VADriverContextP ctx, struct object_config *obj_config);
+#endif
 #endif  /* _I965_ENCODER_H_ */
 
 

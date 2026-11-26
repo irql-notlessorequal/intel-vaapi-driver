@@ -10,3 +10,21 @@ option('with_wayland_drm',
 option('enable_hybrid_codec', type : 'boolean', value : false,
     description: 'Enables support for loading the separate hybrid codec driver.')
 option('enable_tests', type : 'boolean', value : false)
+option('generations', type : 'combo',
+    choices : ['default', 'all', 'enforced', 'custom'],
+    value : 'default',
+    description : 'Hardware generation preset to use at compile-time')
+option('enable_gen6', type : 'boolean', value : true,
+    description : 'Build Gen6 support (only used with generations=custom)')
+option('enable_gen7', type : 'boolean', value : true,
+    description : 'Build Gen7 support (only used with generations=custom)')
+option('enable_gen75', type : 'boolean', value : true,
+    description : 'Build Gen7.5 support (only used with generations=custom)')
+option('enable_gen8_bdw', type : 'boolean', value : true,
+    description : 'Build Broadwell support (only used with generations=custom)')
+option('enable_gen8_lp', type : 'boolean', value : true,
+    description : 'Build Cherryview/Braswell support (only used with generations=custom)')
+option('enable_gen9', type : 'boolean', value : true,
+    description : 'Build Gen9 support (only used with generations=custom)')
+option('enable_gen10', type : 'boolean', value : false,
+    description : 'Build Gen10 (Cannon Lake) support (only used with generations=custom)')

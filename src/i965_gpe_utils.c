@@ -733,7 +733,9 @@ gen8_gpe_set_surface2_state(VADriverContextP ctx,
 							struct object_surface *obj_surface,
 							struct gen8_surface_state2 *ss)
 {
+#if defined(ENABLE_GEN9_SUPPORT) || defined(ENABLE_GEN10_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 	int w, h, w_pitch;
 	unsigned int tiling, swizzle;
 
@@ -800,7 +802,9 @@ gen8_gpe_set_media_rw_surface_state(VADriverContextP ctx,
 									struct object_surface *obj_surface,
 									struct gen8_surface_state *ss)
 {
+#if defined(ENABLE_GEN9_SUPPORT) || defined(ENABLE_GEN10_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 	int w, h, w_pitch;
 	unsigned int tiling, swizzle;
 
@@ -833,7 +837,9 @@ gen8_gpe_set_media_chroma_surface_state(VADriverContextP ctx,
 										struct object_surface *obj_surface,
 										struct gen8_surface_state *ss)
 {
+#if defined(ENABLE_GEN9_SUPPORT) || defined(ENABLE_GEN10_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 	int w, w_pitch;
 	unsigned int tiling, swizzle;
 	int cbcr_offset;
@@ -928,7 +934,9 @@ gen8_gpe_set_buffer_surface_state(VADriverContextP ctx,
 								  struct i965_buffer_surface *buffer_surface,
 								  struct gen8_surface_state *ss)
 {
+#if defined(ENABLE_GEN9_SUPPORT) || defined(ENABLE_GEN10_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 	int num_entries;
 
 	assert(buffer_surface->bo);

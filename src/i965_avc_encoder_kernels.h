@@ -42,7 +42,9 @@ extern const unsigned int kbl_avc_encoder_kernels[AVC_ENC_KBL_SZ];
 #define AVC_ENC_BDW_SZ 96428
 extern const unsigned int bdw_avc_encoder_kernels[AVC_ENC_BDW_SZ];
 
+#if defined(ENABLE_GEN10_SUPPORT)
 #define AVC_ENC_CNL_SZ 101330
 extern const unsigned int cnl_avc_encoder_kernels[AVC_ENC_CNL_SZ];
+#endif
 
 #endif//_I965_AVC_ENCODER_KERNELS_H
