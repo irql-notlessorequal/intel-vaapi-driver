@@ -61,6 +61,7 @@ and then bump the version to `2.5.x` where only fixes for regressions and critic
 ```
 MIT License
 
+Copyright (c) IRQL_NOT_LESS_OR_EQUAL
 Copyright (c) 2023 Intel Corporation
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

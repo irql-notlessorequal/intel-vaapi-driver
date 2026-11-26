@@ -1,4 +1,5 @@
-intel-vaapi-driver NEWS -- summary of changes.  2020-06-01
+intel-vaapi-driver NEWS -- summary of changes.
+Copyright (C) IRQL_NOT_LESS_OR_EQUAL
 Copyright (C) 2009-2023 Intel Corporation
 
 Version 2.4.6 - XX.XX.XXXX (IRQL fork)
