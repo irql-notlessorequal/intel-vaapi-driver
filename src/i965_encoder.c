@@ -822,7 +822,9 @@ intel_encoder_check_misc_parameter(VADriverContextP ctx,
 								   struct encode_state *encode_state,
 								   struct intel_encoder_context *encoder_context)
 {
+#if defined(ENABLE_GEN9_SUPPORT) || defined(ENABLE_GEN10_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 	VAStatus ret = VA_STATUS_SUCCESS;
 	int min_width_height = I965_MIN_CODEC_ENC_RESOLUTION_WIDTH_HEIGHT;
 
@@ -1557,7 +1559,9 @@ intel_enc_hw_context_init(VADriverContextP ctx,
 						  hw_init_func vme_context_init,
 						  hw_init_func mfc_context_init)
 {
+#if defined(ENABLE_GEN9_SUPPORT) || defined(ENABLE_GEN10_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 	struct intel_driver_data *intel = intel_driver_data(ctx);
 	struct intel_encoder_context *encoder_context = calloc(1, sizeof(struct intel_encoder_context));
 	int i;
@@ -1698,33 +1702,43 @@ intel_enc_hw_context_init(VADriverContextP ctx,
 	return (struct hw_context *)encoder_context;
 }
 
+#if defined(ENABLE_GEN6_SUPPORT)
 struct hw_context *
 gen6_enc_hw_context_init(VADriverContextP ctx, struct object_config *obj_config)
 {
 	return intel_enc_hw_context_init(ctx, obj_config, gen6_vme_context_init, gen6_mfc_context_init);
 }
+#endif
 
+#if defined(ENABLE_GEN7_SUPPORT)
 struct hw_context *
 gen7_enc_hw_context_init(VADriverContextP ctx, struct object_config *obj_config)
 {
 
 	return intel_enc_hw_context_init(ctx, obj_config, gen7_vme_context_init, gen7_mfc_context_init);
 }
+#endif
 
+#if defined(ENABLE_GEN75_SUPPORT)
 struct hw_context *
 gen75_enc_hw_context_init(VADriverContextP ctx, struct object_config *obj_config)
 {
 	return intel_enc_hw_context_init(ctx, obj_config, gen75_vme_context_init, gen75_mfc_context_init);
 }
+#endif
 
+#if defined(ENABLE_GEN8_BDW_SUPPORT) || defined(ENABLE_GEN8_LP_SUPPORT)
 struct hw_context *
 gen8_enc_hw_context_init(VADriverContextP ctx, struct object_config *obj_config)
 {
 	return intel_enc_hw_context_init(ctx, obj_config, gen8_vme_context_init, gen8_mfc_context_init);
 }
+#endif
 
+#if defined(ENABLE_GEN9_SUPPORT)
 struct hw_context *
 gen9_enc_hw_context_init(VADriverContextP ctx, struct object_config *obj_config)
 {
 	return intel_enc_hw_context_init(ctx, obj_config, gen9_vme_context_init, gen9_mfc_context_init);
 }
+#endif

@@ -126,6 +126,7 @@ static struct hw_codec_info ilk_hw_codec_info = {
 	.num_filters = 0,
 };
 
+#if defined(ENABLE_GEN6_SUPPORT)
 static void gen6_hw_codec_preinit(VADriverContextP ctx, struct hw_codec_info *codec_info);
 
 extern void gen6_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
@@ -176,7 +177,9 @@ static struct hw_codec_info snb_hw_codec_info = {
 		{VAProcFilterDeinterlacing, I965_RING_NULL},
 	},
 };
+#endif
 
+#if defined(ENABLE_GEN7_SUPPORT)
 static void gen7_hw_codec_preinit(VADriverContextP ctx, struct hw_codec_info *codec_info);
 
 extern void gen7_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
@@ -233,6 +236,9 @@ static struct hw_codec_info ivb_hw_codec_info = {
 	},
 };
 
+#endif
+
+#if defined(ENABLE_GEN75_SUPPORT)
 static void hsw_hw_codec_preinit(VADriverContextP ctx, struct hw_codec_info *codec_info);
 
 extern struct hw_context *gen75_dec_hw_context_init(VADriverContextP, struct object_config *);
@@ -291,7 +297,9 @@ static struct hw_codec_info hsw_hw_codec_info = {
 		{VAProcFilterSkinToneEnhancement, I965_RING_VEBOX},
 	},
 };
+#endif
 
+#if defined(ENABLE_GEN8_BDW_SUPPORT) || defined(ENABLE_GEN8_LP_SUPPORT)
 extern struct hw_context *gen8_dec_hw_context_init(VADriverContextP, struct object_config *);
 extern struct hw_context *gen8_enc_hw_context_init(VADriverContextP, struct object_config *);
 extern void gen8_post_processing_context_init(VADriverContextP, void *, struct intel_batchbuffer *);
@@ -299,6 +307,7 @@ extern void gen8_post_processing_context_init(VADriverContextP, void *, struct i
 extern void gen8_get_hw_formats(VADriverContextP ctx, struct object_config *obj_config,
 	struct i965_driver_data* data, int *i, VASurfaceAttrib *attribs);
 
+#if defined(ENABLE_GEN8_BDW_SUPPORT)
 static struct hw_codec_info bdw_hw_codec_info = {
 	.dec_hw_context_init = gen8_dec_hw_context_init,
 	.enc_hw_context_init = gen8_enc_hw_context_init,
@@ -352,11 +361,19 @@ static struct hw_codec_info bdw_hw_codec_info = {
 		{VAProcFilterSkinToneEnhancement, I965_RING_VEBOX},
 	},
 };
+#endif
 
+#if defined(ENABLE_GEN9_SUPPORT)
 extern struct hw_context *gen9_dec_hw_context_init(VADriverContextP, struct object_config *);
+#endif
 
+#if defined(ENABLE_GEN8_LP_SUPPORT)
 static struct hw_codec_info chv_hw_codec_info = {
+#if defined(ENABLE_GEN9_SUPPORT)
 	.dec_hw_context_init = gen9_dec_hw_context_init,
+#else
+	.dec_hw_context_init = gen8_dec_hw_context_init,
+#endif
 	.enc_hw_context_init = gen8_enc_hw_context_init,
 	.proc_hw_context_init = gen75_proc_context_init,
 	.render_init = gen8_render_init,
@@ -397,7 +414,9 @@ static struct hw_codec_info chv_hw_codec_info = {
 	.has_vp8_decoding = 1,
 	.has_vp8_encoding = 1,
 	.has_h264_mvc_encoding = 1,
+#if defined(ENABLE_GEN9_SUPPORT)
 	.has_hevc_decoding = 1,
+#endif
 
 	.supports_short_slice_dec = 1,
 
@@ -412,12 +431,15 @@ static struct hw_codec_info chv_hw_codec_info = {
 		{VAProcFilterSkinToneEnhancement, I965_RING_VEBOX},
 	},
 };
+#endif
 
+#if defined(ENABLE_GEN9_SUPPORT)
 static void gen9_hw_codec_preinit(VADriverContextP ctx, struct hw_codec_info *codec_info);
 
 extern struct hw_context *gen9_enc_hw_context_init(VADriverContextP, struct object_config *);
 extern void gen9_post_processing_context_init(VADriverContextP, void *, struct intel_batchbuffer *);
 extern void gen9_max_resolution(struct i965_driver_data *, struct object_config *, int *, int *);
+
 static struct hw_codec_info skl_hw_codec_info = {
 	.dec_hw_context_init = gen9_dec_hw_context_init,
 	.enc_hw_context_init = gen9_enc_hw_context_init,
@@ -778,6 +800,7 @@ static struct hw_codec_info cfl_hw_codec_info = {
 		{VAProcFilterSkinToneEnhancement, I965_RING_VEBOX},
 	},
 };
+#endif
 
 #if defined(ENABLE_GEN10_SUPPORT)
 static struct hw_codec_info cnl_hw_codec_info = {
@@ -853,6 +876,7 @@ static struct hw_codec_info cnl_hw_codec_info = {
 	},
 };
 #endif
+#endif
 
 struct hw_codec_info *
 i965_get_codec_info(int devid)
@@ -884,6 +908,7 @@ static const struct intel_device_info ilk_device_info = {
 	.driver_workarounds = HW_WORKAROUND_INVALID_RGBX_SHADER_USE
 };
 
+#if defined(ENABLE_GEN6_SUPPORT)
 static const struct intel_device_info snb_gt1_device_info = {
 	.gen = 6,
 	.gt = 1,
@@ -903,7 +928,9 @@ static const struct intel_device_info snb_gt2_device_info = {
 
 	.driver_workarounds = HW_WORKAROUND_INVALID_RGBX_SHADER_USE
 };
+#endif
 
+#if defined(ENABLE_GEN7_SUPPORT)
 static const struct intel_device_info ivb_gt1_device_info = {
 	.gen = 7,
 	.gt = 1,
@@ -934,7 +961,9 @@ static const struct intel_device_info byt_device_info = {
 	.is_ivybridge = 1,
 	.is_baytrail = 1,
 };
+#endif
 
+#if defined(ENABLE_GEN75_SUPPORT)
 static const struct intel_device_info hsw_gt1_device_info = {
 	.gen = 7,
 	.gt = 1,
@@ -964,14 +993,19 @@ static const struct intel_device_info hsw_gt3_device_info = {
 
 	.is_haswell = 1,
 };
+#endif
 
+#if defined(ENABLE_GEN8_BDW_SUPPORT) || defined(ENABLE_GEN8_LP_SUPPORT)
+#if defined(ENABLE_GEN8_BDW_SUPPORT)
 static const struct intel_device_info bdw_device_info = {
 	.gen = 8,
 
 	.urb_size = 4096,
 	.max_wm_threads = 64,       /* per PSD */
 };
+#endif
 
+#if defined(ENABLE_GEN8_LP_SUPPORT)
 static const struct intel_device_info chv_device_info = {
 	.gen = 8,
 
@@ -982,7 +1016,9 @@ static const struct intel_device_info chv_device_info = {
 
 	.is_cherryview = 1,
 };
+#endif
 
+#if defined(ENABLE_GEN9_SUPPORT)
 static const struct intel_device_info skl_device_info = {
 	.gen = 9,
 
@@ -1031,6 +1067,7 @@ static const struct intel_device_info cfl_device_info = {
 
 	.is_cfllake = 1,
 };
+#endif
 
 #if defined(ENABLE_GEN10_SUPPORT)
 static const struct intel_device_info cnl_device_info = {
@@ -1039,6 +1076,7 @@ static const struct intel_device_info cnl_device_info = {
 	.urb_size = 4096,
 	.max_wm_threads = 64,       /* per PSD */
 };
+#endif
 #endif
 
 const struct intel_device_info *
@@ -1093,6 +1131,7 @@ static int intel_driver_detect_cpustring(char *model_id)
  * the hook_list for HSW.
  * It is captured by /proc/cpuinfo and the space character is stripped.
  */
+#if defined(ENABLE_GEN75_SUPPORT)
 const static char *hsw_cpu_hook_list[] =  {
 	"Intel(R)Pentium(R)3556U",
 	"Intel(R)Pentium(R)3560Y",
@@ -1155,7 +1194,9 @@ static void hsw_hw_codec_preinit(VADriverContextP ctx, struct hw_codec_info *cod
 	}
 	return;
 }
+#endif
 
+#if defined(ENABLE_GEN6_SUPPORT)
 /*
  * the hook_list for Sandybride.
  * It is captured by /proc/cpuinfo and the space character is stripped.
@@ -1216,7 +1257,9 @@ static void gen6_hw_codec_preinit(VADriverContextP ctx, struct hw_codec_info *co
 	}
 	return;
 }
+#endif
 
+#if defined(ENABLE_GEN7_SUPPORT)
 /*
  * the hook_list for Ivybridge.
  * It is captured by /proc/cpuinfo and the space character is stripped.
@@ -1307,7 +1350,9 @@ static void gen7_hw_codec_preinit(VADriverContextP ctx, struct hw_codec_info *co
 	}
 	return;
 }
+#endif
 
+#if defined(ENABLE_GEN9_SUPPORT)
 static void gen9_hw_codec_preinit(VADriverContextP ctx, struct hw_codec_info *codec_info)
 {
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
@@ -1318,3 +1363,4 @@ static void gen9_hw_codec_preinit(VADriverContextP ctx, struct hw_codec_info *co
 	if (i965->intel.has_huc && codec_info->has_lp_vp9_encoding)
 		codec_info->lp_vp9_brc_mode |= (VA_RC_CQP | VA_RC_CBR | VA_RC_VBR);
 }
+#endif

@@ -395,7 +395,9 @@ gen8_pp_set_surface_state(VADriverContextP ctx, struct i965_post_processing_cont
 						  int width, int height, int pitch, int format,
 						  int index, int is_target)
 {
+#if defined(ENABLE_GEN9_SUPPORT) || defined(ENABLE_GEN10_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 	struct gen8_surface_state *ss;
 	dri_bo *ss_bo;
 	unsigned int tiling;
@@ -445,7 +447,9 @@ gen8_pp_set_surface2_state(VADriverContextP ctx, struct i965_post_processing_con
 						   int format, int interleave_chroma,
 						   int index)
 {
+#if defined(ENABLE_GEN9_SUPPORT) || defined(ENABLE_GEN10_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 	struct gen8_surface_state2 *ss2;
 	dri_bo *ss2_bo;
 	unsigned int tiling;

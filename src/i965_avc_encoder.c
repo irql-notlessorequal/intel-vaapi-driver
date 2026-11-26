@@ -1776,7 +1776,9 @@ gen9_avc_send_surface_scaling(VADriverContextP ctx,
 							  void *param)
 {
 	struct scaling_param *surface_param = (struct scaling_param *)param;
+#if defined(ENABLE_GEN8_BDW_SUPPORT) || defined(ENABLE_GEN8_LP_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 	unsigned int surface_format;
 	unsigned int res_size;
 

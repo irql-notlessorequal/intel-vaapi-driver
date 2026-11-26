@@ -1719,7 +1719,9 @@ gen8_mfc_avc_batchbuffer_pipeline(VADriverContextP ctx,
 								  struct encode_state *encode_state,
 								  struct intel_encoder_context *encoder_context)
 {
+#if defined(ENABLE_GEN9_SUPPORT) || defined(ENABLE_GEN10_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 	struct gen6_mfc_context *mfc_context = encoder_context->mfc_context;
 	struct intel_batchbuffer *batch = encoder_context->base.batch;
 	int i;

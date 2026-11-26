@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+#include "sysdeps.h"
 #include "i965_avc_encoder_kernels.h"
 
 const unsigned int skl_avc_encoder_kernels[] = {

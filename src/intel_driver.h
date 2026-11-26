@@ -1,6 +1,8 @@
 #ifndef _INTEL_DRIVER_H_
 #define _INTEL_DRIVER_H_
 
+#include "sysdeps.h"
+
 #include <stddef.h>
 #include <pthread.h>
 #include <signal.h>
@@ -271,9 +273,17 @@ struct intel_region {
 #define IS_GEN7(device_info)            (device_info->gen == 7)
 
 #define IS_CHERRYVIEW(device_info)      (device_info->is_cherryview)
+#if defined(ENABLE_GEN8_BDW_SUPPORT) || defined(ENABLE_GEN8_LP_SUPPORT)
 #define IS_GEN8(device_info)            (device_info->gen == 8)
+#else
+#define IS_GEN8(device_info)            (0)
+#endif
 
+#if defined(ENABLE_GEN9_SUPPORT)
 #define IS_GEN9(device_info)            (device_info->gen == 9)
+#else
+#define IS_GEN9(device_info)            (0)
+#endif
 
 #define IS_SKL(device_info)             (device_info->is_skylake)
 

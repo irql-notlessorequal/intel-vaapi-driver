@@ -46,21 +46,28 @@ intel_yuv420p8_scaling_post_processing(
 	struct i965_surface *dst_surface,
 	VARectangle *dst_rect)
 {
+#if defined(ENABLE_GEN8_BDW_SUPPORT) || defined(ENABLE_GEN8_LP_SUPPORT) || \
+	defined(ENABLE_GEN9_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
-	VAStatus va_status;
+#endif
+	VAStatus va_status = VA_STATUS_ERROR_UNIMPLEMENTED;
 
+#if defined(ENABLE_GEN8_BDW_SUPPORT) || defined(ENABLE_GEN8_LP_SUPPORT)
 	if (IS_GEN8(i965->intel.device_info))
 		va_status = gen8_yuv420p8_scaling_post_processing(ctx, pp_context,
 														  src_surface,
 														  src_rect,
 														  dst_surface,
 														  dst_rect);
-	else
+#endif
+#if defined(ENABLE_GEN9_SUPPORT)
+	if (IS_GEN9(i965->intel.device_info))
 		va_status = gen9_yuv420p8_scaling_post_processing(ctx, pp_context,
 														  src_surface,
 														  src_rect,
 														  dst_surface,
 														  dst_rect);
+#endif
 
 	return va_status;
 }
@@ -73,9 +80,12 @@ intel_10bit_8bit_scaling_post_processing(VADriverContextP   ctx,
 										 struct i965_surface *dst_surface,
 										 VARectangle *dst_rect)
 {
+#if defined(ENABLE_GEN9_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 	VAStatus va_status = VA_STATUS_ERROR_UNIMPLEMENTED;
 
+#if defined(ENABLE_GEN9_SUPPORT)
 	if (IS_GEN9(i965->intel.device_info) ||
 		IS_GEN10(i965->intel.device_info))
 		va_status = gen9_10bit_8bit_scaling_post_processing(ctx, pp_context,
@@ -83,6 +93,7 @@ intel_10bit_8bit_scaling_post_processing(VADriverContextP   ctx,
 															src_rect,
 															dst_surface,
 															dst_rect);
+#endif
 
 	return va_status;
 }
@@ -95,21 +106,28 @@ intel_8bit_420_rgb32_scaling_post_processing(VADriverContextP   ctx,
 											 struct i965_surface *dst_surface,
 											 VARectangle *dst_rect)
 {
+#if defined(ENABLE_GEN8_BDW_SUPPORT) || defined(ENABLE_GEN8_LP_SUPPORT) || \
+	defined(ENABLE_GEN9_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 	VAStatus va_status = VA_STATUS_ERROR_UNIMPLEMENTED;
 
+#if defined(ENABLE_GEN8_BDW_SUPPORT) || defined(ENABLE_GEN8_LP_SUPPORT)
 	if (IS_GEN8(i965->intel.device_info))
 		va_status = gen8_8bit_420_rgb32_scaling_post_processing(ctx, pp_context,
 																src_surface,
 																src_rect,
 																dst_surface,
 																dst_rect);
-	else
+#endif
+#if defined(ENABLE_GEN9_SUPPORT)
+	if (IS_GEN9(i965->intel.device_info))
 		va_status = gen9_8bit_420_rgb32_scaling_post_processing(ctx, pp_context,
 																src_surface,
 																src_rect,
 																dst_surface,
 																dst_rect);
+#endif
 
 	return va_status;
 }
@@ -215,6 +233,7 @@ intel_common_scaling_post_processing(VADriverContextP ctx,
 		(src_rect->height == dst_rect->height))
 		scale_flag = 0;
 
+#if defined(ENABLE_GEN9_SUPPORT)
 	if (((scale_flag & MASK_CSC) == SCALE_10BIT_10BIT_420) &&
 		(pp_context->scaling_gpe_context_initialized & VPPGPE_10BIT_10BIT)) {
 		unsigned int tmp_width, tmp_x;
@@ -230,6 +249,7 @@ intel_common_scaling_post_processing(VADriverContextP ctx,
 												   (struct i965_surface *)src_surface, (VARectangle *)src_rect,
 												   dst_surface, &aligned_dst_rect);
 	}
+#endif
 
 	if (((scale_flag & MASK_CSC) == SCALE_8BIT_8BIT_420) &&
 		(pp_context->scaling_gpe_context_initialized & VPPGPE_8BIT_8BIT)) {
