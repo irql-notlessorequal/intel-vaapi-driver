@@ -6,6 +6,27 @@ config_cfg.set('INTEL_DRIVER_MINOR_VERSION', intel_vaapi_driver_minor_version)
 config_cfg.set('INTEL_DRIVER_MICRO_VERSION', intel_vaapi_driver_micro_version)
 config_cfg.set('INTEL_DRIVER_PRE_VERSION', intel_vaapi_driver_pre_version)
 config_cfg.set10('HAVE_HYBRID_CODEC', get_option('enable_hybrid_codec'))
+if gen6_enabled
+  config_cfg.set10('ENABLE_GEN6_SUPPORT', true)
+endif
+if gen7_enabled
+  config_cfg.set10('ENABLE_GEN7_SUPPORT', true)
+endif
+if gen75_enabled
+  config_cfg.set10('ENABLE_GEN75_SUPPORT', true)
+endif
+if gen8_bdw_enabled
+  config_cfg.set10('ENABLE_GEN8_BDW_SUPPORT', true)
+endif
+if gen8_lp_enabled
+  config_cfg.set10('ENABLE_GEN8_LP_SUPPORT', true)
+endif
+if gen9_enabled
+  config_cfg.set10('ENABLE_GEN9_SUPPORT', true)
+endif
+if gen10_enabled
+  config_cfg.set10('ENABLE_GEN10_SUPPORT', true)
+endif
 if WITH_X11
   config_cfg.set('HAVE_VA_X11', 1)
 endif
@@ -40,30 +61,6 @@ version_file = configure_file(
 
 sources = [
   'dso_utils.c',
-  'gen6_mfc.c',
-  'gen6_mfc_common.c',
-  'gen6_mfd.c',
-  'gen6_vme.c',
-  'gen7_vme.c',
-  'gen7_mfc.c',
-  'gen7_mfd.c',
-  'gen75_mfd.c',
-  'gen75_mfc.c',
-  'gen8_encoder_vp8.c',
-  'gen8_mfc.c',
-  'gen8_mfd.c',
-  'gen8_vme.c',
-  'gen9_encoder_vp8.c',
-  'gen9_vme.c',
-  'gen9_mfc.c',
-  'gen9_mfc_hevc.c',
-  'gen9_mfd.c',
-  'gen9_vdenc.c',
-  'gen75_picture_process.c',
-  'gen75_vme.c',
-  'gen75_vpp_gpe.c',
-  'gen75_vpp_vebox.c',
-  'gen9_post_processing.c',
   'i965_avc_bsd.c',
   'i965_avc_hw_scoreboard.c',
   'i965_avc_ildb.c',
@@ -79,11 +76,8 @@ sources = [
   'i965_gpe_utils.c',
   'i965_post_processing.c',
   'i965_yuv_coefs.c',
-  'gen8_post_processing.c',
   'i965_render.c',
   'i965_vpp_avs.c',
-  'gen8_render.c',
-  'gen9_render.c',
   'intel_batchbuffer.c',
   'intel_batchbuffer_dump.c',
   'intel_driver.c',
@@ -93,26 +87,12 @@ sources = [
   'vp8_probs.c',
   'vp9_probs.c',
   'vpx_quant.c',
-  'gen9_vp9_encoder_kernels.c',
-  'gen9_vp9_const_def.c',
-  'gen9_vp9_encoder.c',
   'intel_common_vpp_internal.c',
   'i965_encoder_const_def.c',
   'i965_avc_const_def.c',
   'i965_avc_encoder_kernels.c',
   'i965_avc_encoder_common.c',
   'i965_avc_encoder.c',
-  'gen9_hevc_enc_kernels_binary.c',
-  'gen9_hevc_encoder.c',
-  'gen9_hevc_enc_utils.c',
-  'gen10_encoder_vp8.c',
-  'gen10_hcp_common.c',
-  'gen10_hevc_enc_kernels_binary.c',
-  'gen10_hevc_enc_common.c',
-  'gen10_hevc_encoder.c',
-  'gen10_huc_common.c',
-  'gen10_vdenc_common.c',
-  'gen10_vdenc_vp9.c',
 ]
 
 headers = [
@@ -189,6 +169,77 @@ headers = [
   'gen10_vdenc_common.h',
   'gen10_vdenc_vp9.h',
 ]
+
+if gen6_enabled
+  sources += [
+    'gen6_mfc.c',
+    'gen6_mfc_common.c',
+    'gen6_mfd.c',
+    'gen6_vme.c',
+  ]
+endif
+
+if gen7_enabled
+  sources += [
+    'gen7_vme.c',
+    'gen7_mfc.c',
+    'gen7_mfd.c',
+  ]
+endif
+
+if gen75_enabled
+  sources += [
+    'gen75_mfd.c',
+    'gen75_mfc.c',
+    'gen75_picture_process.c',
+    'gen75_vme.c',
+    'gen75_vpp_gpe.c',
+    'gen75_vpp_vebox.c',
+  ]
+endif
+
+if gen8_bdw_enabled or gen8_lp_enabled
+  sources += [
+    'gen8_encoder_vp8.c',
+    'gen8_mfc.c',
+    'gen8_mfd.c',
+    'gen8_vme.c',
+    'gen8_post_processing.c',
+    'gen8_render.c',
+  ]
+endif
+
+if gen9_enabled
+  sources += [
+    'gen9_encoder_vp8.c',
+    'gen9_vme.c',
+    'gen9_mfc.c',
+    'gen9_mfc_hevc.c',
+    'gen9_mfd.c',
+    'gen9_vdenc.c',
+    'gen9_post_processing.c',
+    'gen9_render.c',
+    'gen9_vp9_encoder_kernels.c',
+    'gen9_vp9_const_def.c',
+    'gen9_vp9_encoder.c',
+    'gen9_hevc_enc_kernels_binary.c',
+    'gen9_hevc_encoder.c',
+    'gen9_hevc_enc_utils.c',
+  ]
+endif
+
+if gen10_enabled
+  sources += [
+    'gen10_encoder_vp8.c',
+    'gen10_hcp_common.c',
+    'gen10_hevc_enc_kernels_binary.c',
+    'gen10_hevc_enc_common.c',
+    'gen10_hevc_encoder.c',
+    'gen10_huc_common.c',
+    'gen10_vdenc_common.c',
+    'gen10_vdenc_vp9.c',
+  ]
+endif
 
 if WITH_X11
   sources += 'i965_output_x11.c'
