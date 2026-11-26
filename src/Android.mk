@@ -28,7 +28,7 @@ include $(LOCAL_PATH)/Makefile.sources
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := $(source_c)
+LOCAL_SRC_FILES := $(source_c) $(all_gen_source_c)
 
 LOCAL_MODULE := i965_drv_video
 LOCAL_MODULE_TAGS := optional
@@ -65,6 +65,13 @@ LOCAL_CFLAGS := -DLINUX -g -Wall -Wno-unused -fvisibility=hidden \
 	-Wno-unused-parameter \
 	-Wno-pointer-arith \
 	-Wno-sign-compare \
+	-DENABLE_GEN6_SUPPORT \
+	-DENABLE_GEN7_SUPPORT \
+	-DENABLE_GEN75_SUPPORT \
+	-DENABLE_GEN8_BDW_SUPPORT \
+	-DENABLE_GEN8_LP_SUPPORT \
+	-DENABLE_GEN9_SUPPORT \
+	-DENABLE_GEN10_SUPPORT \
 
 LOCAL_SHARED_LIBRARIES := libdl libdrm libdrm_intel libcutils \
                libva libva-android libstdc++

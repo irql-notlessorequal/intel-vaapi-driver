@@ -83,6 +83,34 @@ source_h			+= $(protocol_source_h)
 driver_cflags			+= $(WAYLAND_CLIENT_CFLAGS)
 endif
 
+if USE_GEN6_SUPPORT
+source_c			+= $(gen6_source_c)
+endif
+
+if USE_GEN7_SUPPORT
+source_c			+= $(gen7_source_c)
+endif
+
+if USE_GEN75_SUPPORT
+source_c			+= $(gen75_source_c)
+endif
+
+if USE_GEN8_BDW_SUPPORT
+source_c			+= $(gen8_source_c)
+else
+if USE_GEN8_LP_SUPPORT
+source_c			+= $(gen8_source_c)
+endif
+endif
+
+if USE_GEN9_SUPPORT
+source_c			+= $(gen9_source_c)
+endif
+
+if USE_GEN10_SUPPORT
+source_c			+= $(gen10_source_c)
+endif
+
 # git version
 VERSION_FILE			= .VERSION
 OLD_VERSION_FILE		= $(VERSION_FILE).old
