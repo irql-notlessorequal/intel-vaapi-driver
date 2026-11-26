@@ -1999,9 +1999,11 @@ Bool gen9_vme_context_init(VADriverContextP ctx, struct intel_encoder_context *e
 			   encoder_context->codec == CODEC_H264_MVC) {
 		return gen9_avc_vme_context_init(ctx, encoder_context);
 	} else if (encoder_context->codec == CODEC_HEVC) {
+#if defined(ENABLE_GEN10_SUPPORT)
 		if (IS_GEN10(i965->intel.device_info))
 			return gen10_hevc_vme_context_init(ctx, encoder_context);
 		else
+#endif
 			return gen9_hevc_vme_context_init(ctx, encoder_context);
 	}
 

@@ -49,7 +49,9 @@ extern Bool gen10_vdenc_vp9_context_init(VADriverContextP ctx, struct intel_enco
 
 Bool gen9_mfc_context_init(VADriverContextP ctx, struct intel_encoder_context *encoder_context)
 {
+#if defined(ENABLE_GEN10_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 
 	switch (encoder_context->codec) {
 	case CODEC_VP8:
@@ -67,16 +69,20 @@ Bool gen9_mfc_context_init(VADriverContextP ctx, struct intel_encoder_context *e
 			return gen9_avc_pak_context_init(ctx, encoder_context);
 
 	case CODEC_HEVC:
+#if defined(ENABLE_GEN10_SUPPORT)
 		if (IS_GEN10(i965->intel.device_info))
 			return gen10_hevc_pak_context_init(ctx, encoder_context);
 		else
+#endif
 			return gen9_hevc_pak_context_init(ctx, encoder_context);
 
 	case CODEC_VP9:
+#if defined(ENABLE_GEN10_SUPPORT)
 		if (encoder_context->low_power_mode) {
 			assert(IS_GEN10(i965->intel.device_info));
 			return gen10_vdenc_vp9_context_init(ctx, encoder_context);
 		} else
+#endif
 			return gen9_vp9_pak_context_init(ctx, encoder_context);
 	}
 

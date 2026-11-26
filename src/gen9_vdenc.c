@@ -2688,6 +2688,7 @@ gen9_vdenc_vdenc_pipe_buf_addr_state(VADriverContextP ctx,
 	ADVANCE_BCS_BATCH(batch);
 }
 
+#if defined(ENABLE_GEN10_SUPPORT)
 static void
 gen10_vdenc_vdenc_pipe_buf_addr_state(VADriverContextP ctx,
 									  struct encode_state *encode_state,
@@ -2783,6 +2784,7 @@ gen10_vdenc_vdenc_pipe_buf_addr_state(VADriverContextP ctx,
 
 	ADVANCE_BCS_BATCH(batch);
 }
+#endif
 
 static void
 gen9_vdenc_vdenc_const_qpt_state(VADriverContextP ctx,
@@ -2867,14 +2869,19 @@ gen95_vdenc_vdecn_weihgtsoffsets_state(VADriverContextP ctx,
 									   struct intel_encoder_context *encoder_context,
 									   VAEncSliceParameterBufferH264 *slice_param)
 {
+#if defined(ENABLE_GEN10_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 	struct intel_batchbuffer *batch = encoder_context->base.batch;
 	VAEncPictureParameterBufferH264 *pic_param = (VAEncPictureParameterBufferH264 *)encode_state->pic_param_ext->buffer;
 
+#if defined(ENABLE_GEN10_SUPPORT)
 	if (IS_GEN10(i965->intel.device_info)) {
 		BEGIN_BCS_BATCH(batch, 5);
 		OUT_BCS_BATCH(batch, VDENC_WEIGHTSOFFSETS_STATE | (5 - 2));
-	} else {
+	} else
+#endif
+	{
 		BEGIN_BCS_BATCH(batch, 3);
 		OUT_BCS_BATCH(batch, VDENC_WEIGHTSOFFSETS_STATE | (3 - 2));
 	}
@@ -2895,6 +2902,7 @@ gen95_vdenc_vdecn_weihgtsoffsets_state(VADriverContextP ctx,
 							  1 << 0));
 	}
 
+#if defined(ENABLE_GEN10_SUPPORT)
 	if (IS_GEN10(i965->intel.device_info)) {
 		OUT_BCS_BATCH(batch, (0 << 24 |
 							  1 << 16 |
@@ -2905,6 +2913,7 @@ gen95_vdenc_vdecn_weihgtsoffsets_state(VADriverContextP ctx,
 							  0 << 8 |
 							  1 << 0));
 	}
+#endif
 
 	ADVANCE_BCS_BATCH(batch);
 }
@@ -2916,7 +2925,9 @@ gen95_vdenc_vdenc_walker_state(VADriverContextP ctx,
 							   VAEncSliceParameterBufferH264 *slice_param,
 							   VAEncSliceParameterBufferH264 *next_slice_param)
 {
+#if defined(ENABLE_GEN10_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 	struct gen9_vdenc_context *vdenc_context = encoder_context->mfc_context;
 	struct intel_batchbuffer *batch = encoder_context->base.batch;
 	VAEncPictureParameterBufferH264 *pic_param = (VAEncPictureParameterBufferH264 *)encode_state->pic_param_ext->buffer;
@@ -2945,10 +2956,13 @@ gen95_vdenc_vdenc_walker_state(VADriverContextP ctx,
 	else
 		luma_log2_weight_denom = 0;
 
+#if defined(ENABLE_GEN10_SUPPORT)
 	if (IS_GEN10(i965->intel.device_info)) {
 		BEGIN_BCS_BATCH(batch, 6);
 		OUT_BCS_BATCH(batch, VDENC_WALKER_STATE | (6 - 2));
-	} else {
+	} else
+#endif
+	{
 		BEGIN_BCS_BATCH(batch, 4);
 		OUT_BCS_BATCH(batch, VDENC_WALKER_STATE | (4 - 2));
 	}
@@ -2959,11 +2973,13 @@ gen95_vdenc_vdenc_walker_state(VADriverContextP ctx,
 						  next_slice_ver_pos));
 	OUT_BCS_BATCH(batch, luma_log2_weight_denom);
 
+#if defined(ENABLE_GEN10_SUPPORT)
 	if (IS_GEN10(i965->intel.device_info)) {
 		/* Not used for VDENC H264 */
 		OUT_BCS_BATCH(batch, 0);
 		OUT_BCS_BATCH(batch, 0);
 	}
+#endif
 
 	ADVANCE_BCS_BATCH(batch);
 }
@@ -3655,7 +3671,9 @@ gen9_vdenc_mfx_vdenc_pipeline(VADriverContextP ctx,
 							  struct encode_state *encode_state,
 							  struct intel_encoder_context *encoder_context)
 {
+#if defined(ENABLE_GEN10_SUPPORT)
 	struct i965_driver_data *i965 = i965_driver_data(ctx);
+#endif
 	struct gen9_vdenc_context *vdenc_context = encoder_context->mfc_context;
 	struct intel_batchbuffer *batch = encoder_context->base.batch;
 	struct gpe_mi_batch_buffer_start_parameter mi_batch_buffer_start_params;
@@ -3691,9 +3709,11 @@ gen9_vdenc_mfx_vdenc_pipeline(VADriverContextP ctx,
 	gen9_vdenc_vdenc_ref_surface_state(ctx, encoder_context, &vdenc_context->recon_surface_res);
 	gen9_vdenc_vdenc_ds_ref_surface_state(ctx, encoder_context, &vdenc_context->scaled_4x_recon_surface_res);
 
+#if defined(ENABLE_GEN10_SUPPORT)
 	if (IS_GEN10(i965->intel.device_info))
 		gen10_vdenc_vdenc_pipe_buf_addr_state(ctx, encode_state, encoder_context);
 	else
+#endif
 		gen9_vdenc_vdenc_pipe_buf_addr_state(ctx, encode_state, encoder_context);
 
 	gen9_vdenc_vdenc_const_qpt_state(ctx, encode_state, encoder_context);
