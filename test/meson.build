@@ -72,6 +72,27 @@ test_cppflags = [
 if thread_dep.found()
   test_cppflags += [ '-DPTHREADS' ]
 endif
+if gen6_enabled
+  test_cppflags += [ '-DENABLE_GEN6_SUPPORT' ]
+endif
+if gen7_enabled
+  test_cppflags += [ '-DENABLE_GEN7_SUPPORT' ]
+endif
+if gen75_enabled
+  test_cppflags += [ '-DENABLE_GEN75_SUPPORT' ]
+endif
+if gen8_bdw_enabled
+  test_cppflags += [ '-DENABLE_GEN8_BDW_SUPPORT' ]
+endif
+if gen8_lp_enabled
+  test_cppflags += [ '-DENABLE_GEN8_LP_SUPPORT' ]
+endif
+if gen9_enabled
+  test_cppflags += [ '-DENABLE_GEN9_SUPPORT' ]
+endif
+if gen10_enabled
+  test_cppflags += [ '-DENABLE_GEN10_SUPPORT' ]
+endif
 
 test_i965_drv_video = executable(
   'test_i965_drv_video',
