@@ -67,6 +67,92 @@ AC_ARG_ENABLE([tests],
                     [build tests @<:@default=no@:>@])],
     [], [enable_tests="no"])
 
+AC_ARG_WITH([generations],
+    [AC_HELP_STRING([--with-generations=PRESET],
+                    [hardware generation preset: default, all, enforced, custom @<:@default=default@:>@])],
+    [], [with_generations="default"])
+
+AC_ARG_ENABLE([gen6-support],
+    [AC_HELP_STRING([--enable-gen6-support],
+                    [build with Gen6 support @<:@default=yes@:>@])],
+    [], [enable_gen6_support="yes"])
+
+AC_ARG_ENABLE([gen7-support],
+    [AC_HELP_STRING([--enable-gen7-support],
+                    [build with Gen7 support @<:@default=yes@:>@])],
+    [], [enable_gen7_support="yes"])
+
+AC_ARG_ENABLE([gen75-support],
+    [AC_HELP_STRING([--enable-gen75-support],
+                    [build with Gen7.5 support @<:@default=yes@:>@])],
+    [], [enable_gen75_support="yes"])
+
+AC_ARG_ENABLE([gen8-bdw],
+    [AC_HELP_STRING([--enable-gen8-bdw],
+                    [build with Broadwell support @<:@default=yes@:>@])],
+    [], [enable_gen8_bdw="yes"])
+
+AC_ARG_ENABLE([gen8-lp],
+    [AC_HELP_STRING([--enable-gen8-lp],
+                    [build with Cherryview/Braswell support @<:@default=yes@:>@])],
+    [], [enable_gen8_lp="yes"])
+
+AC_ARG_ENABLE([gen9-support],
+    [AC_HELP_STRING([--enable-gen9-support],
+                    [build with Gen9 support @<:@default=yes@:>@])],
+    [], [enable_gen9_support="yes"])
+
+AC_ARG_ENABLE([gen10-support],
+    [AC_HELP_STRING([--enable-gen10-support],
+                    [build with Gen10 (Cannon Lake) support @<:@default=no@:>@])],
+    [], [enable_gen10_support="no"])
+
+case "$with_generations" in
+    default)
+        enable_gen6_support="yes"
+        enable_gen7_support="yes"
+        enable_gen75_support="yes"
+        enable_gen8_bdw="yes"
+        enable_gen8_lp="yes"
+        enable_gen9_support="yes"
+        enable_gen10_support="no"
+        ;;
+    all)
+        enable_gen6_support="yes"
+        enable_gen7_support="yes"
+        enable_gen75_support="yes"
+        enable_gen8_bdw="yes"
+        enable_gen8_lp="yes"
+        enable_gen9_support="yes"
+        enable_gen10_support="yes"
+        ;;
+    enforced)
+        enable_gen6_support="yes"
+        enable_gen7_support="yes"
+        enable_gen75_support="yes"
+        enable_gen8_bdw="no"
+        enable_gen8_lp="yes"
+        enable_gen9_support="no"
+        enable_gen10_support="no"
+        ;;
+    custom)
+        ;;
+    *)
+        AC_MSG_ERROR([invalid generation preset '$with_generations': expected default, all, enforced or custom])
+        ;;
+esac
+
+AS_IF([test "$enable_gen7_support" = "yes" && test "$enable_gen6_support" != "yes"],
+    [AC_MSG_ERROR([Gen7 support requires Gen6 support])])
+AS_IF([test "$enable_gen75_support" = "yes" && test "$enable_gen7_support" != "yes"],
+    [AC_MSG_ERROR([Gen7.5 support requires Gen7 support])])
+AS_IF([(test "$enable_gen8_bdw" = "yes" || test "$enable_gen8_lp" = "yes") && test "$enable_gen75_support" != "yes"],
+    [AC_MSG_ERROR([Gen8 support requires Gen7.5 support])])
+AS_IF([test "$enable_gen9_support" = "yes" && test "$enable_gen8_bdw" != "yes" && test "$enable_gen8_lp" != "yes"],
+    [AC_MSG_ERROR([Gen9 support requires Gen8 support])])
+AS_IF([test "$enable_gen10_support" = "yes" && test "$enable_gen9_support" != "yes"],
+    [AC_MSG_ERROR([Gen10 support requires Gen9 support])])
+
 AC_DISABLE_STATIC
 AC_PROG_LIBTOOL
 AC_PROG_CC
@@ -131,7 +217,44 @@ if test "$enable_hybrid_codec" = "yes"; then
     AC_DEFINE([HAVE_HYBRID_CODEC], [1], [Defined to 1 if hybrid codec is needed])
 fi
 
+AS_IF([test "$enable_gen6_support" = "yes"],
+    [AC_DEFINE([ENABLE_GEN6_SUPPORT], [1], [Defined to 1 if Gen6 support is enabled])])
+AS_IF([test "$enable_gen7_support" = "yes"],
+    [AC_DEFINE([ENABLE_GEN7_SUPPORT], [1], [Defined to 1 if Gen7 support is enabled])])
+AS_IF([test "$enable_gen75_support" = "yes"],
+    [AC_DEFINE([ENABLE_GEN75_SUPPORT], [1], [Defined to 1 if Gen7.5 support is enabled])])
+AS_IF([test "$enable_gen8_bdw" = "yes"],
+    [AC_DEFINE([ENABLE_GEN8_BDW_SUPPORT], [1], [Defined to 1 if Broadwell support is enabled])])
+AS_IF([test "$enable_gen8_lp" = "yes"],
+    [AC_DEFINE([ENABLE_GEN8_LP_SUPPORT], [1], [Defined to 1 if Cherryview/Braswell support is enabled])])
+AS_IF([test "$enable_gen9_support" = "yes"],
+    [AC_DEFINE([ENABLE_GEN9_SUPPORT], [1], [Defined to 1 if Gen9 support is enabled])])
+AS_IF([test "$enable_gen10_support" = "yes"],
+    [AC_DEFINE([ENABLE_GEN10_SUPPORT], [1], [Defined to 1 if Gen10 support is enabled])])
+
+GEN_SUPPORT_CPPFLAGS=
+AS_IF([test "$enable_gen6_support" = "yes"],
+    [GEN_SUPPORT_CPPFLAGS="$GEN_SUPPORT_CPPFLAGS -DENABLE_GEN6_SUPPORT"])
+AS_IF([test "$enable_gen7_support" = "yes"],
+    [GEN_SUPPORT_CPPFLAGS="$GEN_SUPPORT_CPPFLAGS -DENABLE_GEN7_SUPPORT"])
+AS_IF([test "$enable_gen75_support" = "yes"],
+    [GEN_SUPPORT_CPPFLAGS="$GEN_SUPPORT_CPPFLAGS -DENABLE_GEN75_SUPPORT"])
+AS_IF([test "$enable_gen8_support" = "yes"],
+    [GEN_SUPPORT_CPPFLAGS="$GEN_SUPPORT_CPPFLAGS -DENABLE_GEN8_SUPPORT"])
+AS_IF([test "$enable_gen9_support" = "yes"],
+    [GEN_SUPPORT_CPPFLAGS="$GEN_SUPPORT_CPPFLAGS -DENABLE_GEN9_SUPPORT"])
+AS_IF([test "$enable_gen10_support" = "yes"],
+    [GEN_SUPPORT_CPPFLAGS="$GEN_SUPPORT_CPPFLAGS -DENABLE_GEN10_SUPPORT"])
+AC_SUBST([GEN_SUPPORT_CPPFLAGS])
+
 AM_CONDITIONAL(ENABLE_TESTS, test "$enable_tests" = "yes")
+AM_CONDITIONAL(USE_GEN6_SUPPORT, test "$enable_gen6_support" = "yes")
+AM_CONDITIONAL(USE_GEN7_SUPPORT, test "$enable_gen7_support" = "yes")
+AM_CONDITIONAL(USE_GEN75_SUPPORT, test "$enable_gen75_support" = "yes")
+AM_CONDITIONAL(USE_GEN8_BDW_SUPPORT, test "$enable_gen8_bdw" = "yes")
+AM_CONDITIONAL(USE_GEN8_LP_SUPPORT, test "$enable_gen8_lp" = "yes")
+AM_CONDITIONAL(USE_GEN9_SUPPORT, test "$enable_gen9_support" = "yes")
+AM_CONDITIONAL(USE_GEN10_SUPPORT, test "$enable_gen10_support" = "yes")
 
 VA_VERSION=`$PKG_CONFIG --modversion libva`
 VA_MAJOR_VERSION=`echo "$VA_VERSION" | cut -d'.' -f1`
@@ -222,5 +345,6 @@ echo
 echo VA-API version ................... : $VA_VERSION_STR
 echo VA-API drivers path .............. : $LIBVA_DRIVERS_PATH
 echo Windowing systems ................ : $BACKENDS
+echo Generation preset ................ : $with_generations
 echo Build tests ...................... : $enable_tests
 echo
